@@ -1,45 +1,173 @@
+import { useNavigate } from "react-router";
+import { MapPin, Phone, Mail, Instagram, Linkedin, Facebook, Send, Leaf, ArrowRight } from "lucide-react";
+import logo from "../../../assets/images/logo.png";
+
 const Footer = () => {
+  const navigate = useNavigate();
+  const currentYear = new Date().getFullYear();
+
+  const quickLinks = [
+    { label: "Home", path: "/home" },
+    { label: "Sobre o Agro", path: "#sobre" },
+    { label: "Serviços", path: "#servico" },
+    { label: "Vagas", path: "/pesquisa-de-vagas" },
+    { label: "Contato", path: "#contato" },
+  ];
+
+  const socialLinks = [
+    { icon: Instagram, href: "#", label: "Instagram" },
+    { icon: Linkedin, href: "#", label: "LinkedIn" },
+    { icon: Facebook, href: "#", label: "Facebook" },
+  ];
+
   return (
-    <footer className="bg-oliveGreen flex justify-center p-18">
-      <div className="w-full max-w-7xl flex flex-col md:flex-row items-center md:items-start px-6 sm:px-12 md:px-16 lg:px-24 xl:px-36 gap-12 md:gap-24">
-        <div className="flex flex-col items-center md:items-start text-center md:text-left gap-2 font-SecondFont">
-          <div>Rua Dolores Florenzano Vidal, Vila Nunes - Lorena/SP</div>
-          <div>TELEFONE: (11) 9898-9293</div>
-          <div>WHATSAPP: (11) 9898-9293</div>
-          <div>EMAIL: plantio@contato.com</div>
-        </div>
-
-        <div className="flex flex-col items-center md:items-start text-center md:text-left gap-2 font-SecondFont">
-          <span className="font-bold">ACESSO RÁPIDO</span>
-          <a className="underline" href="#">
-            Home
-          </a>
-          <a className="underline" href="#">
-            Quem somos
-          </a>
-          <a className="underline" href="#">
-            Serviço
-          </a>
-          <a className="underline" href="#">
-            Vagas
-          </a>
-          <a className="underline" href="#">
-            Contato
-          </a>
-        </div>
-
-        <div className="flex flex-col items-center w-full md:w-auto gap-4 px-6">
-          <div className="text-center md:text-left">
-            Receba informações do lançamento de vagas e cadastro de currículos
+    <footer id="contato" className="bg-oliveGreen">
+      {/* Main Footer Content */}
+      <div className="max-w-7xl mx-auto px-6 sm:px-12 lg:px-16 py-16">
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-12">
+          {/* Brand Column */}
+          <div className="lg:col-span-1">
+            <div className="flex items-center gap-3 mb-6">
+              <img src={logo} alt="Logo" className="h-12 brightness-0 invert" />
+            </div>
+            <p className="text-white/80 font-SecondFont text-sm leading-relaxed mb-6">
+              Conectando talentos às melhores oportunidades do agronegócio brasileiro.
+            </p>
+            <div className="flex gap-3">
+              {socialLinks.map((social) => (
+                <a
+                  key={social.label}
+                  href={social.href}
+                  aria-label={social.label}
+                  className="w-10 h-10 bg-white/10 hover:bg-white/20 rounded-full
+                           flex items-center justify-center transition-all duration-300
+                           hover:scale-110"
+                >
+                  <social.icon size={18} className="text-white" />
+                </a>
+              ))}
+            </div>
           </div>
-          <input
-            type="text"
-            placeholder="Insira seu Email"
-            className="w-full p-3 border rounded-full focus:outline-none focus:ring-2 focus:ring-green-700  text-center"
-          />
-          <button className="w-full bg-deepGreen text-white px-6 py-3 rounded-lg hover:bg-green-900 text-lg font-semibold">
-            INSCREVER-SE
-          </button>
+
+          {/* Contact Column */}
+          <div>
+            <h3 className="text-white font-SecondFont font-bold text-lg mb-6 flex items-center gap-2">
+              <Leaf size={18} className="text-paleGreen" />
+              Contato
+            </h3>
+            <div className="space-y-4">
+              <a
+                href="#"
+                className="flex items-start gap-3 text-white/80 hover:text-white
+                         transition-colors duration-300 font-SecondFont text-sm group"
+              >
+                <MapPin size={18} className="text-paleGreen flex-shrink-0 mt-0.5" />
+                <span>Rua Dolores Florenzano Vidal, Vila Nunes - Lorena/SP</span>
+              </a>
+              <a
+                href="tel:+5511989879293"
+                className="flex items-center gap-3 text-white/80 hover:text-white
+                         transition-colors duration-300 font-SecondFont text-sm"
+              >
+                <Phone size={18} className="text-paleGreen flex-shrink-0" />
+                <span>(11) 9898-9293</span>
+              </a>
+              <a
+                href="mailto:plantio@contato.com"
+                className="flex items-center gap-3 text-white/80 hover:text-white
+                         transition-colors duration-300 font-SecondFont text-sm"
+              >
+                <Mail size={18} className="text-paleGreen flex-shrink-0" />
+                <span>plantio@contato.com</span>
+              </a>
+            </div>
+          </div>
+
+          {/* Quick Links Column */}
+          <div>
+            <h3 className="text-white font-SecondFont font-bold text-lg mb-6">
+              Acesso Rápido
+            </h3>
+            <nav className="space-y-3">
+              {quickLinks.map((link) => (
+                <a
+                  key={link.label}
+                  onClick={() => link.path.startsWith("/") && navigate(link.path)}
+                  href={link.path.startsWith("#") ? link.path : undefined}
+                  className="group flex items-center gap-2 text-white/80 hover:text-white
+                           transition-colors duration-300 font-SecondFont text-sm cursor-pointer"
+                >
+                  <ArrowRight
+                    size={14}
+                    className="text-paleGreen opacity-0 -ml-4 group-hover:opacity-100 group-hover:ml-0
+                             transition-all duration-300"
+                  />
+                  {link.label}
+                </a>
+              ))}
+            </nav>
+          </div>
+
+          {/* Newsletter Column */}
+          <div>
+            <h3 className="text-white font-SecondFont font-bold text-lg mb-6">
+              Newsletter
+            </h3>
+            <p className="text-white/80 font-SecondFont text-sm mb-4">
+              Receba informações sobre novas vagas e oportunidades no agronegócio.
+            </p>
+            <div className="space-y-3">
+              <div className="relative">
+                <input
+                  type="email"
+                  placeholder="Seu melhor e-mail"
+                  className="w-full p-4 pr-12 bg-white/10 border border-white/20 rounded-xl
+                           focus:outline-none focus:ring-2 focus:ring-paleGreen focus:border-transparent
+                           text-white placeholder-white/50 font-SecondFont text-sm
+                           transition-all duration-300"
+                />
+                <button
+                  className="absolute right-2 top-1/2 -translate-y-1/2 w-8 h-8 bg-paleGreen
+                           rounded-lg flex items-center justify-center
+                           hover:bg-white transition-colors duration-300 group"
+                >
+                  <Send size={16} className="text-deepGreen" />
+                </button>
+              </div>
+              <button
+                className="w-full bg-paleGreen text-deepGreen px-6 py-3 rounded-xl
+                         font-SecondFont font-semibold hover:bg-white transition-all duration-300
+                         hover:shadow-lg"
+              >
+                INSCREVER-SE
+              </button>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      {/* Bottom Bar */}
+      <div className="border-t border-white/10">
+        <div className="max-w-7xl mx-auto px-6 sm:px-12 lg:px-16 py-6">
+          <div className="flex flex-col md:flex-row items-center justify-between gap-4">
+            <p className="text-white/60 font-SecondFont text-sm text-center md:text-left">
+              {currentYear} Plante Vagas. Todos os direitos reservados.
+            </p>
+            <div className="flex gap-6">
+              <a
+                href="#"
+                className="text-white/60 hover:text-white font-SecondFont text-sm transition-colors duration-300"
+              >
+                Termos de Uso
+              </a>
+              <a
+                href="#"
+                className="text-white/60 hover:text-white font-SecondFont text-sm transition-colors duration-300"
+              >
+                Privacidade
+              </a>
+            </div>
+          </div>
         </div>
       </div>
     </footer>

@@ -1,79 +1,121 @@
-import { FiPaperclip } from "react-icons/fi";
-import { FaRegBookmark, FaBookmark } from "react-icons/fa";
-import { useState } from "react";
+import { useState, useEffect } from "react";
+import { Link2, Bookmark, BookmarkCheck, Briefcase, Building2, Check } from "lucide-react";
+import { toast } from "sonner";
 import JobInformation from "../company-job-infomation/job-information";
 import CompanyInfoPage from "../company-job-infomation/enterprise";
 
 const MainJobPage = () => {
   const [saved, setSaved] = useState(false);
-  const [message, setMessage] = useState("");
-  const [activeTab, setActiveTabe] = useState("vaga");
+  const [copied, setCopied] = useState(false);
+  const [activeTab, setActiveTab] = useState("vaga");
 
   const toggleBookmark = () => {
     const newSavedState = !saved;
     setSaved(newSavedState);
 
     if (newSavedState) {
-      setMessage("Vaga adicionada a sua lista");
+      toast.success("Vaga salva!", {
+        description: "Adicionada à sua lista de vagas salvas",
+        duration: 3000,
+      });
     } else {
-      setMessage("Vaga removida da sua lista");
+      toast.info("Vaga removida", {
+        description: "Removida da sua lista de vagas salvas",
+        duration: 3000,
+      });
     }
   };
 
-  setTimeout(() => {
-    setMessage("");
-  }, 3000);
-  return (
-    <>
-      <section className="grid max-w-[1000px] mx-auto grid-cols-1 gap-4 p-4">
-        <div className="flex justify-between mx-full font-PrimaryFont">
-          <p className="font-bold text-deepGreen text-xl sm:text-2xl md:text-3xl">
-            AUXILIAR COMERCIAL
-          </p>
-          <p className="underline inline-flex items-center text-base sm:text-lg md:text-xl space-x-2 ml-auto">
-            <FiPaperclip className="mr-2" /> Copiar link
-            <span className="ml-4 flex items-center" onClick={toggleBookmark}>
-              {saved ? <FaBookmark /> : <FaRegBookmark />}
-              {message && (
-                <span className="ml-2 text-sm text-green-500 font-semibold">
-                  {message}
-                </span>
-              )}
-            </span>
-          </p>
-        </div>
-        <br />
-        <div className="flex font-SecondFont justify-start  w-full max-w-[200px] mx-full items-start">
-          <button
-            className={`px-4 py-2 rounded-md transition-colors mr-2 ${
-              activeTab === "vaga"
-                ? "bg-oliveGreen text-white"
-                : "bg-gray-200 text-gray-700"
-            }`}
-            onClick={() => setActiveTabe("vaga")}
-          >
-            {" "}
-            VAGA{" "}
-          </button>
-          <button
-            className={`px-4 py-2 rounded-md transition-colors ${
-              activeTab === "empresa"
-                ? "bg-oliveGreen  text-white"
-                : "bg-gray-200 text-gray-700"
-            }`}
-            onClick={() => setActiveTabe("empresa")}
-          >
-            {" "}
-            EMPRESA{" "}
-          </button>
-        </div>
+  const copyLink = () => {
+    navigator.clipboard.writeText(window.location.href);
+    setCopied(true);
+    toast.success("Link copiado!", {
+      description: "Link da vaga copiado para a área de transferência",
+      duration: 2000,
+    });
+  };
 
-        <hr className="my-2 border-black max-w-[1000px] mx-auto w-full" />
-        <div>
-          {activeTab === "vaga" ? <JobInformation /> : <CompanyInfoPage />}
+  useEffect(() => {
+    if (copied) {
+      const timer = setTimeout(() => setCopied(false), 2000);
+      return () => clearTimeout(timer);
+    }
+  }, [copied]);
+
+  const tabs = [
+    { id: "vaga", label: "Vaga", icon: Briefcase },
+    { id: "empresa", label: "Empresa", icon: Building2 },
+  ];
+
+  return (
+    <section className="bg-white rounded-2xl shadow-lg border border-gray-100 overflow-hidden">
+      {/* Header */}
+      <div className="p-6 sm:p-8 border-b border-gray-100">
+        <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4">
+          <h1 className="text-2xl sm:text-3xl font-bold text-deepGreen font-PrimaryFont">
+            AUXILIAR COMERCIAL
+          </h1>
+
+          {/* Actions */}
+          <div className="flex items-center gap-3">
+            <button
+              onClick={copyLink}
+              className={`flex items-center gap-2 px-4 py-2.5 rounded-xl font-SecondFont text-sm font-medium
+                       transition-all duration-300 ${
+                         copied
+                           ? "bg-green-100 text-green-700"
+                           : "bg-gray-100 text-gray-700 hover:bg-gray-200"
+                       }`}
+            >
+              {copied ? <Check size={18} /> : <Link2 size={18} />}
+              {copied ? "Copiado!" : "Copiar link"}
+            </button>
+
+            <button
+              onClick={toggleBookmark}
+              className={`flex items-center gap-2 px-4 py-2.5 rounded-xl font-SecondFont text-sm font-medium
+                       transition-all duration-300 ${
+                         saved
+                           ? "bg-deepGreen text-white"
+                           : "bg-gray-100 text-gray-700 hover:bg-gray-200"
+                       }`}
+            >
+              {saved ? <BookmarkCheck size={18} /> : <Bookmark size={18} />}
+              {saved ? "Salvo" : "Salvar"}
+            </button>
+          </div>
         </div>
-      </section>
-    </>
+      </div>
+
+      {/* Tabs */}
+      <div className="px-6 sm:px-8 pt-4 border-b border-gray-100">
+        <div className="flex gap-2">
+          {tabs.map((tab) => (
+            <button
+              key={tab.id}
+              onClick={() => setActiveTab(tab.id)}
+              className={`flex items-center gap-2 px-6 py-3 rounded-t-xl font-SecondFont font-medium
+                       transition-all duration-300 relative ${
+                         activeTab === tab.id
+                           ? "bg-paleGreen text-deepGreen"
+                           : "text-gray-500 hover:text-gray-700 hover:bg-gray-50"
+                       }`}
+            >
+              <tab.icon size={18} />
+              {tab.label}
+              {activeTab === tab.id && (
+                <span className="absolute bottom-0 left-0 right-0 h-0.5 bg-deepGreen" />
+              )}
+            </button>
+          ))}
+        </div>
+      </div>
+
+      {/* Content */}
+      <div className="p-6 sm:p-8">
+        {activeTab === "vaga" ? <JobInformation /> : <CompanyInfoPage />}
+      </div>
+    </section>
   );
 };
 
