@@ -1,0 +1,19 @@
+@import "tailwindcss";
+
+@theme {
+  --color-paleGreen: #d9e2d1;
+  --color-oliveGreen: #ADBD9F;
+  --color-mediumGreen: #436850;
+  --color-deepGreen: #12372a;
+
+  --color-brown: #b99370;
+  --color-blueSky: #ebf2fb;
+  
+  --color-lightBrown: #b99370;
+  --color-MediumGray: #F0F0F0;
+  --color-DeepGray: #B7B7B7;
+  --color-LightGray: #f2f2f2;
+  --color-softGreen: #adbd9f;
+  --font-PrimaryFont: "Lustria";
+  --font-SecondFont: "Poppins";
+}

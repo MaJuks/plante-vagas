@@ -1,0 +1,67 @@
+generator client {
+  provider = "prisma-client-js"
+  output   = "../generated/prisma"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+model Address {
+  id              Int           @id @default(autoincrement())
+  country         String?
+  state           String?
+  city            String
+  district        String
+  street          String
+  number          String
+  complement      String?
+  postalCode      String
+  userCandidateId Int           @unique
+  UserCandidate   UserCandidate @relation(fields: [userCandidateId], references: [id], onDelete: Cascade)
+}
+
+model UserCandidate {
+  id            Int      @id @default(autoincrement())
+  email         String   @unique
+  password      String
+  name          String
+  dateNasc      DateTime
+  cpf           String   @unique
+  phone         String
+  gender        String
+  disablePerson String
+  createdAt     DateTime @default(now())
+  Address       Address?
+}
+
+model AddressCompany {
+  id              Int           @id @default(autoincrement())
+  country         String?
+  state           String?
+  city            String
+  district        String
+  street          String
+  number          String
+  complement      String?
+  postalCode      String
+  userCompanyId   Int           @unique
+  userCompany     UserCompany @relation(fields: [userCompanyId], references: [id], onDelete: Cascade)
+}
+
+model UserCompany {
+  id            Int      @id @default(autoincrement())
+  email         String   @unique
+  password      String
+  name          String
+  openingDate   DateTime
+  cnpj          String   @unique
+  description   String
+  socialReason  String
+  fantasyName   String
+  phone         String
+  createdAt     DateTime @default(now())
+  Address       AddressCompany?
+}
+
