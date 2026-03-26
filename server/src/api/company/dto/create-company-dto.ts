@@ -1,4 +1,31 @@
-import { IsEmail, IsString } from 'class-validator';
+import { IsEmail, IsNotEmpty, IsOptional, IsString, ValidateNested } from 'class-validator';
+import { Type } from 'class-transformer';
+
+export class AddressCompanyDTO {
+  @IsOptional()
+  country?: string;
+
+  @IsOptional()
+  state?: string;
+
+  @IsNotEmpty()
+  city: string;
+
+  @IsNotEmpty()
+  district: string;
+
+  @IsNotEmpty()
+  street: string;
+
+  @IsNotEmpty()
+  number: string;
+
+  @IsOptional()
+  complement?: string;
+
+  @IsNotEmpty()
+  postalCode: string;
+}
 
 export class CompanyDto {
   @IsEmail()
@@ -28,4 +55,9 @@ export class CompanyDto {
 
   @IsString()
   openingDate: string;
+
+  @ValidateNested()
+  @Type(() => AddressCompanyDTO)
+  @IsNotEmpty()
+  address: AddressCompanyDTO;
 }
