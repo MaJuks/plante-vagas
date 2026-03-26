@@ -1,4 +1,31 @@
-import { IsEmail, IsNotEmpty } from 'class-validator';
+import { IsEmail, IsNotEmpty, IsOptional, ValidateNested } from 'class-validator';
+import { Type } from 'class-transformer';
+
+export class AddressDTO {
+  @IsOptional()
+  country?: string;
+
+  @IsOptional()
+  state?: string;
+
+  @IsNotEmpty()
+  city: string;
+
+  @IsNotEmpty()
+  district: string;
+
+  @IsNotEmpty()
+  street: string;
+
+  @IsNotEmpty()
+  number: string;
+
+  @IsOptional()
+  complement?: string;
+
+  @IsNotEmpty()
+  postalCode: string;
+}
 
 export class CreateUserDTO {
   @IsEmail()
@@ -25,4 +52,9 @@ export class CreateUserDTO {
 
   @IsNotEmpty()
   disablePerson: string;
+
+  @ValidateNested()
+  @Type(() => AddressDTO)
+  @IsNotEmpty()
+  address: AddressDTO;
 }

@@ -28,10 +28,27 @@ export class CompanyService {
 
     const hashedPassword = await bcrypt.hash(createCompany.password, 10);
 
+    const { address, ...companyData } = createCompany;
+
     return this.prisma.userCompany.create({
       data: {
-        ...createCompany,
+        ...companyData,
         password: hashedPassword,
+        Address: {
+          create: {
+            city: address.city,
+            district: address.district,
+            street: address.street,
+            number: address.number,
+            postalCode: address.postalCode,
+            complement: address.complement,
+            state: address.state,
+            country: address.country || 'Brasil',
+          },
+        },
+      },
+      include: {
+        Address: true,
       },
     });
   }

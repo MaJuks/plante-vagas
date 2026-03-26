@@ -2,6 +2,7 @@ import React, { useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { toast } from "sonner";
 import { Mail, Lock, Eye, EyeOff, LogIn, Loader2 } from "lucide-react";
+import { hashPassword } from "../../utils/hashPassword";
 
 const LoginForm = () => {
   const navigate = useNavigate();
@@ -17,12 +18,13 @@ const LoginForm = () => {
     setIsLoading(true);
 
     try {
+      const hashedPassword = hashPassword(password);
       const res = await fetch("http://localhost:3000/auth/login", {
         method: "POST",
         headers: {
           "Content-Type": "application/json",
         },
-        body: JSON.stringify({ email, password }),
+        body: JSON.stringify({ email, password: hashedPassword }),
       });
 
       if (!res.ok) {

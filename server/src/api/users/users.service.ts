@@ -26,8 +26,28 @@ export class UserService {
     }
     const hashedPassword = await bcrypt.hash(createUser.password, 10);
 
+    const { address, ...userData } = createUser;
+
     return this.prisma.userCandidate.create({
-      data: { ...createUser, password: hashedPassword },
+      data: {
+        ...userData,
+        password: hashedPassword,
+        Address: {
+          create: {
+            city: address.city,
+            district: address.district,
+            street: address.street,
+            number: address.number,
+            postalCode: address.postalCode,
+            complement: address.complement,
+            state: address.state,
+            country: address.country || 'Brasil',
+          },
+        },
+      },
+      include: {
+        Address: true,
+      },
     });
   }
 

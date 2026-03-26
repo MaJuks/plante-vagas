@@ -13,7 +13,6 @@ const RegisterUserThree = () => {
             Transformando o Agro
           </h1>
         </div>
-
         <RegisterThree />
 
         <h1 className="text-center text-2xl m-12 cursor-pointer text-deepGreen underline"></h1>
