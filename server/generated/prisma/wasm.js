@@ -173,6 +173,57 @@ exports.Prisma.UserCompanyScalarFieldEnum = {
   createdAt: 'createdAt'
 };
 
+exports.Prisma.CurriculoScalarFieldEnum = {
+  id: 'id',
+  usuarioId: 'usuarioId',
+  createdAt: 'createdAt',
+  updatedAt: 'updatedAt'
+};
+
+exports.Prisma.ExperienciaProfissionalScalarFieldEnum = {
+  id: 'id',
+  cargo: 'cargo',
+  empresa: 'empresa',
+  descricao: 'descricao',
+  inicioData: 'inicioData',
+  fimData: 'fimData',
+  empregoAtual: 'empregoAtual',
+  curriculoId: 'curriculoId'
+};
+
+exports.Prisma.FormacaoAcademicaScalarFieldEnum = {
+  id: 'id',
+  nivelFormacao: 'nivelFormacao',
+  grauFormacao: 'grauFormacao',
+  curso: 'curso',
+  nomeInstituicao: 'nomeInstituicao',
+  status: 'status',
+  inicioData: 'inicioData',
+  fimData: 'fimData',
+  curriculoId: 'curriculoId'
+};
+
+exports.Prisma.CertificadoScalarFieldEnum = {
+  id: 'id',
+  nomeInstituicao: 'nomeInstituicao',
+  descricao: 'descricao',
+  dataEmissao: 'dataEmissao',
+  curriculoId: 'curriculoId'
+};
+
+exports.Prisma.IdiomaScalarFieldEnum = {
+  id: 'id',
+  idioma: 'idioma',
+  nivel: 'nivel',
+  curriculoId: 'curriculoId'
+};
+
+exports.Prisma.DiferencialScalarFieldEnum = {
+  id: 'id',
+  descricao: 'descricao',
+  curriculoId: 'curriculoId'
+};
+
 exports.Prisma.SortOrder = {
   asc: 'asc',
   desc: 'desc'
@@ -193,7 +244,13 @@ exports.Prisma.ModelName = {
   Address: 'Address',
   UserCandidate: 'UserCandidate',
   AddressCompany: 'AddressCompany',
-  UserCompany: 'UserCompany'
+  UserCompany: 'UserCompany',
+  Curriculo: 'Curriculo',
+  ExperienciaProfissional: 'ExperienciaProfissional',
+  FormacaoAcademica: 'FormacaoAcademica',
+  Certificado: 'Certificado',
+  Idioma: 'Idioma',
+  Diferencial: 'Diferencial'
 };
 
 /**
