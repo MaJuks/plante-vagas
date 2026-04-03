@@ -1,34 +1,53 @@
-import { Controller, Get, Post, Body, Patch, Param, Delete } from '@nestjs/common';
+import { Controller, Get, Post, Body, Patch, Param, Delete, UseGuards, Req } from '@nestjs/common';
 import { CurriculumService } from './curriculum.service';
 import { CreateCurriculumDto } from './dto/create-curriculum.dto';
 import { UpdateCurriculumDto } from './dto/update-curriculum.dto';
+import { JwtAuthGuard } from '../auth/guards/jwt.auth.guard';
+import { RolesGuard } from '../auth/guards/roles.guard';
+import { Roles } from 'src/common/decorators/roles.decorator';
+import { use } from 'passport';
 
 @Controller('curriculum')
 export class CurriculumController {
   constructor(private readonly curriculumService: CurriculumService) {}
 
-  @Post()
-  create(@Body() createCurriculumDto: CreateCurriculumDto) {
-    return this.curriculumService.create(createCurriculumDto);
+  @Post('create')
+  @UseGuards(JwtAuthGuard, RolesGuard)
+  @Roles('candidate')
+  async create(@Body() createCurriculumDto: CreateCurriculumDto, @Req() req) {
+    const userId = req.user.sub;
+    console.log(userId);
+    return this.curriculumService.create(createCurriculumDto, userId);
   }
 
-  @Get()
+  @Get('find/all')
+  @UseGuards(JwtAuthGuard, RolesGuard)
+  @Roles('candidate')
   findAll() {
     return this.curriculumService.findAll();
   }
-
-  @Get(':id')
-  findOne(@Param('id') id: string) {
-    return this.curriculumService.findOne(+id);
+ß
+  @Get('find/:id')
+  @UseGuards(JwtAuthGuard, RolesGuard)
+  @Roles('candidate')
+  async findOne(@Req() req: any) {
+    const userId = req.user.sub;
+    return this.curriculumService.findOne( userId);
   }
 
-  @Patch(':id')
-  update(@Param('id') id: string, @Body() updateCurriculumDto: UpdateCurriculumDto) {
-    return this.curriculumService.update(+id, updateCurriculumDto);
+  @Patch('update')
+  @UseGuards(JwtAuthGuard, RolesGuard)
+  @Roles('candidate')
+  async update(@Req() req: any, @Body() CreateCurriculumDto: CreateCurriculumDto) {
+    const userID = req.user.sub;
+    return this.curriculumService.update(userID, CreateCurriculumDto);
   }
 
-  @Delete(':id')
-  remove(@Param('id') id: string) {
-    return this.curriculumService.remove(+id);
+  @Delete('delete/:id')
+  @UseGuards(JwtAuthGuard, RolesGuard)
+  @Roles('candidate')
+  remove(@Param('id') id:string , @Req() req) {
+    const userId = req.user.sub;
+    return this.curriculumService.remove(Number(id),userId);
   }
 }

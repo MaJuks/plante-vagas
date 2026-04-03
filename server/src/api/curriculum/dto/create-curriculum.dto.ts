@@ -80,8 +80,6 @@ class DiferencialDto {
 }
 
 export class CreateCurriculumDto {
-  @IsInt()
-  usuarioId: number;
 
   @IsArray()
   @ValidateNested({ each: true })
