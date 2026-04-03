@@ -239,7 +239,11 @@ const config = {
       "value": "prisma-client-js"
     },
     "output": {
+<<<<<<< HEAD
       "value": "/Users/arthurtenorio/projetos/faculdade/tcc/plante-vagas/server/generated/prisma",
+=======
+      "value": "/Users/mariajulia/SmartLanding/plante-vagas-v2/server/generated/prisma",
+>>>>>>> origin/main
       "fromEnvVar": null
     },
     "config": {
@@ -253,7 +257,11 @@ const config = {
       }
     ],
     "previewFeatures": [],
+<<<<<<< HEAD
     "sourceFilePath": "/Users/arthurtenorio/projetos/faculdade/tcc/plante-vagas/server/prisma/schema.prisma",
+=======
+    "sourceFilePath": "/Users/mariajulia/SmartLanding/plante-vagas-v2/server/prisma/schema.prisma",
+>>>>>>> origin/main
     "isCustomOutput": true
   },
   "relativeEnvPaths": {

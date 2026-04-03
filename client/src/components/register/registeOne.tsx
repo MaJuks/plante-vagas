@@ -3,6 +3,7 @@ import { useRegister } from "./RegisterContext";
 import { useEffect, useState } from "react";
 import { Eye, EyeOff } from "lucide-react";
 import { toast } from "sonner";
+import { hashPassword } from "../../utils/hashPassword";
 
 const RegisterOne = () => {
   const navigate = useNavigate();
@@ -53,7 +54,8 @@ const RegisterOne = () => {
         duration: 3000,
       });
     } else {
-      updateFormData({ email, password });
+      const hashedPassword = hashPassword(password);
+      updateFormData({ email, password: hashedPassword });
       navigate("/register-2");
     }
   };

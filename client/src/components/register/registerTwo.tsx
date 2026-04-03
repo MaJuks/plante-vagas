@@ -16,8 +16,17 @@ const RegisterTwo = () => {
   const [gender, setGender] = useState("");
   const [disablePerson, setDisablePerson] = useState("");
 
+  // Campos de endereço
+  const [cep, setCep] = useState("");
+  const [street, setStreet] = useState("");
+  const [number, setNumber] = useState("");
+  const [complement, setComplement] = useState("");
+  const [district, setDistrict] = useState("");
+  const [city, setCity] = useState("");
+  const [state, setState] = useState("");
+
   const handleSubmit = async () => {
-    if (!name || !cpf || !phone || !dateNasc || !gender || !disablePerson) {
+    if (!name || !cpf || !phone || !dateNasc || !gender || !disablePerson || !cep || !street || !number || !district || !city || !state) {
       toast.error("Preencha todos os campos para avançar", {
         description:
           "Todos os campos a seguir devem ser preenchidos para realizar o cadastro",
@@ -34,6 +43,16 @@ const RegisterTwo = () => {
           phone: phone,
           gender: gender,
           disablePerson: disablePerson,
+          address: {
+            postalCode: cep,
+            street: street,
+            number: number,
+            complement: complement,
+            district: district,
+            city: city,
+            state: state,
+            country: "Brasil",
+          },
         },
       };
 
@@ -246,6 +265,118 @@ const RegisterTwo = () => {
             <label htmlFor="Não" className="text-lg text-gray-700">
               Não
             </label>
+          </div>
+        </div>
+
+        {/* Seção de Endereço */}
+        <div className="text-start text-lg mt-6 mb-2">
+          <h1 className="text-green-900 text-2xl">Endereço</h1>
+        </div>
+
+        <div className="grid mt-3 mb-3">
+          <label htmlFor="cep" className="text-start text-lg mt-2 mb-2">
+            CEP
+          </label>
+          <input
+            type="text"
+            id="cep"
+            name="cep"
+            value={cep}
+            onChange={(e) => setCep(e.target.value)}
+            placeholder="00000-000"
+            className="border-2 border-deepGreen rounded-lg shadow-md p-3 pl-3 text-black bg-LightGray"
+          />
+        </div>
+
+        <div className="grid grid-cols-2 gap-4 mt-3 mb-3">
+          <div>
+            <label htmlFor="street" className="text-start text-lg mt-2 mb-2">
+              Rua
+            </label>
+            <input
+              type="text"
+              id="street"
+              name="street"
+              value={street}
+              onChange={(e) => setStreet(e.target.value)}
+              placeholder="Nome da rua"
+              className="border-2 border-deepGreen rounded-lg shadow-md p-3 pl-3 text-black bg-LightGray w-full"
+            />
+          </div>
+          <div>
+            <label htmlFor="number" className="text-start text-lg mt-2 mb-2">
+              Número
+            </label>
+            <input
+              type="text"
+              id="number"
+              name="number"
+              value={number}
+              onChange={(e) => setNumber(e.target.value)}
+              placeholder="Nº"
+              className="border-2 border-deepGreen rounded-lg shadow-md p-3 pl-3 text-black bg-LightGray w-full"
+            />
+          </div>
+        </div>
+
+        <div className="grid mt-3 mb-3">
+          <label htmlFor="complement" className="text-start text-lg mt-2 mb-2">
+            Complemento (opcional)
+          </label>
+          <input
+            type="text"
+            id="complement"
+            name="complement"
+            value={complement}
+            onChange={(e) => setComplement(e.target.value)}
+            placeholder="Apto, bloco, etc."
+            className="border-2 border-deepGreen rounded-lg shadow-md p-3 pl-3 text-black bg-LightGray"
+          />
+        </div>
+
+        <div className="grid mt-3 mb-3">
+          <label htmlFor="district" className="text-start text-lg mt-2 mb-2">
+            Bairro
+          </label>
+          <input
+            type="text"
+            id="district"
+            name="district"
+            value={district}
+            onChange={(e) => setDistrict(e.target.value)}
+            placeholder="Nome do bairro"
+            className="border-2 border-deepGreen rounded-lg shadow-md p-3 pl-3 text-black bg-LightGray"
+          />
+        </div>
+
+        <div className="grid grid-cols-2 gap-4 mt-3 mb-3">
+          <div>
+            <label htmlFor="city" className="text-start text-lg mt-2 mb-2">
+              Cidade
+            </label>
+            <input
+              type="text"
+              id="city"
+              name="city"
+              value={city}
+              onChange={(e) => setCity(e.target.value)}
+              placeholder="Nome da cidade"
+              className="border-2 border-deepGreen rounded-lg shadow-md p-3 pl-3 text-black bg-LightGray w-full"
+            />
+          </div>
+          <div>
+            <label htmlFor="state" className="text-start text-lg mt-2 mb-2">
+              Estado
+            </label>
+            <input
+              type="text"
+              id="state"
+              name="state"
+              value={state}
+              onChange={(e) => setState(e.target.value)}
+              placeholder="UF"
+              className="border-2 border-deepGreen rounded-lg shadow-md p-3 pl-3 text-black bg-LightGray w-full"
+            />
           </div>
         </div>
 
