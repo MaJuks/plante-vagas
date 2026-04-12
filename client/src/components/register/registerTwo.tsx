@@ -4,6 +4,7 @@ import { useState } from "react";
 import { cpfMask } from "../masks/cpfMask";
 import { phoneMask } from "../masks/phoneMask";
 import { toast } from "sonner";
+import { cepMask } from "../masks/cepMask";
 
 const RegisterTwo = () => {
   const navigate = useNavigate();
@@ -24,6 +25,40 @@ const RegisterTwo = () => {
   const [district, setDistrict] = useState("");
   const [city, setCity] = useState("");
   const [state, setState] = useState("");
+
+  const [filled, setFilled] = useState<Record<string, boolean>>({});
+  const markFilled = (field: string, value: string) =>
+    setFilled((prev) => ({ ...prev, [field]: !!value.trim() }));
+  const bg = (field: string) => filled[field] ? "bg-MediumGray2" : "bg-LightGray";
+
+  const handleCepChange = async (e: React.ChangeEvent<HTMLInputElement>) => {
+    const masked = cepMask(e.target.value);
+    setCep(masked);
+    const cleaned = masked.replace("-", "");
+    if (cleaned.length === 8) {
+      try {
+        const res = await fetch(`https://viacep.com.br/ws/${cleaned}/json/`);
+        const data = await res.json();
+        if (data.erro) {
+          toast.error("CEP não encontrado");
+        } else {
+          setStreet(data.logradouro || "");
+          setDistrict(data.bairro || "");
+          setCity(data.localidade || "");
+          setState(data.uf || "");
+          setFilled((prev) => ({
+            ...prev,
+            street: !!data.logradouro,
+            district: !!data.bairro,
+            city: !!data.localidade,
+            state: !!data.uf,
+          }));
+        }
+      } catch {
+        toast.error("Erro ao buscar CEP");
+      } 
+    }
+  };
 
   const handleSubmit = async () => {
     if (!name || !cpf || !phone || !dateNasc || !gender || !disablePerson || !cep || !street || !number || !district || !city || !state) {
@@ -98,11 +133,11 @@ const RegisterTwo = () => {
             type="text"
             id="nome"
             name="nome"
-            onChange={(e) => {
-              setName(e.target.value);
-            }}
+            value={name}
+            onChange={(e) => setName(e.target.value)}
+            onBlur={(e) => markFilled("name", e.target.value)}
             placeholder="Insira seu nome aqui."
-            className="border-2 border-deepGreen rounded-lg shadow-md p-3 pl-3 text-black bg-LightGray"
+            className={`border-2 border-deepGreen rounded-lg shadow-md p-3 pl-3 text-black transition-colors ${bg("name")}`}
           />
         </div>
 
@@ -113,12 +148,10 @@ const RegisterTwo = () => {
             id="CPF"
             name="CPF"
             value={cpf}
-            onChange={(e) => {
-              const maskedCpf = cpfMask(e.target.value);
-              setCpf(maskedCpf);
-            }}
+            onChange={(e) => setCpf(cpfMask(e.target.value))}
+            onBlur={(e) => markFilled("cpf", e.target.value)}
             placeholder="000.000.000-00"
-            className="border-2 border-deepGreen rounded-lg shadow-md p-3 pl-3 text-left text-black bg-LightGray w-full"
+            className={`border-2 border-deepGreen rounded-lg shadow-md p-3 pl-3 text-left text-black w-full transition-colors ${bg("cpf")}`}
           />
         </div>
 
@@ -132,12 +165,10 @@ const RegisterTwo = () => {
               id="telephone"
               name="telephone"
               value={phone}
-              onChange={(e) => {
-                const maskedPhone = phoneMask(e.target.value);
-                setPhone(maskedPhone);
-              }}
+              onChange={(e) => setPhone(phoneMask(e.target.value))}
+              onBlur={(e) => markFilled("phone", e.target.value)}
               placeholder="99 99 99999-9999"
-              className="border-2 border-deepGreen rounded-lg shadow-md p-3 pl-3 text-black bg-LightGray w-full"
+              className={`border-2 border-deepGreen rounded-lg shadow-md p-3 pl-3 text-black w-full transition-colors ${bg("phone")}`}
             />
           </div>
 
@@ -149,11 +180,11 @@ const RegisterTwo = () => {
               type="date"
               id="date"
               name="date"
-              onChange={(e) => {
-                setDateNasc(e.target.value);
-              }}
+              value={dateNasc}
+              onChange={(e) => setDateNasc(e.target.value)}
+              onBlur={(e) => markFilled("dateNasc", e.target.value)}
               placeholder="00/00/0000"
-              className="border-2 border-deepGreen rounded-lg shadow-md p-3 pl-3  text-black  bg-LightGray w-full"
+              className={`border-2 border-deepGreen rounded-lg shadow-md p-3 pl-3 text-black w-full transition-colors ${bg("dateNasc")}`}
             />
           </div>
         </div>
@@ -277,15 +308,16 @@ const RegisterTwo = () => {
           <label htmlFor="cep" className="text-start text-lg mt-2 mb-2">
             CEP
           </label>
-          <input
-            type="text"
-            id="cep"
-            name="cep"
-            value={cep}
-            onChange={(e) => setCep(e.target.value)}
-            placeholder="00000-000"
-            className="border-2 border-deepGreen rounded-lg shadow-md p-3 pl-3 text-black bg-LightGray"
-          />
+            <input
+              type="text"
+              id="cep"
+              name="cep"
+              value={cep}
+              onChange={handleCepChange}
+              onBlur={(e) => markFilled("cep", e.target.value)}
+              placeholder="00000-000"
+              className={`border-2 border-deepGreen rounded-lg shadow-md p-3 pl-3 text-black transition-colors ${bg("cep")}`}
+            />
         </div>
 
         <div className="grid grid-cols-2 gap-4 mt-3 mb-3">
@@ -299,8 +331,9 @@ const RegisterTwo = () => {
               name="street"
               value={street}
               onChange={(e) => setStreet(e.target.value)}
+              onBlur={(e) => markFilled("street", e.target.value)}
               placeholder="Nome da rua"
-              className="border-2 border-deepGreen rounded-lg shadow-md p-3 pl-3 text-black bg-LightGray w-full"
+              className={`border-2 border-deepGreen rounded-lg shadow-md p-3 pl-3 text-black w-full transition-colors ${bg("street")}`}
             />
           </div>
           <div>
@@ -313,8 +346,9 @@ const RegisterTwo = () => {
               name="number"
               value={number}
               onChange={(e) => setNumber(e.target.value)}
+              onBlur={(e) => markFilled("number", e.target.value)}
               placeholder="Nº"
-              className="border-2 border-deepGreen rounded-lg shadow-md p-3 pl-3 text-black bg-LightGray w-full"
+              className={`border-2 border-deepGreen rounded-lg shadow-md p-3 pl-3 text-black w-full transition-colors ${bg("number")}`}
             />
           </div>
         </div>
@@ -329,8 +363,9 @@ const RegisterTwo = () => {
             name="complement"
             value={complement}
             onChange={(e) => setComplement(e.target.value)}
+            onBlur={(e) => markFilled("complement", e.target.value)}
             placeholder="Apto, bloco, etc."
-            className="border-2 border-deepGreen rounded-lg shadow-md p-3 pl-3 text-black bg-LightGray"
+            className={`border-2 border-deepGreen rounded-lg shadow-md p-3 pl-3 text-black transition-colors ${bg("complement")}`}
           />
         </div>
 
@@ -344,8 +379,9 @@ const RegisterTwo = () => {
             name="district"
             value={district}
             onChange={(e) => setDistrict(e.target.value)}
+            onBlur={(e) => markFilled("district", e.target.value)}
             placeholder="Nome do bairro"
-            className="border-2 border-deepGreen rounded-lg shadow-md p-3 pl-3 text-black bg-LightGray"
+            className={`border-2 border-deepGreen rounded-lg shadow-md p-3 pl-3 text-black transition-colors ${bg("district")}`}
           />
         </div>
 
@@ -360,8 +396,9 @@ const RegisterTwo = () => {
               name="city"
               value={city}
               onChange={(e) => setCity(e.target.value)}
+              onBlur={(e) => markFilled("city", e.target.value)}
               placeholder="Nome da cidade"
-              className="border-2 border-deepGreen rounded-lg shadow-md p-3 pl-3 text-black bg-LightGray w-full"
+              className={`border-2 border-deepGreen rounded-lg shadow-md p-3 pl-3 text-black w-full transition-colors ${bg("city")}`}
             />
           </div>
           <div>
@@ -374,8 +411,9 @@ const RegisterTwo = () => {
               name="state"
               value={state}
               onChange={(e) => setState(e.target.value)}
+              onBlur={(e) => markFilled("state", e.target.value)}
               placeholder="UF"
-              className="border-2 border-deepGreen rounded-lg shadow-md p-3 pl-3 text-black bg-LightGray w-full"
+              className={`border-2 border-deepGreen rounded-lg shadow-md p-3 pl-3 text-black w-full transition-colors ${bg("state")}`}
             />
           </div>
         </div>
