@@ -2,5 +2,5 @@ export class CertificadoEntity {
   id: number;
   nomeInstituicao: string;
   descricao: string;
-  dataEmissao: Date;
+  certificate_name: string;
 }

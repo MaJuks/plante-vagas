@@ -26,7 +26,7 @@ export class CurriculumController {
   findAll() {
     return this.curriculumService.findAll();
   }
-ß
+
   @Get('find/:id')
   @UseGuards(JwtAuthGuard, RolesGuard)
   @Roles('candidate')

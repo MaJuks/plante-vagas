@@ -62,8 +62,8 @@ class CertificadoDto {
   @IsString()
   descricao: string;
 
-  @IsDateString()
-  dataEmissao: string;
+  @IsString()
+  certificate_name: string;
 }
 
 class IdiomaDto {

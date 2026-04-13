@@ -12,7 +12,7 @@ export class AddressCompanyDTO {
   city: string;
 
   @IsNotEmpty()
-  district: string;
+  district!: string;
 
   @IsNotEmpty()
   street: string;

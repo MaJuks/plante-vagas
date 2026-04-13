@@ -115,7 +115,7 @@ model Certificado {
   id              Int @id @default(autoincrement())
   nomeInstituicao String
   descricao       String
-  dataEmissao     DateTime
+  certificate_name String
 
   curriculoId Int
   curriculo   Curriculo @relation(fields: [curriculoId], references: [id], onDelete: Cascade)

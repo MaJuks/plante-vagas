@@ -1,65 +1,135 @@
 import { Save, Trash2 } from "lucide-react";
-import { useState } from "react";
+import { useEffect, useState } from "react";
+import { toast } from "sonner";
+import { useCurriculum } from "../curriculumContext";
+import { ConfirmDialog } from "@/components/ui/confirm-dialog";
+
+const adjetivos = [
+  // Positivos
+  "Comunicativo",
+  "Proativo",
+  "Organizado",
+  "Pontual",
+  "Responsável",
+  "Criativo",
+  "Dedicado",
+  "Colaborativo",
+  "Empático",
+  "Focado",
+  "Resiliente",
+  "Inovador",
+  "Comprometido",
+  "Motivado",
+  "Líder",
+  "Versátil",
+  "Curioso",
+  "Analítico",
+  "Paciente",
+  "Adaptável",
+
+  // Negativos ou pontos de atenção
+  "Ansioso",
+  "Perfeccionista",
+  "Teimoso",
+  "Impulsivo",
+  "Distraído",
+  "Crítico demais",
+  "Introvertido",
+  "Lento para decisões",
+  "Dependente de validação",
+  "Evita conflitos",
+
+  // Neutros/contextuais
+  "Cauteloso",
+  "Observador",
+  "Sincero",
+  "Reservado",
+  "Pragmático",
+];
 
 export default function Differentiate() {
-  const adjetivos = [
-    // Positivos
-    "Comunicativo",
-    "Proativo",
-    "Organizado",
-    "Pontual",
-    "Responsável",
-    "Criativo",
-    "Dedicado",
-    "Colaborativo",
-    "Empático",
-    "Focado",
-    "Resiliente",
-    "Inovador",
-    "Comprometido",
-    "Motivado",
-    "Líder",
-    "Versátil",
-    "Curioso",
-    "Analítico",
-    "Paciente",
-    "Adaptável",
+  const { curriculum, saveSection } = useCurriculum();
 
-    // Negativos ou pontos de atenção
-    "Ansioso",
-    "Perfeccionista",
-    "Teimoso",
-    "Impulsivo",
-    "Distraído",
-    "Crítico demais",
-    "Introvertido",
-    "Lento para decisões",
-    "Dependente de validação",
-    "Evita conflitos",
-
-    // Neutros/contextuais
-    "Cauteloso",
-    "Observador",
-    "Sincero",
-    "Reservado",
-    "Pragmático",
-  ];
-
+  const [confirmGroup, setConfirmGroup] = useState<1 | 2 | null>(null);
   const [selecionados_1, setSelecionados_1] = useState<string[]>([]);
   const [selecionados_2, setSelecionados_2] = useState<string[]>([]);
+
+  useEffect(() => {
+    const descricoes = curriculum.diferenciais.map((d: any) => d.descricao);
+    setSelecionados_1(descricoes.filter((d: string) => adjetivos.includes(d)));
+  }, [curriculum.diferenciais]);
 
   const toggleSelecionado = (adj: string) => {
     setSelecionados_1((prev) =>
       prev.includes(adj) ? prev.filter((a) => a !== adj) : [...prev, adj]
     );
   };
+
   const toggleSelecionado2 = (adj: string) => {
     setSelecionados_2((prev) =>
       prev.includes(adj) ? prev.filter((a) => a !== adj) : [...prev, adj]
     );
   };
+
+  const handleSave1 = async () => {
+    const loadingToast = toast.loading("Salvando diferenciais...");
+    try {
+      const combined = [...new Set([...selecionados_1, ...selecionados_2])].map((d) => ({ descricao: d }));
+      await saveSection("diferenciais", combined);
+      toast.success("Diferenciais salvos com sucesso", { id: loadingToast });
+    } catch {
+      toast.error("Erro ao salvar diferenciais", { id: loadingToast });
+    }
+  };
+
+  const handleSave2 = async () => {
+    const loadingToast = toast.loading("Salvando diferenciais...");
+    try {
+      const combined = [...new Set([...selecionados_1, ...selecionados_2])].map((d) => ({ descricao: d }));
+      await saveSection("diferenciais", combined);
+      toast.success("Diferenciais salvos com sucesso", { id: loadingToast });
+    } catch {
+      toast.error("Erro ao salvar diferenciais", { id: loadingToast });
+    }
+  };
+
+  const handleDelete1 = async () => {
+    const loadingToast = toast.loading("Excluindo...");
+    try {
+      setSelecionados_1([]);
+      const combined = selecionados_2.map((d) => ({ descricao: d }));
+      await saveSection("diferenciais", combined);
+      toast.success("Características removidas com sucesso!", { id: loadingToast });
+    } catch {
+      toast.error("Erro ao excluir características.", { id: loadingToast });
+    }
+  };
+
+  const handleDelete2 = async () => {
+    const loadingToast = toast.loading("Excluindo...");
+    try {
+      setSelecionados_2([]);
+      const combined = selecionados_1.map((d) => ({ descricao: d }));
+      await saveSection("diferenciais", combined);
+      toast.success("Características removidas com sucesso!", { id: loadingToast });
+    } catch {
+      toast.error("Erro ao excluir características.", { id: loadingToast });
+    }
+  };
+
   return (
     <>
+      <ConfirmDialog
+        open={confirmGroup !== null}
+        onOpenChange={(open) => { if (!open) setConfirmGroup(null) }}
+        title="Limpar características"
+        description="Tem certeza que deseja remover estas características? Esta ação não pode ser desfeita."
+        onConfirm={() => {
+          if (confirmGroup === 1) { handleDelete1(); }
+          else if (confirmGroup === 2) { handleDelete2(); }
+          setConfirmGroup(null);
+        }}
+      />
       <div className="flex flex-col p-8  md:p-36 lg:p-40 w-full bg-MediumGray max-w-6xl mx-auto font-SecondFont">
         <hr className="mb-6" />
 
@@ -91,11 +161,13 @@ export default function Differentiate() {
         </div>
 
         <div className="flex justify-end gap-3 mb-10">
-          <button className="text-deepGreen cursor-pointer">
-            <Save />
+          <button className="flex items-center gap-2 px-4 py-2 bg-deepGreen text-white rounded-md cursor-pointer hover:opacity-90 transition" onClick={handleSave1}>
+            <Save size={18} />
+            <span>Salvar</span>
           </button>
-          <button className="text-red-900 cursor-pointer">
-            <Trash2 />
+          <button className="flex items-center gap-2 px-4 py-2 bg-red-700 text-white rounded-md cursor-pointer hover:opacity-90 transition" onClick={() => setConfirmGroup(1)}>
+            <Trash2 size={18} />
+            <span>Excluir</span>
           </button>
         </div>
 
@@ -124,11 +196,13 @@ export default function Differentiate() {
         </div>
 
         <div className="flex justify-end gap-3 mb-10">
-          <button className="text-deepGreen cursor-pointer">
-            <Save />
+          <button className="flex items-center gap-2 px-4 py-2 bg-deepGreen text-white rounded-md cursor-pointer hover:opacity-90 transition" onClick={handleSave2}>
+            <Save size={18} />
+            <span>Salvar</span>
           </button>
-          <button className="text-red-900 cursor-pointer">
-            <Trash2 />
+          <button className="flex items-center gap-2 px-4 py-2 bg-red-700 text-white rounded-md cursor-pointer hover:opacity-90 transition" onClick={() => setConfirmGroup(2)}>
+            <Trash2 size={18} />
+            <span>Excluir</span>
           </button>
         </div>
       </div>
