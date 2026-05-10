@@ -1,9 +1,11 @@
 import * as React from "react";
-import { User, Clipboard, AlignJustify, IdCardIcon, Briefcase, UserCheck } from "lucide-react";
+import { User, Clipboard, AlignJustify, Briefcase, UserCheck, LogOut } from "lucide-react";
+import { useNavigate } from "react-router-dom";
 
 import { NavMain } from "@/components/ui/nav-main";
+import { NavUser } from "@/components/ui/nav-user";
 
-import { Sidebar, SidebarContent, SidebarRail } from "@/components/ui/sidebar";
+import { Sidebar, SidebarContent, SidebarFooter, SidebarMenu, SidebarMenuButton, SidebarMenuItem, SidebarRail } from "@/components/ui/sidebar";
 
 export function AppSidebar({
   activeTab,
@@ -13,6 +15,15 @@ export function AppSidebar({
   activeTab: string;
   setActiveTab: (tab: string) => void;
 } & React.ComponentProps<typeof Sidebar>) {
+  const navigate = useNavigate();
+
+  const handleLogout = () => {
+    localStorage.removeItem("token");
+    localStorage.removeItem("userType");
+    localStorage.removeItem("userId");
+    localStorage.removeItem("refreshToken");
+    navigate("/login");
+  };
   const data = {
     user: {
       name: "shadcn",
@@ -93,13 +104,25 @@ export function AppSidebar({
 
   return (
     <Sidebar
-      className="flex mt-20 font-SecondFont "
+      className="flex top-20 h-[calc(100svh-5rem)] font-SecondFont"
       collapsible="icon"
       {...props}
     >
       <SidebarContent>
         <NavMain items={data.navMain} />
       </SidebarContent>
+
+      <SidebarFooter>
+        <NavUser />
+        <SidebarMenu>
+          <SidebarMenuItem>
+            <SidebarMenuButton onClick={handleLogout} className="text-red-600 hover:text-red-700 hover:bg-red-50">
+              <LogOut />
+              Sair da conta
+            </SidebarMenuButton>
+          </SidebarMenuItem>
+        </SidebarMenu>
+      </SidebarFooter>
 
       <SidebarRail />
     </Sidebar>
@@ -147,7 +170,7 @@ export function AppSidebarCreate({
 
   return (
     <Sidebar
-      className="flex mt-20 font-SecondFont "
+      className="flex top-20 h-[calc(100svh-5rem)] font-SecondFont"
       collapsible="icon"
       {...props}
     >

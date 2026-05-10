@@ -19,29 +19,40 @@ interface UserContextType {
       gender: string;
       disablePerson: string;
       createdAt: string;
+      Address: {
+        postalCode: string;
+        street: string;
+        number: string;
+        district: string;
+        complement?: string;
+        city: string;
+        state?: string;
+        country?: string;
+      } | null;
     };
   };
+  refreshUser: () => Promise<void>;
 }
 
 const UserContext = createContext<UserContextType>({} as UserContextType);
 
 export const UserProvider = ({ children }: { children: ReactNode }) => {
+  const fetchUserData = async () => {
+    try {
+      const token = localStorage.getItem("token");
+      const response = await fetch("http://localhost:3000/users/profile", {
+        method: "GET",
+        headers: { authorization: `bearer ${token}` },
+      });
+
+      const data = await response.json();
+      setUserData(data);
+    } catch (error) {
+      console.log(error);
+    }
+  };
+
   useEffect(() => {
-    const fetchUserData = async () => {
-      try {
-        const token = localStorage.getItem("token");
-        const response = await fetch("http://localhost:3000/users/profile", {
-          method: "GET",
-          headers: { authorization: `bearer ${token}` },
-        });
-
-        const data = await response.json();
-        setUserData(data);
-      } catch (error) {
-        console.log(error);
-      }
-    };
-
     fetchUserData();
   }, []);
 
@@ -57,11 +68,21 @@ export const UserProvider = ({ children }: { children: ReactNode }) => {
       gender: "",
       disablePerson: "",
       createdAt: "",
+      Address: null as {
+        postalCode: string;
+        street: string;
+        number: string;
+        district: string;
+        complement?: string;
+        city: string;
+        state?: string;
+        country?: string;
+      } | null,
     },
   });
 
   return (
-    <UserContext.Provider value={{ UserData: userData }}>
+    <UserContext.Provider value={{ UserData: userData, refreshUser: fetchUserData }}>
       {children}
     </UserContext.Provider>
   );

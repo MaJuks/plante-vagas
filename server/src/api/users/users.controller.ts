@@ -3,7 +3,10 @@ import { JwtAuthGuard } from '../auth/guards/jwt.auth.guard';
 import { RolesGuard } from '../auth/guards/roles.guard';
 import { UserService } from './users.service';
 
-import { Body, Controller, Get, Post, Req, UseGuards } from '@nestjs/common';
+import { Body, Controller, Delete, Get, Param, Patch, Post, Req, UseGuards } from '@nestjs/common';
+import { use } from 'passport';
+import { CreateUserDTO } from './dto/create-user-dto';
+import { UpdateUserDTO } from './dto/update-user-deto';
 
 @Controller('users')
 export class UsersController {
@@ -32,4 +35,21 @@ export class UsersController {
     console.log(userId);
     return this.userService.getInfo(userId);
   }
+
+   @Patch('update')
+    @UseGuards(JwtAuthGuard, RolesGuard)
+    @Roles('candidate')
+    async update(@Req() req: any, @Body() UpdateUserDTO: UpdateUserDTO ) {
+      const userID = req.user.sub;
+      return this.userService.update(userID, UpdateUserDTO)
+    }
+
+@Delete('delete/:id')
+@UseGuards(JwtAuthGuard, RolesGuard)
+@Roles('candidate')
+async deleteUser(@Req() req){
+  const userId = req.user.sub
+  return this.userService.delete(userId);
+}
+
 }
