@@ -12,6 +12,7 @@ import MyData from "./profile/myData";
 import Address from "./profile/address";
 import InfoLogin from "./profile/infoLogin";
 import PersonalInfo from "./curriculum/infoPersonal";
+import CurriculumView from "./curriculum/curriculumView";
 import AcademicInfo from "./curriculum/infoAcademic";
 import Language from "./curriculum/language";
 import ProfessionalInfo from "./curriculum/infoProfessional";
@@ -33,6 +34,8 @@ export default function Page() {
         return <Address />;
       case "informacoes-login":
         return <InfoLogin />;
+      case "visualizar-curriculo":
+        return <CurriculumView />;
       case "informacoes-pessoais":
         return <PersonalInfo />;
       case "formacao-academica":
