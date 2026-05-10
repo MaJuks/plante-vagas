@@ -40,16 +40,14 @@ export const CurriculumProvider = ({ children }: { children: ReactNode }) => {
       const saveSection = async (section: any, data: any) => {
         const updated = {...curriculumData, [section]:data}
 
-        if (existCurriculum ) {
-
+        if (existCurriculum) {
             await updateCurriculum(updated)
         } else {
-
            await createCurriculum(updated)
+           setExistCurriculum(true)
         }
 
         setCurriculumData(updated)
-
       }
 
     return (

@@ -1,5 +1,5 @@
 import * as React from "react";
-import { User, Clipboard, AlignJustify, Briefcase, UserCheck, LogOut } from "lucide-react";
+import { User, Clipboard, AlignJustify, Briefcase, UserCheck, LogOut, Eye } from "lucide-react";
 import { useNavigate } from "react-router-dom";
 
 import { NavMain } from "@/components/ui/nav-main";
@@ -61,6 +61,12 @@ export function AppSidebar({
         icon: Clipboard,
         onClick: () => setActiveTab("curriculo"),
         items: [
+          {
+            title: "Visualizar Currículo",
+            url: "#",
+            icon: Eye,
+            onClick: () => setActiveTab("visualizar-curriculo"),
+          },
           {
             title: "Informações Pessoais",
             url: "#",
