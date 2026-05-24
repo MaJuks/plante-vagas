@@ -1,12 +1,12 @@
 import { createContext, ReactNode, useContext,  useState , useEffect} from "react";
 
-import { CurriculumPayload, getCurriculum, createCurriculum, updateCurriculum, 
- } from "../../services/curriculum";
+import { CurriculumPayload, getCurriculum, createCurriculum, updateCurriculum } from "../../services/curriculum";
 
-interface CurriculumContextType { 
+interface CurriculumContextType {
     curriculum : CurriculumPayload
     existCurriculum : boolean
-      saveSection: (section: any, data: any) => Promise<void> 
+    saveSection: (section: any, data: any) => Promise<void>
+    importAll: (data: CurriculumPayload) => Promise<void>
 }
 
 
@@ -50,8 +50,18 @@ export const CurriculumProvider = ({ children }: { children: ReactNode }) => {
         setCurriculumData(updated)
       }
 
+      const importAll = async (data: CurriculumPayload) => {
+        if (existCurriculum) {
+          await updateCurriculum(data)
+        } else {
+          await createCurriculum(data)
+          setExistCurriculum(true)
+        }
+        setCurriculumData(data)
+      }
+
     return (
-    <CurriculumContext.Provider value={{ curriculum: curriculumData, existCurriculum: existCurriculum, saveSection }}>
+    <CurriculumContext.Provider value={{ curriculum: curriculumData, existCurriculum: existCurriculum, saveSection, importAll }}>
       {children}
     </CurriculumContext.Provider>
   );

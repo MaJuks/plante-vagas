@@ -64,3 +64,18 @@ export async function deleteCurriculum(id: number) {
   }
   return response.json();
 }
+
+export async function importCurriculumFromPdf(file: File): Promise<CurriculumPayload> {
+  const formData = new FormData();
+  formData.append("file", file);
+  const response = await fetch(`${BASE_URL}/import-pdf`, {
+    method: "POST",
+    headers: { authorization: `bearer ${getToken()}` },
+    body: formData,
+  });
+  if (!response.ok) {
+    const error = await response.json();
+    throw new Error(error.message || "Erro na importação");
+  }
+  return response.json();
+}

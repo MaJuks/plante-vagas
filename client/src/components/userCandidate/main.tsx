@@ -19,6 +19,7 @@ import ProfessionalInfo from "./curriculum/infoProfessional";
 import Certificate from "./curriculum/certificates";
 import Differentiate from "./curriculum/differentiate";
 import SelectionProcess from "./selectionProcess/selectionProcess";
+import ImportCurriculum from "./curriculum/importCurriculum";
 import { CurriculumProvider } from "./curriculumContext";
 export default function Page() {
   const [activeTab, setActiveTab] = useState("Perfil");
@@ -50,6 +51,8 @@ export default function Page() {
         return <Differentiate />;
       case "processos-seletivos":
         return <SelectionProcess />;
+      case "importar-curriculo":
+        return <ImportCurriculum />;
       default:
         return ;
     }

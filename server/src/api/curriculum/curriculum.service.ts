@@ -1,8 +1,9 @@
-import { ConflictException, Injectable } from '@nestjs/common';
+import { ConflictException, Injectable, InternalServerErrorException } from '@nestjs/common';
 import { CreateCurriculumDto } from './dto/create-curriculum.dto';
 import { UpdateCurriculumDto } from './dto/update-curriculum.dto';
 import { PrismaService } from '../prisma/prisma.service';
 import { Prisma } from 'generated/prisma';
+import axios from 'axios';
 
 @Injectable()
 export class CurriculumService {
@@ -117,5 +118,114 @@ export class CurriculumService {
     return this.prisma.curriculo.delete({
       where: { id: existCurriculum.id },
     });
+  }
+
+  async importFromPdf(fileBuffer: Buffer): Promise<CreateCurriculumDto> {
+    const apiKey = process.env.OPENAI_API_KEY;
+    if (!apiKey) {
+      throw new InternalServerErrorException('OPENAI_API_KEY não configurada');
+    }
+
+    const base64Pdf = fileBuffer.toString('base64');
+
+    const prompt = `Analise este currículo em PDF e extraia as informações retornando APENAS um JSON válido com a seguinte estrutura exata (sem explicações, sem markdown):
+{
+  "experiencias": [
+    {
+      "cargo": "string",
+      "empresa": "string",
+      "descricao": "string",
+      "inicioData": "YYYY-MM-DDTHH:mm:ss.000Z",
+      "fimData": "YYYY-MM-DDTHH:mm:ss.000Z ou null",
+      "empregoAtual": false
+    }
+  ],
+  "formacoes": [
+    {
+      "nivelFormacao": "fundamental|medio|tecnico|superior|posgraduacao|mestrado|doutorado",
+      "grauFormacao": "string",
+      "curso": "string",
+      "nomeInstituicao": "string",
+      "status": "completo|em andamento|incompleto",
+      "inicioData": "YYYY-MM-DDTHH:mm:ss.000Z",
+      "fimData": "YYYY-MM-DDTHH:mm:ss.000Z ou null"
+    }
+  ],
+  "certificados": [
+    {
+      "certificate_name": "string",
+      "nomeInstituicao": "string",
+      "descricao": "string"
+    }
+  ],
+  "idiomas": [
+    {
+      "idioma": "portugues|ingles|espanhol|frances|alemao|italiano|mandarim|japones|coreano|arabe|russo",
+      "nivel": "basico|intermediario|avancado|fluente|nativo"
+    }
+  ],
+  "diferenciais": [
+    {
+      "descricao": "string"
+    }
+  ]
+}
+
+Regras importantes:
+- Datas desconhecidas: use "2000-01-01T00:00:00.000Z"
+- fimData null quando empregoAtual=true
+- Extraia habilidades/competências como diferenciais
+- Retorne SOMENTE o JSON, sem nenhum texto adicional`;
+
+    let responseText: string;
+    try {
+      const { data } = await axios.post(
+        'https://api.openai.com/v1/chat/completions',
+        {
+          model: 'gpt-4o',
+          max_tokens: 4096,
+          messages: [
+            {
+              role: 'user',
+              content: [
+                {
+                  type: 'file',
+                  file: {
+                    filename: 'curriculum.pdf',
+                    file_data: `data:application/pdf;base64,${base64Pdf}`,
+                  },
+                },
+                {
+                  type: 'text',
+                  text: prompt,
+                },
+              ],
+            },
+          ],
+        },
+        {
+          headers: {
+            'Content-Type': 'application/json',
+            Authorization: `Bearer ${apiKey}`,
+          },
+        },
+      );
+
+      responseText = data.choices[0].message.content;
+    } catch (err: any) {
+      const msg = err?.response?.data?.error?.message || err.message;
+      throw new InternalServerErrorException(`Erro ao chamar a API de IA: ${msg}`);
+    }
+
+    const jsonMatch = responseText.match(/\{[\s\S]*\}/);
+    if (!jsonMatch) {
+      throw new InternalServerErrorException('A IA não retornou um JSON válido');
+    }
+
+    try {
+      return JSON.parse(jsonMatch[0]) as CreateCurriculumDto;
+    } catch {
+      throw new InternalServerErrorException('Falha ao interpretar o JSON retornado pela IA');
+    }
   }
 }
