@@ -33,9 +33,9 @@ model UserCandidate {
   gender        String
   disablePerson String
   createdAt     DateTime @default(now())
-  Address       Address?
-  curriculo Curriculo?
-
+  Address         Address?
+  curriculo       Curriculo?
+  candidatoEtapas CandidatoEtapa[]
 }
 
 model AddressCompany {
@@ -65,6 +65,78 @@ model UserCompany {
   phone         String
   createdAt     DateTime @default(now())
   Address       AddressCompany?
+  vagas         Vaga[]
+}
+
+model Vaga {
+  id        Int    @id @default(autoincrement())
+  nome      String
+  cargo     String
+  descricao String
+  salario   Float?
+
+  empresaId         Int
+  empresa           UserCompany       @relation(fields: [empresaId], references: [id], onDelete: Cascade)
+  beneficios        Beneficio[]
+  etapas            EtapaProcessoSeletivo[]
+  processoSeletivo  ProcessoSeletivo?
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+}
+
+model Beneficio {
+  id     Int    @id @default(autoincrement())
+  nome   String
+
+  vagaId Int
+  vaga   Vaga @relation(fields: [vagaId], references: [id], onDelete: Cascade)
+}
+
+model ProcessoSeletivo {
+  id                  Int      @id @default(autoincrement())
+  cpf                 String
+  dataDeNascimento    DateTime
+  genero              String
+  pessoaComDeficiencia String
+
+  vagaId Int    @unique
+  vaga   Vaga   @relation(fields: [vagaId], references: [id], onDelete: Cascade)
+
+  etapas    EtapaProcessoSeletivo[]
+
+  createdAt DateTime  @default(now())
+  updatedAt DateTime  @updatedAt
+}
+
+model EtapaProcessoSeletivo {
+  id        Int    @id @default(autoincrement())
+  nome      String
+  descricao String
+  status    String @default("aberta")
+
+  vagaId Int
+  vaga   Vaga @relation(fields: [vagaId], references: [id], onDelete: Cascade)
+
+  processoSeletivoId Int?
+  processoSeletivo   ProcessoSeletivo? @relation(fields: [processoSeletivoId], references: [id])
+
+  candidatoEtapas CandidatoEtapa[]
+}
+
+model CandidatoEtapa {
+  id               Int       @id @default(autoincrement())
+  statusCandidato  Boolean   @default(false)
+  dataConclusao    DateTime?
+  observacoes      String?
+
+  candidatoId Int
+  candidato   UserCandidate         @relation(fields: [candidatoId], references: [id], onDelete: Cascade)
+
+  etapaId     Int
+  etapa       EtapaProcessoSeletivo @relation(fields: [etapaId], references: [id], onDelete: Cascade)
+
+  createdAt   DateTime @default(now())
 }
 
 
