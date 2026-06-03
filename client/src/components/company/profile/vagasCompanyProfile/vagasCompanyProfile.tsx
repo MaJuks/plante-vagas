@@ -1,24 +1,17 @@
 import VagaProfile from "./vagaProfile";
+import { Vaga } from "@/services/vaga";
 
-type VagaType = {
-  name: string;
-  cidade: string;
-  postada: string;
-  pcd: boolean;
-  regime: string;
-  contratacao: string;
-  salario: string;
-};
+export default function VagasCompanyProfile({ vagas }: { vagas: Vaga[] }) {
+  if (vagas.length === 0) {
+    return (
+      <p className="text-gray-500 text-center py-8">Nenhuma vaga cadastrada ainda.</p>
+    );
+  }
 
-type Props = {
-  vagas: VagaType[];
-};
-
-export default function VagasCompanyProfile({ vagas }: Props) {
   return (
     <div className="flex flex-col gap-8">
-      {vagas.map((vaga, index) => (
-        <VagaProfile key={index} vaga={vaga} />
+      {vagas.map((vaga) => (
+        <VagaProfile key={vaga.id} vaga={vaga} />
       ))}
     </div>
   );

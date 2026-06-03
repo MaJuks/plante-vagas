@@ -1,57 +1,122 @@
 import { useState } from "react";
 import { useNavigate } from "react-router";
+import { useVagaCreate } from "../../VagaCreateContext";
+import { createVaga, updateVaga } from "@/services/vaga";
 
+interface EtapaForm {
+  nome: string;
+  descricao: string;
+}
 
-const Etapas = () => {
-  const [texto, setTexto] = useState("");
+const Etapas = ({ vagaId }: { vagaId?: number }) => {
+  const isEdit = !!vagaId;
+  const [etapas, setEtapas] = useState<EtapaForm[]>([{ nome: "", descricao: "" }]);
+  const [loading, setLoading] = useState(false);
+  const [erro, setErro] = useState("");
   const maxCaracteres = 5000;
   const navigate = useNavigate();
+  const { data } = useVagaCreate();
+
+  const updateEtapa = (index: number, field: keyof EtapaForm, value: string) => {
+    setEtapas((prev) =>
+      prev.map((e, i) => (i === index ? { ...e, [field]: value } : e))
+    );
+  };
+
+  const adicionarEtapa = () => {
+    setEtapas((prev) => [...prev, { nome: "", descricao: "" }]);
+  };
+
+  const handleProximo = async () => {
+    const primeiraVazia = etapas.find((e) => !e.nome.trim());
+    if (primeiraVazia) {
+      setErro("Todas as etapas precisam ter um nome.");
+      return;
+    }
+    setLoading(true);
+    setErro("");
+    try {
+      const payload = {
+        nome: data.nome,
+        cargo: data.cargo,
+        descricao: data.descricao,
+        salario: data.salario
+          ? parseFloat(data.salario.replace(/[^0-9,.]/g, "").replace(",", "."))
+          : undefined,
+        beneficios: data.beneficio ? [{ nome: data.beneficio }] : [],
+        etapas: etapas.map((e) => ({ nome: e.nome.trim(), descricao: e.descricao.trim() })),
+      };
+
+      if (isEdit) {
+        await updateVaga(vagaId, payload);
+      } else {
+        await createVaga(payload);
+      }
+      navigate("/vagas-empresa");
+    } catch (e: any) {
+      setErro(e.message || "Erro ao salvar vaga");
+    } finally {
+      setLoading(false);
+    }
+  };
 
   return (
-    <>
-      <div className="flex flex-col p-8  md:p-36 lg:p-40 w-full bg-MediumGray max-w-6xl mx-auto font-SecondFont">
-        <h1 className="text-2xl my-2">Preencha as etapas do processo seletivo</h1>
-        <h2 className="text-xl my-2">Definição de etapas</h2>
+    <div className="flex flex-col p-8 md:p-36 lg:p-40 w-full bg-MediumGray max-w-6xl mx-auto font-SecondFont">
+      <h1 className="text-2xl my-2">Preencha as etapas do processo seletivo</h1>
+      <h2 className="text-xl my-2">Definição de etapas</h2>
 
-        <span className="my-2 mb-10">Etapa 1</span>
-        <div className="flex w-full my-4 gap-5">
-          <div className="flex flex-col">
+      <div className="flex flex-col gap-10 mt-6">
+        {etapas.map((etapa, index) => (
+          <div key={index} className="flex flex-col gap-4">
+            <span className="font-semibold">Etapa {index + 1}</span>
+
+            <div className="flex flex-col w-full">
               <label>Nome da etapa</label>
               <input
                 type="text"
-                className="w-180 border-1 rounded-sm mt-1 p-1 pl-4 bg-white shadow-md"
+                value={etapa.nome}
+                onChange={(e) => updateEtapa(index, "nome", e.target.value)}
+                className="w-full border-1 rounded-sm mt-1 p-1 pl-4 bg-white shadow-md"
               />
-          </div>
-            <div className="flex flex-col w-full md:w-1/3">
-              <label className="">Duração</label>
-              <select name="" id="" className="bg-white shadow-md border-1 rounded-sm mt-1 p-1 pl-4">
-                  <option>3 dias</option>
-                  <option>7 dias</option>
-                  <option>10 dias</option>
-                  <option>15 dias</option>
-                  <option>20 dias</option>
-                  <option>30 dias</option>
-              </select>
             </div>
-        </div>
 
-        <div className="flex flex-col w-full">
-            <label className="">Descrição da etapa</label>
-            <input
-              value={texto}
-              onChange={(e) => setTexto(e.target.value)}
-              maxLength={maxCaracteres}
-              type="text"
-              className="w-full h-50 border-1 rounded-sm mt-1 p-1 pl-4 bg-white shadow-md"
+            <div className="flex flex-col w-full">
+              <label>Descrição da etapa</label>
+              <textarea
+                value={etapa.descricao}
+                onChange={(e) => updateEtapa(index, "descricao", e.target.value)}
+                maxLength={maxCaracteres}
+                className="w-full h-36 border-1 rounded-sm mt-1 p-2 pl-4 bg-white shadow-md resize-none"
               />
-              <div className="text-right text-sm text-gray-500 mt-1">{texto.length}/{maxCaracteres}</div>
-        </div>
-        <button  onClick={() => {navigate("/empresa");}}  className="bg-deepGreen text-white px-6 py-3 rounded-lg  cursor-pointer hover:bg-green-900 font-PrimaryFont">
-          FINALIZAR
-        </button>
+              <div className="text-right text-sm text-gray-500 mt-1">
+                {etapa.descricao.length}/{maxCaracteres}
+              </div>
+            </div>
 
+            {index < etapas.length - 1 && <hr className="mt-2" />}
+          </div>
+        ))}
       </div>
-    </>
+
+      <button
+        onClick={adicionarEtapa}
+        className="mt-8 border-2 border-deepGreen text-deepGreen px-6 py-3 rounded-lg font-PrimaryFont font-semibold hover:bg-deepGreen hover:text-white transition-colors w-fit"
+      >
+        + Adicionar mais uma etapa
+      </button>
+
+      {erro && <p className="text-red-500 text-sm mt-4">{erro}</p>}
+
+      <div className="flex justify-end mt-8">
+        <button
+          onClick={handleProximo}
+          disabled={loading}
+          className="bg-deepGreen text-white px-8 py-3 rounded-lg cursor-pointer hover:bg-green-900 font-PrimaryFont font-semibold disabled:opacity-60"
+        >
+          {loading ? "Salvando..." : isEdit ? "SALVAR ALTERAÇÕES" : "PRÓXIMO"}
+        </button>
+      </div>
+    </div>
   );
 };
 

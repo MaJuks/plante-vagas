@@ -8,6 +8,7 @@ import { AddressModule } from './api/address/address.module';
 import { AuthModule } from './api/auth/auth.module';
 import { CompanyModule } from './api/company/company.module';
 import { CurriculumModule } from './api/curriculum/curriculum.module';
+import { VagaModule } from './api/vaga/vaga.module';
 
 @Module({
   imports: [
@@ -18,6 +19,7 @@ import { CurriculumModule } from './api/curriculum/curriculum.module';
     AuthModule,
     CompanyModule,
     CurriculumModule,
+    VagaModule,
   ],
   controllers: [AppController],
   providers: [AppService],

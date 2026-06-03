@@ -19,6 +19,7 @@ import CompanyVagas from "@/pages/companyVagas";
 import ManagementProcess from "@/pages/managementProcess";
 import Candidates from "@/pages/candidates";
 import { UserProviderCompany } from "@/components/company/userContextCompany";
+import CreateVaga from "@/pages/createVaga";
 
 export default function Router() {
   return (
@@ -70,6 +71,7 @@ export default function Router() {
                 element={<ManagementProcess />}
               />
               <Route path="/candidatos" element={<Candidates />} />
+              <Route path="/criar-vaga" element={<CreateVaga />} />
             </Route>
           </Routes>
         </RegisterProviderCompany>

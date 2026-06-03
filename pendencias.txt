@@ -1,0 +1,52 @@
+PENDÊNCIAS DE NEGÓCIO — PLANTE VAGAS
+======================================
+
+1. TELA DE PROCESSO SELETIVO SEM FUNCIONALIDADE REAL
+------------------------------------------------------
+Problema:
+  A tela "Processo Seletivo" no fluxo de cadastro de vaga
+  (campos: nome do processo, data de início, duração, descrição)
+  existe visualmente mas NÃO salva nenhum dado.
+  O botão "Próximo" apenas avança para a tela de etapas
+  sem coletar ou persistir as informações preenchidas.
+
+Impacto de negócio:
+  - A empresa preenche os dados do processo seletivo e eles
+    são completamente descartados.
+  - Não há como consultar posteriormente o nome, data de início
+    ou duração do processo seletivo de uma vaga.
+  - Funcionalidades como "consultaDataEncerramento()" previstas
+    no diagrama de classes não têm dados para operar.
+
+O que precisa ser feito:
+  - Definir quais campos o processo seletivo deve ter (alinhamento
+    com o time de negócio / diagrama de classes).
+  - Conectar o formulário ao banco de dados.
+  - Garantir que a data de encerramento e o nome do processo
+    sejam salvos e exibidos na tela de gerenciamento.
+
+
+2. MODELO ProcessoSeletivo COM CAMPOS INCORRETOS
+-------------------------------------------------
+Problema:
+  No diagrama de classes, o modelo ProcessoSeletivo contém:
+    - cpf
+    - dataDeNascimento
+    - genero
+    - pessoaComDeficiencia
+
+  Esses são campos de CANDIDATO, não de processo seletivo.
+  Atualmente o modelo está no banco mas sem uso definido,
+  o que gera ambiguidade sobre o que ele representa.
+
+Impacto de negócio:
+  - Confusão entre o que é "processo seletivo criado pela empresa"
+    e "candidatura feita pelo candidato".
+  - Risco de implementar fluxos errados se não houver alinhamento.
+
+O que precisa ser definido:
+  - ProcessoSeletivo é a candidatura do candidato a uma vaga?
+    (dados pessoais que ele preenche ao se inscrever)
+  - Ou é o processo criado pela empresa com nome, datas e etapas?
+  - Esse alinhamento deve ser feito antes de continuar o desenvolvimento
+    do módulo de candidaturas.
