@@ -2,7 +2,6 @@ import HeaderLogin from "@/components/home-page/headers/header-login";
 import Loginform from "@/components/login-area/loginform";
 import { useNavigate } from "react-router-dom";
 import { Building2, User, Leaf, ArrowRight } from "lucide-react";
-import bgImage from "@/assets/images/bg-teste.jpg";
 
 const Login = () => {
   const navigate = useNavigate();

@@ -1,4 +1,3 @@
-import { useNavigate } from "react-router-dom";
 import { useEffect } from "react";
 import feather from "feather-icons";
 import { MapPin } from "lucide-react";
@@ -15,7 +14,6 @@ const VagasProcess = (props: {
   contratacao: string;
   salario: any;
 }) => {
-  const navigate = useNavigate();
   useEffect(() => {
     feather.replace(); // Substitui os ícones no DOM
   }, []);
