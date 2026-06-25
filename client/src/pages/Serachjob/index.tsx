@@ -2,7 +2,7 @@ import Footer from "@/components/home-page/footer/footer";
 import Header from "@/components/home-page/headers/header";
 import FilterBar from "@/components/searchJob/filterBar/filterBar";
 import Vagas from "@/components/searchJob/jobs/vagas";
-import { Briefcase, ChevronDown, Loader2 } from "lucide-react";
+import { Briefcase, ChevronDown } from "lucide-react";
 
 const SearchJobs = () => {
   // Mock data - em produção viria da API

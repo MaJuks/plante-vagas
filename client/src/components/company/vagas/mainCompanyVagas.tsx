@@ -1,65 +1,18 @@
-import VagasCompanyVagas from "./vagasCompanyVagas";
+import { useEffect, useState } from "react";
 import { useNavigate } from "react-router";
+import { getVagasByEmpresa, Vaga } from "@/services/vaga";
+import VagaVagas from "./vagaVagas";
 
 export default function MainCompanyVagas() {
-  const vagas = [
-    {
-      name: "Auxiliar Agrícola",
-      cidade: "Ribeirão Preto - SP",
-      postada: "3",
-      pcd: true,
-      regime: "CLT",
-      contratacao: "Imediata",
-      salario: "R$ 1.950,00",
-      descricao:
-        "Responsável por atividades de apoio no cultivo, irrigação e manejo de plantações. Auxilia na organização e limpeza do ambiente agrícola.",
-    },
-    {
-      name: "Técnico de Campo",
-      cidade: "Sorriso - MT",
-      postada: "12",
-      pcd: false,
-      regime: "PJ",
-      contratacao: "30 dias",
-      salario: "R$ 4.200,00",
-      descricao:
-        "Realiza visitas técnicas, acompanha lavouras, coleta dados de produtividade e presta suporte agronômico a clientes e parceiros.",
-    },
-    {
-      name: "Engenheiro Agrônomo",
-      cidade: "Londrina - PR",
-      postada: "1",
-      pcd: false,
-      regime: "CLT",
-      contratacao: "Imediata",
-      salario: "R$ 7.500,00",
-      descricao:
-        "Atua no planejamento, execução e acompanhamento de atividades agrícolas, com foco em aumento de produtividade e uso racional de insumos.",
-    },
-    {
-      name: "Operador de Máquinas",
-      cidade: "Lucas do Rio Verde - MT",
-      postada: "5",
-      pcd: true,
-      regime: "CLT",
-      contratacao: "15 dias",
-      salario: "R$ 3.100,00",
-      descricao:
-        "Opera tratores, colheitadeiras e outras máquinas agrícolas, garantindo o bom funcionamento dos equipamentos durante o plantio e a colheita.",
-    },
-    {
-      name: "Gerente de Fazenda",
-      cidade: "Uberaba - MG",
-      postada: "8",
-      pcd: false,
-      regime: "PJ",
-      contratacao: "A combinar",
-      salario: "R$ 9.000,00",
-      descricao:
-        "Responsável pela gestão operacional, administrativa e de pessoal da fazenda. Elabora relatórios e supervisiona todas as áreas de produção.",
-    },
-  ];
+  const [vagas, setVagas] = useState<Vaga[]>([]);
+  const [loading, setLoading] = useState(true);
   const navigate = useNavigate();
+
+  useEffect(() => {
+    getVagasByEmpresa()
+      .then(setVagas)
+      .finally(() => setLoading(false));
+  }, []);
 
   return (
     <>
@@ -79,7 +32,17 @@ export default function MainCompanyVagas() {
           </button>
         </div>
 
-        <VagasCompanyVagas vagas={vagas} />
+        {loading ? (
+          <p className="text-center text-gray-500">Carregando vagas...</p>
+        ) : vagas.length === 0 ? (
+          <p className="text-center text-gray-500">Nenhuma vaga cadastrada ainda.</p>
+        ) : (
+          <div className="flex flex-col gap-8">
+            {vagas.map((vaga) => (
+              <VagaVagas key={vaga.id} vaga={vaga} />
+            ))}
+          </div>
+        )}
       </div>
     </>
   );

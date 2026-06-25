@@ -1,6 +1,5 @@
 import { useNavigate } from "react-router-dom";
 import { MapPin, Clock, Briefcase, FileText, DollarSign, UserCheck, ArrowRight, Building2 } from "lucide-react";
-import logoEmpresa from "../../../assets/images/empresas.png";
 
 const Vagas = (props: {
   name: string;

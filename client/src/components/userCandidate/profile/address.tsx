@@ -64,8 +64,6 @@ export default function Address() {
     }
   };
 
-  const display = (value?: string | null) => (isEditing ? undefined : value || "—");
-
   return (
     <>
       <div className="flex flex-col p-8 md:p-36 lg:p-40 w-full bg-MediumGray max-w-6xl mx-auto font-SecondFont">

@@ -3,13 +3,15 @@ import feather from "feather-icons";
 import medalha from "../../../assets/icon/medalha.png";
 import AboutCompany from "./aboutCompanyProfile/aboutCompany";
 import VagasCompanyProfile from "./vagasCompanyProfile/vagasCompanyProfile";
+import { Vaga } from "@/services/vaga";
 
 const Board = (props: {
   name: string;
   imagem: any;
   descricao_curta: string;
   descricao_longa: string;
-  vagas: any;
+  vagas: Vaga[];
+  loadingVagas?: boolean;
 }) => {
   useEffect(() => {
     feather.replace(); // Substitui os ícones no DOM
@@ -72,7 +74,9 @@ const Board = (props: {
 
       <div className="py-10">
         {activeTab === "vaga" ? (
-          <VagasCompanyProfile vagas={props.vagas} />
+          props.loadingVagas
+            ? <p className="text-gray-500 text-center py-8">Carregando vagas...</p>
+            : <VagasCompanyProfile vagas={props.vagas} />
         ) : (
           <AboutCompany descricao_longa={props.descricao_longa} />
         )}
