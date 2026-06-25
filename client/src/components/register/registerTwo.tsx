@@ -101,7 +101,7 @@ const RegisterTwo = () => {
         const result = await response.json();
 
         if (response.ok) {
-          toast.error("Cadastro Realizado com sucesso", {
+          toast.success("Cadastro Realizado com sucesso", {
             duration: 3000,
           });
           navigate("/login");

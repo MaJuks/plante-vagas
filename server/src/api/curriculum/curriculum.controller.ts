@@ -1,11 +1,11 @@
-import { Controller, Get, Post, Body, Patch, Param, Delete, UseGuards, Req } from '@nestjs/common';
+import { Controller, Get, Post, Body, Patch, Param, Delete, UseGuards, Req, UseInterceptors, UploadedFile, BadRequestException } from '@nestjs/common';
+import { FileInterceptor } from '@nestjs/platform-express';
 import { CurriculumService } from './curriculum.service';
 import { CreateCurriculumDto } from './dto/create-curriculum.dto';
 import { UpdateCurriculumDto } from './dto/update-curriculum.dto';
 import { JwtAuthGuard } from '../auth/guards/jwt.auth.guard';
 import { RolesGuard } from '../auth/guards/roles.guard';
 import { Roles } from 'src/common/decorators/roles.decorator';
-import { use } from 'passport';
 
 @Controller('curriculum')
 export class CurriculumController {
@@ -49,5 +49,19 @@ export class CurriculumController {
   remove(@Param('id') id:string , @Req() req) {
     const userId = req.user.sub;
     return this.curriculumService.remove(Number(id),userId);
+  }
+
+  @Post('import-pdf')
+  @UseGuards(JwtAuthGuard, RolesGuard)
+  @Roles('candidate')
+  @UseInterceptors(FileInterceptor('file', { storage: undefined }))
+  async importFromPdf(@UploadedFile() file: { buffer: Buffer; originalname: string; mimetype: string }) {
+    if (!file) {
+      throw new BadRequestException('Nenhum arquivo enviado');
+    }
+    if (file.mimetype !== 'application/pdf') {
+      throw new BadRequestException('O arquivo deve ser um PDF');
+    }
+    return this.curriculumService.importFromPdf(file.buffer);
   }
 }
