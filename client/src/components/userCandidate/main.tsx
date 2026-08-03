@@ -64,10 +64,10 @@ export default function Page() {
         <AppSidebar activeTab={activeTab} setActiveTab={setActiveTab} />
           <SidebarInset>
             <header>
-              <HeaderLogged />
+              <HeaderLogged activeTab={activeTab} />
             </header>
 
-            <div className="w-full h-12 bg-paleGreen mt-20 flex items-center p-2">
+            <div className="w-full h-12 bg-paleGreen mt-20 sticky top-20 z-10 flex items-center p-2">
               <SidebarTrigger />
             </div>
 

@@ -9,6 +9,9 @@ export default function Header() {
   const [isMenuOpen, setIsMenuOpen] = useState(false);
   const [isScrolled, setIsScrolled] = useState(false);
 
+  const token = localStorage.getItem("token");
+  const userType = localStorage.getItem("userType");
+
   useEffect(() => {
     const handleScroll = () => {
       setIsScrolled(window.scrollY > 20);
@@ -17,8 +20,14 @@ export default function Header() {
     return () => window.removeEventListener("scroll", handleScroll);
   }, []);
 
-  const HandleLoginClick = () => {
-    navigate("/login");
+  const handleLoginClick = () => {
+    if (token && userType === "candidate") {
+      navigate("/candidato/pagina-inicial");
+    } else if (token && userType === "company") {
+      navigate("/empresa");
+    } else {
+      navigate("/login");
+    }
   };
 
   const navLinks = [
@@ -73,14 +82,14 @@ export default function Header() {
         {/* Login Button - Desktop */}
         <div className="hidden lg:flex items-center space-x-3">
           <button
-            onClick={HandleLoginClick}
+            onClick={handleLoginClick}
             className="group flex items-center space-x-2 bg-deepGreen text-white px-5 py-2.5 rounded-full
                        font-SecondFont font-medium text-sm tracking-wide
                        hover:bg-mediumGreen transition-all duration-300
                        hover:shadow-lg hover:shadow-deepGreen/20 hover:scale-105"
           >
             <User size={18} className="transition-transform group-hover:scale-110" />
-            <span>ENTRAR</span>
+            <span>{token ? "MEU PERFIL" : "ENTRAR"}</span>
           </button>
         </div>
 
@@ -125,7 +134,7 @@ export default function Header() {
           <div className="px-6 py-4 mt-2">
             <button
               onClick={() => {
-                HandleLoginClick();
+                handleLoginClick();
                 setIsMenuOpen(false);
               }}
               className="w-full flex items-center justify-center space-x-2 bg-deepGreen text-white
@@ -133,7 +142,7 @@ export default function Header() {
                          hover:bg-mediumGreen transition-all duration-300"
             >
               <User size={18} />
-              <span>ENTRAR</span>
+              <span>{token ? "MEU PERFIL" : "ENTRAR"}</span>
             </button>
           </div>
         </nav>

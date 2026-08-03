@@ -1,5 +1,5 @@
 import * as React from "react";
-import { User, Clipboard, AlignJustify, Briefcase, UserCheck, LogOut, Eye, Upload } from "lucide-react";
+import { User, Clipboard, AlignJustify, Briefcase, UserCheck, LogOut, Eye, Upload, Search } from "lucide-react";
 import { useNavigate } from "react-router-dom";
 
 import { NavMain } from "@/components/ui/nav-main";
@@ -59,7 +59,7 @@ export function AppSidebar({
         title: "Curriculo",
         url: "#",
         icon: Clipboard,
-        onClick: () => setActiveTab("curriculo"),
+        onClick: () => setActiveTab("visualizar-curriculo"),
         items: [
           {
             title: "Visualizar Currículo",
@@ -127,6 +127,16 @@ export function AppSidebar({
       <SidebarFooter>
         <NavUser />
         <SidebarMenu>
+          <SidebarMenuItem>
+            <SidebarMenuButton
+              onClick={() => navigate("/pesquisa-de-vagas")}
+              className="bg-deepGreen text-white hover:bg-mediumGreen hover:text-white font-medium"
+              tooltip="Buscar Vagas"
+            >
+              <Search size={16} />
+              <span>Buscar Vagas</span>
+            </SidebarMenuButton>
+          </SidebarMenuItem>
           <SidebarMenuItem>
             <SidebarMenuButton onClick={handleLogout} className="text-red-600 hover:text-red-700 hover:bg-red-50">
               <LogOut />

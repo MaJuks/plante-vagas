@@ -108,7 +108,6 @@ export default function ImportCurriculum() {
         )}
       </div>
 
-      {/* Botão de importar */}
       {selectedFile && importState !== "preview" && (
         <div className="flex justify-end mt-6">
           <button
@@ -122,7 +121,6 @@ export default function ImportCurriculum() {
         </div>
       )}
 
-      {/* Estado de erro */}
       {importState === "error" && (
         <div className="flex items-center gap-3 mt-6 bg-red-50 border border-red-300 text-red-700 rounded-md p-4">
           <AlertCircle className="w-5 h-5 shrink-0" />
@@ -130,7 +128,6 @@ export default function ImportCurriculum() {
         </div>
       )}
 
-      {/* Preview dos dados extraídos */}
       {importState === "preview" && extractedData && (
         <div className="mt-8 flex flex-col gap-6">
           <div className="flex items-center gap-2 text-deepGreen">
