@@ -6,6 +6,7 @@ import { NavMain } from "@/components/ui/nav-main";
 import { NavUser } from "@/components/ui/nav-user";
 
 import { Sidebar, SidebarContent, SidebarFooter, SidebarMenu, SidebarMenuButton, SidebarMenuItem, SidebarRail } from "@/components/ui/sidebar";
+import { clearSession } from "@/services/api";
 
 export function AppSidebar({
   activeTab,
@@ -18,10 +19,7 @@ export function AppSidebar({
   const navigate = useNavigate();
 
   const handleLogout = () => {
-    localStorage.removeItem("token");
-    localStorage.removeItem("userType");
-    localStorage.removeItem("userId");
-    localStorage.removeItem("refreshToken");
+    clearSession();
     navigate("/login");
   };
   const data = {

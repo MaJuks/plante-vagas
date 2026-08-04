@@ -5,6 +5,7 @@ import {
   useEffect,
   useState,
 } from "react";
+import { authFetch, BASE_URL, clearSession } from "../../services/api";
 
 interface UserContextType {
   UserData: {
@@ -39,11 +40,17 @@ const UserContext = createContext<UserContextType>({} as UserContextType);
 export const UserProvider = ({ children }: { children: ReactNode }) => {
   const fetchUserData = async () => {
     try {
-      const token = localStorage.getItem("token");
-      const response = await fetch("http://localhost:3000/users/profile", {
+      const response = await authFetch(`${BASE_URL}/users/profile`, {
         method: "GET",
-        headers: { authorization: `bearer ${token}` },
       });
+
+      if (!response.ok) {
+        if (response.status === 401) {
+          clearSession();
+          window.location.href = "/login";
+        }
+        return;
+      }
 
       const data = await response.json();
       setUserData(data);

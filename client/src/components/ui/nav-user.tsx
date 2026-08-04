@@ -22,6 +22,7 @@ import {
   useSidebar,
 } from "@/components/ui/sidebar"
 import { useUser } from "../userCandidate/userContext"
+import { clearSession } from "@/services/api"
 
 export function NavUser() {
   const { isMobile } = useSidebar()
@@ -34,10 +35,7 @@ export function NavUser() {
     : "?"
 
   const handleLogout = () => {
-    localStorage.removeItem("token")
-    localStorage.removeItem("userType")
-    localStorage.removeItem("userId")
-    localStorage.removeItem("refreshToken")
+    clearSession()
     navigate("/login")
   }
 

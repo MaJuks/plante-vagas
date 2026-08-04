@@ -2,6 +2,7 @@ import { useState } from "react";
 import { useNavigate } from "react-router";
 import { Menu, X, Home, LogOut, User } from "lucide-react";
 import logo from "../../../assets/images/logo.png";
+import { clearSession } from "../../../services/api";
 
 export default function HeaderCompany() {
   const navigate = useNavigate();
@@ -9,10 +10,7 @@ export default function HeaderCompany() {
   const [accountMenuOpen, setAccountMenuOpen] = useState(false);
 
   const handleLogout = () => {
-    localStorage.removeItem("token");
-    localStorage.removeItem("userType");
-    localStorage.removeItem("userId");
-    localStorage.removeItem("refreshToken");
+    clearSession();
     navigate("/login");
   };
 

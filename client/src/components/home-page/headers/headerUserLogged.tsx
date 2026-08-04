@@ -2,6 +2,7 @@ import { useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { Home, LogOut, ChevronRight, User, Search } from "lucide-react";
 import logo from "../../../assets/images/logo.png";
+import { clearSession } from "../../../services/api";
 
 const tabLabels: Record<string, string> = {
   "Perfil": "Perfil",
@@ -26,10 +27,7 @@ const HeaderLogged = ({ activeTab }: { activeTab?: string }) => {
   const screenTitle = activeTab ? (tabLabels[activeTab] ?? activeTab) : "";
 
   const handleLogout = () => {
-    localStorage.removeItem("token");
-    localStorage.removeItem("userType");
-    localStorage.removeItem("userId");
-    localStorage.removeItem("refreshToken");
+    clearSession();
     navigate("/login");
   };
 

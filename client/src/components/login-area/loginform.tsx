@@ -3,6 +3,7 @@ import { useNavigate } from "react-router-dom";
 import { toast } from "sonner";
 import { Mail, Lock, Eye, EyeOff, LogIn, Loader2 } from "lucide-react";
 import { hashPassword } from "../../utils/hashPassword";
+import { setSession } from "../../services/api";
 
 const LoginForm = () => {
   const navigate = useNavigate();
@@ -39,10 +40,7 @@ const LoginForm = () => {
 
       const data = await res.json();
 
-      localStorage.setItem("token", data.accessToken);
-      localStorage.setItem("userType", data.userType);
-      localStorage.setItem("userId", data.userId);
-      localStorage.setItem("refreshToken", data.refreshToken);
+      setSession(data);
 
       toast.success("Login realizado com sucesso!", {
         duration: 2000,

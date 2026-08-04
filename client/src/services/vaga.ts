@@ -1,5 +1,6 @@
-const getToken = () => localStorage.getItem("token");
-const BASE_URL = "http://localhost:3000/vaga";
+import { authFetch, BASE_URL } from "./api";
+
+const VAGA_URL = `${BASE_URL}/vaga`;
 
 export interface VagaPayload {
   nome: string;
@@ -31,11 +32,10 @@ export interface Vaga {
 }
 
 export async function createVaga(data: VagaPayload): Promise<Vaga> {
-  const response = await fetch(`${BASE_URL}/create`, {
+  const response = await authFetch(`${VAGA_URL}/create`, {
     method: "POST",
     headers: {
       "Content-Type": "application/json",
-      authorization: `bearer ${getToken()}`,
     },
     body: JSON.stringify(data),
   });
@@ -47,9 +47,7 @@ export async function createVaga(data: VagaPayload): Promise<Vaga> {
 }
 
 export async function getVagaById(id: number): Promise<Vaga> {
-  const response = await fetch(`${BASE_URL}/find/${id}`, {
-    headers: { authorization: `bearer ${getToken()}` },
-  });
+  const response = await authFetch(`${VAGA_URL}/find/${id}`);
   if (!response.ok) {
     const error = await response.json();
     throw new Error(error.message || "Erro ao buscar vaga");
@@ -58,9 +56,7 @@ export async function getVagaById(id: number): Promise<Vaga> {
 }
 
 export async function getVagasByEmpresa(): Promise<Vaga[]> {
-  const response = await fetch(`${BASE_URL}/find/empresa`, {
-    headers: { authorization: `bearer ${getToken()}` },
-  });
+  const response = await authFetch(`${VAGA_URL}/find/empresa`);
   if (!response.ok) {
     const error = await response.json();
     throw new Error(error.message || "Erro ao buscar vagas");
@@ -69,11 +65,10 @@ export async function getVagasByEmpresa(): Promise<Vaga[]> {
 }
 
 export async function updateVaga(id: number, data: Partial<VagaPayload>): Promise<Vaga> {
-  const response = await fetch(`${BASE_URL}/update/${id}`, {
+  const response = await authFetch(`${VAGA_URL}/update/${id}`, {
     method: "PATCH",
     headers: {
       "Content-Type": "application/json",
-      authorization: `bearer ${getToken()}`,
     },
     body: JSON.stringify(data),
   });
@@ -85,11 +80,10 @@ export async function updateVaga(id: number, data: Partial<VagaPayload>): Promis
 }
 
 export async function updateEtapaService(etapaId: number, data: { nome: string; descricao: string }): Promise<EtapaProcessoSeletivo> {
-  const response = await fetch(`${BASE_URL}/etapa/${etapaId}`, {
+  const response = await authFetch(`${VAGA_URL}/etapa/${etapaId}`, {
     method: "PATCH",
     headers: {
       "Content-Type": "application/json",
-      authorization: `bearer ${getToken()}`,
     },
     body: JSON.stringify(data),
   });
@@ -101,9 +95,8 @@ export async function updateEtapaService(etapaId: number, data: { nome: string; 
 }
 
 export async function deleteEtapa(etapaId: number): Promise<void> {
-  const response = await fetch(`${BASE_URL}/etapa/${etapaId}`, {
+  const response = await authFetch(`${VAGA_URL}/etapa/${etapaId}`, {
     method: "DELETE",
-    headers: { authorization: `bearer ${getToken()}` },
   });
   if (!response.ok) {
     const error = await response.json();
@@ -112,11 +105,10 @@ export async function deleteEtapa(etapaId: number): Promise<void> {
 }
 
 export async function addEtapa(vagaId: number, etapa: { nome: string; descricao: string }): Promise<EtapaProcessoSeletivo> {
-  const response = await fetch(`${BASE_URL}/${vagaId}/etapa`, {
+  const response = await authFetch(`${VAGA_URL}/${vagaId}/etapa`, {
     method: "POST",
     headers: {
       "Content-Type": "application/json",
-      authorization: `bearer ${getToken()}`,
     },
     body: JSON.stringify(etapa),
   });
@@ -128,9 +120,8 @@ export async function addEtapa(vagaId: number, etapa: { nome: string; descricao:
 }
 
 export async function deleteVaga(id: number): Promise<void> {
-  const response = await fetch(`${BASE_URL}/delete/${id}`, {
+  const response = await authFetch(`${VAGA_URL}/delete/${id}`, {
     method: "DELETE",
-    headers: { authorization: `bearer ${getToken()}` },
   });
   if (!response.ok) {
     const error = await response.json();
