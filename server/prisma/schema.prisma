@@ -153,6 +153,13 @@ model Curriculo {
   idiomas        Idioma[]
   diferenciais   Diferencial[]
 
+  operacoesAgricolas  OperacaoAgricola[]
+  operacoesPecuarias  OperacaoPecuaria[]
+  operacoesFlorestais OperacaoFlorestal[]
+  culturas            Cultura[]
+  maquinas            Maquina[]
+  tecnologias         Tecnologia[]
+
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
 }
@@ -206,6 +213,66 @@ model Idioma {
 model Diferencial {
   id        Int @id @default(autoincrement())
   descricao String
+
+  curriculoId Int
+  curriculo   Curriculo @relation(fields: [curriculoId], references: [id], onDelete: Cascade)
+}
+
+model OperacaoAgricola {
+  id               Int    @id @default(autoincrement())
+  nome             String
+  nivelExperiencia String
+  descricao        String
+
+  curriculoId Int
+  curriculo   Curriculo @relation(fields: [curriculoId], references: [id], onDelete: Cascade)
+}
+
+model OperacaoPecuaria {
+  id               Int    @id @default(autoincrement())
+  nome             String
+  nivelExperiencia String
+  descricao        String
+
+  curriculoId Int
+  curriculo   Curriculo @relation(fields: [curriculoId], references: [id], onDelete: Cascade)
+}
+
+model OperacaoFlorestal {
+  id               Int    @id @default(autoincrement())
+  nome             String
+  nivelExperiencia String
+  descricao        String
+
+  curriculoId Int
+  curriculo   Curriculo @relation(fields: [curriculoId], references: [id], onDelete: Cascade)
+}
+
+model Cultura {
+  id               Int    @id @default(autoincrement())
+  nome             String
+  nivelExperiencia String
+  descricao        String
+
+  curriculoId Int
+  curriculo   Curriculo @relation(fields: [curriculoId], references: [id], onDelete: Cascade)
+}
+
+model Maquina {
+  id               Int    @id @default(autoincrement())
+  nome             String
+  nivelExperiencia String
+  descricao        String
+
+  curriculoId Int
+  curriculo   Curriculo @relation(fields: [curriculoId], references: [id], onDelete: Cascade)
+}
+
+model Tecnologia {
+  id               Int    @id @default(autoincrement())
+  nome             String
+  nivelExperiencia String
+  descricao        String
 
   curriculoId Int
   curriculo   Curriculo @relation(fields: [curriculoId], references: [id], onDelete: Cascade)

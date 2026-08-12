@@ -1,5 +1,5 @@
-import { ConflictException, Injectable, InternalServerErrorException } from '@nestjs/common';
-import { CreateCurriculumDto } from './dto/create-curriculum.dto';
+import { BadRequestException, ConflictException, Injectable, InternalServerErrorException } from '@nestjs/common';
+import { CreateCurriculumDto, CURRICULUM_SECTION_MODEL } from './dto/create-curriculum.dto';
 import { UpdateCurriculumDto } from './dto/update-curriculum.dto';
 import { PrismaService } from '../prisma/prisma.service';
 import { Prisma } from 'generated/prisma';
@@ -36,11 +36,29 @@ export class CurriculumService {
         createMany: { data: createCurriculumDto.certificados },
       },                                                                                                                                                                                      
       diferenciais: {
-        createMany: { data: createCurriculumDto.diferenciais },                                                                                                                               
-      },          
+        createMany: { data: createCurriculumDto.diferenciais },
+      },
+      operacoesAgricolas: {
+        createMany: { data: createCurriculumDto.operacoesAgricolas },
+      },
+      operacoesPecuarias: {
+        createMany: { data: createCurriculumDto.operacoesPecuarias },
+      },
+      operacoesFlorestais: {
+        createMany: { data: createCurriculumDto.operacoesFlorestais },
+      },
+      culturas: {
+        createMany: { data: createCurriculumDto.culturas },
+      },
+      maquinas: {
+        createMany: { data: createCurriculumDto.maquinas },
+      },
+      tecnologias: {
+        createMany: { data: createCurriculumDto.tecnologias },
+      },
     },
   });
-                      
+
   }
 
   findAll() {
@@ -51,6 +69,12 @@ export class CurriculumService {
         idiomas: true,
         certificados: true,
         diferenciais: true,
+        operacoesAgricolas: true,
+        operacoesPecuarias: true,
+        operacoesFlorestais: true,
+        culturas: true,
+        maquinas: true,
+        tecnologias: true,
       },
     });
   }
@@ -65,6 +89,12 @@ export class CurriculumService {
         idiomas: true,
         certificados: true,
         diferenciais: true,
+        operacoesAgricolas: true,
+        operacoesPecuarias: true,
+        operacoesFlorestais: true,
+        culturas: true,
+        maquinas: true,
+        tecnologias: true,
       },
     });
 
@@ -85,13 +115,19 @@ export class CurriculumService {
 
     const curriculoId = curriculo.id;
 
-    const update = await this.prisma.$transaction(async (tx) => {
-      await tx.experienciaProfissional.deleteMany({ where: { curriculoId } });
-      await tx.formacaoAcademica.deleteMany({ where: { curriculoId } });
-      await tx.idioma.deleteMany({ where: { curriculoId } });
-      await tx.certificado.deleteMany({ where: { curriculoId } });
-      await tx.diferencial.deleteMany({ where: { curriculoId } });
-      return tx.curriculo.update({
+    const results = await this.prisma.$transaction([
+      this.prisma.experienciaProfissional.deleteMany({ where: { curriculoId } }),
+      this.prisma.formacaoAcademica.deleteMany({ where: { curriculoId } }),
+      this.prisma.idioma.deleteMany({ where: { curriculoId } }),
+      this.prisma.certificado.deleteMany({ where: { curriculoId } }),
+      this.prisma.diferencial.deleteMany({ where: { curriculoId } }),
+      this.prisma.operacaoAgricola.deleteMany({ where: { curriculoId } }),
+      this.prisma.operacaoPecuaria.deleteMany({ where: { curriculoId } }),
+      this.prisma.operacaoFlorestal.deleteMany({ where: { curriculoId } }),
+      this.prisma.cultura.deleteMany({ where: { curriculoId } }),
+      this.prisma.maquina.deleteMany({ where: { curriculoId } }),
+      this.prisma.tecnologia.deleteMany({ where: { curriculoId } }),
+      this.prisma.curriculo.update({
         where: { id: curriculoId },
         data: {
           experiencias: { createMany: { data: curriculumDto.experiencias } },
@@ -99,10 +135,42 @@ export class CurriculumService {
           idiomas: { createMany: { data: curriculumDto.idiomas } },
           certificados: { createMany: { data: curriculumDto.certificados } },
           diferenciais: { createMany: { data: curriculumDto.diferenciais } },
+          operacoesAgricolas: { createMany: { data: curriculumDto.operacoesAgricolas } },
+          operacoesPecuarias: { createMany: { data: curriculumDto.operacoesPecuarias } },
+          operacoesFlorestais: { createMany: { data: curriculumDto.operacoesFlorestais } },
+          culturas: { createMany: { data: curriculumDto.culturas } },
+          maquinas: { createMany: { data: curriculumDto.maquinas } },
+          tecnologias: { createMany: { data: curriculumDto.tecnologias } },
         },
-      });
-    });
-    return update;
+      }),
+    ]);
+    return results[results.length - 1];
+  }
+
+  async updateSection(userId: number, section: string, items: Record<string, any>[]) {
+    const model = CURRICULUM_SECTION_MODEL[section];
+    if (!model) {
+      throw new BadRequestException(`Seção de currículo inválida: ${section}`);
+    }
+
+    const curriculo = await this.prisma.curriculo.findFirst({ where: { usuarioId: userId } });
+
+    if (!curriculo) {
+      throw new ConflictException('Currículo não encontrado para este usuário');
+    }
+
+    const curriculoId = curriculo.id;
+    const delegate = (this.prisma as any)[model];
+
+    const operations = [delegate.deleteMany({ where: { curriculoId } })];
+    if (items.length > 0) {
+      operations.push(
+        delegate.createMany({ data: items.map((item) => ({ ...item, curriculoId })) }),
+      );
+    }
+    await this.prisma.$transaction(operations);
+
+    return delegate.findMany({ where: { curriculoId } });
   }
 
   async remove(id:number, userId: number) {
@@ -168,6 +236,48 @@ export class CurriculumService {
     {
       "descricao": "string"
     }
+  ],
+  "operacoesAgricolas": [
+    {
+      "nome": "string (ex: plantio, colheita, pulverizacao, preparo_solo, irrigacao, adubacao, colheita_mecanizada)",
+      "nivelExperiencia": "basico|intermediario|avancado",
+      "descricao": "string"
+    }
+  ],
+  "operacoesPecuarias": [
+    {
+      "nome": "string (ex: manejo_bovinos, manejo_aves, manejo_suinos, ordenha, vacinacao, nutricao_animal)",
+      "nivelExperiencia": "basico|intermediario|avancado",
+      "descricao": "string"
+    }
+  ],
+  "operacoesFlorestais": [
+    {
+      "nome": "string (ex: plantio_florestal, corte_colheita_madeira, manejo_florestal, viveiro_florestal, controle_pragas_florestais)",
+      "nivelExperiencia": "basico|intermediario|avancado",
+      "descricao": "string"
+    }
+  ],
+  "culturas": [
+    {
+      "nome": "string (ex: soja, milho, cafe, cana_de_acucar, algodao, arroz, feijao, trigo, hortalicas, fruticultura)",
+      "nivelExperiencia": "basico|intermediario|avancado",
+      "descricao": "string"
+    }
+  ],
+  "maquinas": [
+    {
+      "nome": "string (ex: trator, colheitadeira, pulverizador, plantadeira, semeadora, rocadeira, caminhao_carreta_agricola)",
+      "nivelExperiencia": "basico|intermediario|avancado",
+      "descricao": "string"
+    }
+  ],
+  "tecnologias": [
+    {
+      "nome": "string (ex: agricultura_precisao, gps_piloto_automatico, drones_agricolas, sensoriamento_remoto, softwares_gestao_agricola, irrigacao_automatizada)",
+      "nivelExperiencia": "basico|intermediario|avancado",
+      "descricao": "string"
+    }
   ]
 }
 
@@ -175,6 +285,7 @@ Regras importantes:
 - Datas desconhecidas: use "2000-01-01T00:00:00.000Z"
 - fimData null quando empregoAtual=true
 - Extraia habilidades/competências como diferenciais
+- Extraia operações agrícolas, pecuárias e florestais, culturas, máquinas e tecnologias mencionadas no currículo relacionadas ao agronegócio; se não houver informação, retorne listas vazias
 - Retorne SOMENTE o JSON, sem nenhum texto adicional`;
 
     let responseText: string;
