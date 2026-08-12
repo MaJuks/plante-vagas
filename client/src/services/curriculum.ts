@@ -1,4 +1,4 @@
-export type AgroItem = { nome: string; nivelExperiencia: string; descricao: string };
+import { authFetch, BASE_URL } from "./api";
 
 export type CurriculumPayload = {
   experiencias: { cargo: string; empresa: string; descricao: string; inicioData: string; fimData?: string; empregoAtual?: boolean }[];
@@ -14,13 +14,11 @@ export type CurriculumPayload = {
   tecnologias: AgroItem[];
 }
 
-const getToken = () => localStorage.getItem("token");
-const BASE_URL = "http://localhost:3000/curriculum";
+const CURRICULUM_URL = `${BASE_URL}/curriculum`;
 
 export async function getCurriculum() {
-  const response = await fetch(`${BASE_URL}/find/me`, {
+  const response = await authFetch(`${CURRICULUM_URL}/find/me`, {
     method: "GET",
-    headers: { authorization: `bearer ${getToken()}` },
   });
   if (!response.ok) {
     const error = await response.json();
@@ -30,11 +28,10 @@ export async function getCurriculum() {
 }
 
 export async function createCurriculum(data: CurriculumPayload) {
-  const response = await fetch(`${BASE_URL}/create`, {
+  const response = await authFetch(`${CURRICULUM_URL}/create`, {
     method: "POST",
     headers: {
       "Content-Type": "application/json",
-      authorization: `bearer ${getToken()}`,
     },
     body: JSON.stringify(data),
   });
@@ -46,11 +43,10 @@ export async function createCurriculum(data: CurriculumPayload) {
 }
 
 export async function updateCurriculum(data: CurriculumPayload) {
-  const response = await fetch(`${BASE_URL}/update`, {
+  const response = await authFetch(`${CURRICULUM_URL}/update`, {
     method: "PATCH",
     headers: {
       "Content-Type": "application/json",
-      authorization: `bearer ${getToken()}`,
     },
     body: JSON.stringify(data),
   });
@@ -78,9 +74,8 @@ export async function updateCurriculumSection(section: keyof CurriculumPayload, 
 }
 
 export async function deleteCurriculum(id: number) {
-  const response = await fetch(`${BASE_URL}/delete/${id}`, {
+  const response = await authFetch(`${CURRICULUM_URL}/delete/${id}`, {
     method: "DELETE",
-    headers: { authorization: `bearer ${getToken()}` },
   })
   if (!response.ok) {
     const error = await response.json();
@@ -92,9 +87,8 @@ export async function deleteCurriculum(id: number) {
 export async function importCurriculumFromPdf(file: File): Promise<CurriculumPayload> {
   const formData = new FormData();
   formData.append("file", file);
-  const response = await fetch(`${BASE_URL}/import-pdf`, {
+  const response = await authFetch(`${CURRICULUM_URL}/import-pdf`, {
     method: "POST",
-    headers: { authorization: `bearer ${getToken()}` },
     body: formData,
   });
   if (!response.ok) {

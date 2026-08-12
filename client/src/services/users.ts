@@ -1,5 +1,6 @@
-const getToken = () => localStorage.getItem("token");
-const BASE_URL = "http://localhost:3000/users";
+import { authFetch, BASE_URL } from "./api";
+
+const USERS_URL = `${BASE_URL}/users`;
 
 export async function updateUser(data: {
   phone?: string;
@@ -17,11 +18,10 @@ export async function updateUser(data: {
     country?: string;
   };
 }) {
-  const response = await fetch(`${BASE_URL}/update`, {
+  const response = await authFetch(`${USERS_URL}/update`, {
     method: "PATCH",
     headers: {
       "Content-Type": "application/json",
-      authorization: `bearer ${getToken()}`,
     },
     body: JSON.stringify(data),
   });
@@ -34,9 +34,8 @@ export async function updateUser(data: {
 
 export async function deleteUser() {
   const userId = localStorage.getItem("userId");
-  const response = await fetch(`${BASE_URL}/delete/${userId}`, {
+  const response = await authFetch(`${USERS_URL}/delete/${userId}`, {
     method: "DELETE",
-    headers: { authorization: `bearer ${getToken()}` },
   });
   if (!response.ok) {
     const error = await response.json();
