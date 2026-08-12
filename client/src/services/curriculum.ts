@@ -1,9 +1,17 @@
+export type AgroItem = { nome: string; nivelExperiencia: string; descricao: string };
+
 export type CurriculumPayload = {
   experiencias: { cargo: string; empresa: string; descricao: string; inicioData: string; fimData?: string; empregoAtual?: boolean }[];
   formacoes: { nivelFormacao: string; grauFormacao: string; curso: string; nomeInstituicao: string; status: string; inicioData: string; fimData?: string }[];
   certificados: { nomeInstituicao: string; descricao: string; certificate_name: string }[];
   idiomas: { idioma: string; nivel: string }[];
   diferenciais: { descricao: string }[];
+  operacoesAgricolas: AgroItem[];
+  operacoesPecuarias: AgroItem[];
+  operacoesFlorestais: AgroItem[];
+  culturas: AgroItem[];
+  maquinas: AgroItem[];
+  tecnologias: AgroItem[];
 }
 
 const getToken = () => localStorage.getItem("token");
@@ -45,6 +53,22 @@ export async function updateCurriculum(data: CurriculumPayload) {
       authorization: `bearer ${getToken()}`,
     },
     body: JSON.stringify(data),
+  });
+  if (!response.ok) {
+    const error = await response.json();
+    throw new Error(error.message || "Erro na requisição");
+  }
+  return response.json();
+}
+
+export async function updateCurriculumSection(section: keyof CurriculumPayload, data: unknown[]) {
+  const response = await fetch(`${BASE_URL}/update-section/${section}`, {
+    method: "PATCH",
+    headers: {
+      "Content-Type": "application/json",
+      authorization: `bearer ${getToken()}`,
+    },
+    body: JSON.stringify({ data }),
   });
   if (!response.ok) {
     const error = await response.json();

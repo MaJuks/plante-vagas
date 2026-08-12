@@ -103,6 +103,36 @@ export function AppSidebar({
             url: "#",
             onClick: () => setActiveTab("diferenciais"),
           },
+          {
+            title: "Operações Agrícolas",
+            url: "#",
+            onClick: () => setActiveTab("operacoes-agricolas"),
+          },
+          {
+            title: "Operações Pecuárias",
+            url: "#",
+            onClick: () => setActiveTab("operacoes-pecuarias"),
+          },
+          {
+            title: "Operações Florestais",
+            url: "#",
+            onClick: () => setActiveTab("operacoes-florestais"),
+          },
+          {
+            title: "Culturas",
+            url: "#",
+            onClick: () => setActiveTab("culturas"),
+          },
+          {
+            title: "Máquinas",
+            url: "#",
+            onClick: () => setActiveTab("maquinas"),
+          },
+          {
+            title: "Tecnologias",
+            url: "#",
+            onClick: () => setActiveTab("tecnologias"),
+          },
         ],
       },
       {

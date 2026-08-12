@@ -1,6 +1,6 @@
 import { createContext, ReactNode, useContext,  useState , useEffect} from "react";
 
-import { CurriculumPayload, getCurriculum, createCurriculum, updateCurriculum } from "../../services/curriculum";
+import { CurriculumPayload, getCurriculum, createCurriculum, updateCurriculum, updateCurriculumSection } from "../../services/curriculum";
 
 interface CurriculumContextType {
     curriculum : CurriculumPayload
@@ -13,11 +13,17 @@ interface CurriculumContextType {
 const CurriculumContext = createContext<CurriculumContextType>({} as CurriculumContextType);
 
 export const CurriculumProvider = ({ children }: { children: ReactNode }) => {
-    const [curriculumData, setCurriculumData] = useState<CurriculumPayload>({experiencias: [],                                                                                                                                                            
+    const [curriculumData, setCurriculumData] = useState<CurriculumPayload>({experiencias: [],
       formacoes: [],
-      certificados: [],                                                                                                                                                            
+      certificados: [],
       idiomas: [],
-      diferenciais: [], })
+      diferenciais: [],
+      operacoesAgricolas: [],
+      operacoesPecuarias: [],
+      operacoesFlorestais: [],
+      culturas: [],
+      maquinas: [],
+      tecnologias: [], })
     const [existCurriculum, setExistCurriculum]  = useState(false)
 
     useEffect(() => {
@@ -41,7 +47,7 @@ export const CurriculumProvider = ({ children }: { children: ReactNode }) => {
         const updated = {...curriculumData, [section]:data}
 
         if (existCurriculum) {
-            await updateCurriculum(updated)
+            await updateCurriculumSection(section, data)
         } else {
            await createCurriculum(updated)
            setExistCurriculum(true)
