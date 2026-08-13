@@ -18,6 +18,12 @@ import Language from "./curriculum/language";
 import ProfessionalInfo from "./curriculum/infoProfessional";
 import Certificate from "./curriculum/certificates";
 import Differentiate from "./curriculum/differentiate";
+import OperacaoAgricola from "./curriculum/operacaoAgricola";
+import OperacaoPecuaria from "./curriculum/operacaoPecuaria";
+import OperacaoFlorestal from "./curriculum/operacaoFlorestal";
+import Culturas from "./curriculum/culturas";
+import Maquinas from "./curriculum/maquinas";
+import Tecnologias from "./curriculum/tecnologias";
 import SelectionProcess from "./selectionProcess/selectionProcess";
 import ImportCurriculum from "./curriculum/importCurriculum";
 import { CurriculumProvider } from "./curriculumContext";
@@ -49,6 +55,18 @@ export default function Page() {
         return <Certificate />;
       case "diferenciais":
         return <Differentiate />;
+      case "operacoes-agricolas":
+        return <OperacaoAgricola />;
+      case "operacoes-pecuarias":
+        return <OperacaoPecuaria />;
+      case "operacoes-florestais":
+        return <OperacaoFlorestal />;
+      case "culturas":
+        return <Culturas />;
+      case "maquinas":
+        return <Maquinas />;
+      case "tecnologias":
+        return <Tecnologias />;
       case "processos-seletivos":
         return <SelectionProcess />;
       case "importar-curriculo":

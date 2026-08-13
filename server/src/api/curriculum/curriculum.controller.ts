@@ -1,7 +1,7 @@
 import { Controller, Get, Post, Body, Patch, Param, Delete, UseGuards, Req, UseInterceptors, UploadedFile, BadRequestException } from '@nestjs/common';
 import { FileInterceptor } from '@nestjs/platform-express';
 import { CurriculumService } from './curriculum.service';
-import { CreateCurriculumDto } from './dto/create-curriculum.dto';
+import { CreateCurriculumDto, UpdateCurriculumSectionDto } from './dto/create-curriculum.dto';
 import { UpdateCurriculumDto } from './dto/update-curriculum.dto';
 import { JwtAuthGuard } from '../auth/guards/jwt.auth.guard';
 import { RolesGuard } from '../auth/guards/roles.guard';
@@ -41,6 +41,18 @@ export class CurriculumController {
   async update(@Req() req: any, @Body() CreateCurriculumDto: CreateCurriculumDto) {
     const userID = req.user.sub;
     return this.curriculumService.update(userID, CreateCurriculumDto);
+  }
+
+  @Patch('update-section/:section')
+  @UseGuards(JwtAuthGuard, RolesGuard)
+  @Roles('candidate')
+  async updateSection(
+    @Req() req: any,
+    @Param('section') section: string,
+    @Body() body: UpdateCurriculumSectionDto,
+  ) {
+    const userId = req.user.sub;
+    return this.curriculumService.updateSection(userId, section, body.data);
   }
 
   @Delete('delete/:id')

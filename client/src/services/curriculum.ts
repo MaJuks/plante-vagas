@@ -6,6 +6,12 @@ export type CurriculumPayload = {
   certificados: { nomeInstituicao: string; descricao: string; certificate_name: string }[];
   idiomas: { idioma: string; nivel: string }[];
   diferenciais: { descricao: string }[];
+  operacoesAgricolas: AgroItem[];
+  operacoesPecuarias: AgroItem[];
+  operacoesFlorestais: AgroItem[];
+  culturas: AgroItem[];
+  maquinas: AgroItem[];
+  tecnologias: AgroItem[];
 }
 
 const CURRICULUM_URL = `${BASE_URL}/curriculum`;
@@ -43,6 +49,22 @@ export async function updateCurriculum(data: CurriculumPayload) {
       "Content-Type": "application/json",
     },
     body: JSON.stringify(data),
+  });
+  if (!response.ok) {
+    const error = await response.json();
+    throw new Error(error.message || "Erro na requisição");
+  }
+  return response.json();
+}
+
+export async function updateCurriculumSection(section: keyof CurriculumPayload, data: unknown[]) {
+  const response = await fetch(`${BASE_URL}/update-section/${section}`, {
+    method: "PATCH",
+    headers: {
+      "Content-Type": "application/json",
+      authorization: `bearer ${getToken()}`,
+    },
+    body: JSON.stringify({ data }),
   });
   if (!response.ok) {
     const error = await response.json();

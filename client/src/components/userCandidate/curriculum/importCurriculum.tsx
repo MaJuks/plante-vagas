@@ -183,6 +183,54 @@ export default function ImportCurriculum() {
             </PreviewSection>
           )}
 
+          {extractedData.operacoesAgricolas.length > 0 && (
+            <PreviewSection title="Operações Agrícolas">
+              {extractedData.operacoesAgricolas.map((o, i) => (
+                <PreviewCard key={i} primary={o.nome} secondary={o.nivelExperiencia} detail={o.descricao} />
+              ))}
+            </PreviewSection>
+          )}
+
+          {extractedData.operacoesPecuarias.length > 0 && (
+            <PreviewSection title="Operações Pecuárias">
+              {extractedData.operacoesPecuarias.map((o, i) => (
+                <PreviewCard key={i} primary={o.nome} secondary={o.nivelExperiencia} detail={o.descricao} />
+              ))}
+            </PreviewSection>
+          )}
+
+          {extractedData.operacoesFlorestais.length > 0 && (
+            <PreviewSection title="Operações Florestais">
+              {extractedData.operacoesFlorestais.map((o, i) => (
+                <PreviewCard key={i} primary={o.nome} secondary={o.nivelExperiencia} detail={o.descricao} />
+              ))}
+            </PreviewSection>
+          )}
+
+          {extractedData.culturas.length > 0 && (
+            <PreviewSection title="Culturas">
+              {extractedData.culturas.map((c, i) => (
+                <PreviewCard key={i} primary={c.nome} secondary={c.nivelExperiencia} detail={c.descricao} />
+              ))}
+            </PreviewSection>
+          )}
+
+          {extractedData.maquinas.length > 0 && (
+            <PreviewSection title="Máquinas">
+              {extractedData.maquinas.map((m, i) => (
+                <PreviewCard key={i} primary={m.nome} secondary={m.nivelExperiencia} detail={m.descricao} />
+              ))}
+            </PreviewSection>
+          )}
+
+          {extractedData.tecnologias.length > 0 && (
+            <PreviewSection title="Tecnologias">
+              {extractedData.tecnologias.map((t, i) => (
+                <PreviewCard key={i} primary={t.nome} secondary={t.nivelExperiencia} detail={t.descricao} />
+              ))}
+            </PreviewSection>
+          )}
+
           <div className="flex gap-3 justify-end mt-2">
             <button
               className="px-4 py-2 rounded-md border border-gray-300 text-gray-600 hover:bg-gray-100 transition-colors text-sm"
