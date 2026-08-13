@@ -8,7 +8,7 @@ export interface EtapaData {
 interface VagaCreateData {
   nome: string;
   cargo: string;
-  beneficio: string;
+  beneficios: string[];
   salario: string;
   descricao: string;
   etapas: EtapaData[];
@@ -25,7 +25,7 @@ export function VagaCreateProvider({ children }: { children: ReactNode }) {
   const [data, setDataState] = useState<VagaCreateData>({
     nome: "",
     cargo: "",
-    beneficio: "",
+    beneficios: [],
     salario: "",
     descricao: "",
     etapas: [],

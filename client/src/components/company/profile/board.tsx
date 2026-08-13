@@ -1,78 +1,63 @@
-import { useEffect, useState } from "react";
-import feather from "feather-icons";
-import medalha from "../../../assets/icon/medalha.png";
+import { useState } from "react";
+import { Briefcase, Building2 } from "lucide-react";
 import AboutCompany from "./aboutCompanyProfile/aboutCompany";
 import VagasCompanyProfile from "./vagasCompanyProfile/vagasCompanyProfile";
 import { Vaga } from "@/services/vaga";
 
 const Board = (props: {
   name: string;
-  imagem: any;
-  descricao_curta: string;
   descricao_longa: string;
   vagas: Vaga[];
   loadingVagas?: boolean;
 }) => {
-  useEffect(() => {
-    feather.replace(); // Substitui os ícones no DOM
-  }, []);
-  const [activeTab, setActiveTabe] = useState("vaga");
+  const [activeTab, setActiveTab] = useState("vaga");
+
+  const tabs = [
+    { id: "vaga", label: "Vagas", icon: Briefcase },
+    { id: "empresa", label: "Empresa", icon: Building2 },
+  ];
 
   return (
-    <div className="flex flex-col bg-MediumGray p-6 sm:p-10 font-SecondFont">
-      <div className="flex flex-col sm:flex-row gap-8 sm:gap-20">
-        <div className="flex justify-center items-center">
-          <img
-            src={props.imagem}
-            alt="Logo da empresa"
-            className="w-24 h-24 sm:w-38 sm:h-38 object-contain"
-          />
-        </div>
+    <section className="bg-white rounded-2xl shadow-lg border border-gray-100 overflow-hidden font-SecondFont">
+      {/* Banner */}
+      <div className="h-24 sm:h-32 bg-gray-100 border-b border-gray-200" />
 
-        <div className="flex flex-col gap-2 sm:w-[60%] text-center sm:text-left items-center sm:items-start">
-          <p className="text-xl sm:text-2xl font-semibold">
-            Um pouco sobre nós
-          </p>
-          <p className="text-sm">{props.descricao_curta}</p>
+      {/* Header */}
+      <div className="px-6 sm:px-8 pb-6 sm:pb-8 border-b border-gray-100">
+        <div className="w-20 h-20 sm:w-24 sm:h-24 bg-white rounded-2xl shadow-sm flex items-center justify-center -mt-10 sm:-mt-12 mb-4 border-2 border-white">
+          <Building2 size={32} className="text-gray-400" aria-hidden="true" />
         </div>
+        <h1 className="text-2xl sm:text-3xl font-bold text-deepGreen font-PrimaryFont">
+          {props.name}
+        </h1>
+      </div>
 
-        <div className="flex justify-center items-center gap-2 text-center sm:text-left">
-          <img src={medalha} className="w-8 h-8 sm:w-10 sm:h-10" />
-          <span className="text-sm">
-            Essa empresa já contratou usando o Plante Vagas
-          </span>
+      {/* Tabs */}
+      <div className="px-6 sm:px-8 pt-4 border-b border-gray-100">
+        <div className="flex gap-2">
+          {tabs.map((tab) => (
+            <button
+              key={tab.id}
+              onClick={() => setActiveTab(tab.id)}
+              className={`flex items-center gap-2 px-6 py-3 rounded-t-xl font-SecondFont font-medium
+                       transition-all duration-300 relative ${
+                         activeTab === tab.id
+                           ? "bg-paleGreen text-deepGreen"
+                           : "text-gray-500 hover:text-gray-700 hover:bg-gray-50"
+                       }`}
+            >
+              <tab.icon size={18} aria-hidden="true" />
+              {tab.label}
+              {activeTab === tab.id && (
+                <span className="absolute bottom-0 left-0 right-0 h-0.5 bg-deepGreen" />
+              )}
+            </button>
+          ))}
         </div>
       </div>
 
-      <div className="flex flex-col mt-10">
-        <span className="text-xl sm:text-2xl font-bold">{props.name}</span>
-        <hr className="border-t-2 mt-2" />
-
-        <div className="flex flex-wrap gap-4 mt-4">
-          <button
-            className={`px-4 py-2 transition-colors rounded ${
-              activeTab === "vaga"
-                ? "bg-oliveGreen text-white"
-                : "bg-gray-200 text-gray-700"
-            }`}
-            onClick={() => setActiveTabe("vaga")}
-          >
-            VAGAS
-          </button>
-          <button
-            className={`px-4 py-2 transition-colors rounded ${
-              activeTab === "empresa"
-                ? "bg-oliveGreen text-white"
-                : "bg-gray-200 text-gray-700"
-            }`}
-            onClick={() => setActiveTabe("empresa")}
-          >
-            EMPRESA
-          </button>
-        </div>
-      </div>
-
-      <div className="py-10">
+      {/* Content */}
+      <div className="p-6 sm:p-8">
         {activeTab === "vaga" ? (
           props.loadingVagas
             ? <p className="text-gray-500 text-center py-8">Carregando vagas...</p>
@@ -81,7 +66,7 @@ const Board = (props: {
           <AboutCompany descricao_longa={props.descricao_longa} />
         )}
       </div>
-    </div>
+    </section>
   );
 };
 

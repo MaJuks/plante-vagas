@@ -39,9 +39,8 @@ const Footer = () => {
                   key={social.label}
                   href={social.href}
                   aria-label={social.label}
-                  className="w-10 h-10 bg-white/10 hover:bg-white/20 rounded-full
-                           flex items-center justify-center transition-all duration-300
-                           hover:scale-110"
+                  className="w-10 h-10 rounded-full border border-white/20 hover:border-white/40 hover:bg-white/10
+                           flex items-center justify-center transition-colors duration-300"
                 >
                   <social.icon size={18} className="text-white" />
                 </a>
@@ -122,22 +121,21 @@ const Footer = () => {
                   type="email"
                   placeholder="Seu melhor e-mail"
                   className="w-full p-4 pr-12 bg-white/10 border border-white/20 rounded-xl
-                           focus:outline-none focus:ring-2 focus:ring-paleGreen focus:border-transparent
+                           focus:outline-none focus:border-paleGreen
                            text-white placeholder-white/50 font-SecondFont text-sm
-                           transition-all duration-300"
+                           transition-colors duration-300"
                 />
                 <button
-                  className="absolute right-2 top-1/2 -translate-y-1/2 w-8 h-8 bg-paleGreen
-                           rounded-lg flex items-center justify-center
+                  className="absolute right-2 top-1/2 -translate-y-1/2 w-8 h-8 rounded-lg bg-paleGreen
+                           flex items-center justify-center
                            hover:bg-white transition-colors duration-300 group"
                 >
                   <Send size={16} className="text-deepGreen" />
                 </button>
               </div>
               <button
-                className="w-full bg-paleGreen text-deepGreen px-6 py-3 rounded-xl
-                         font-SecondFont font-semibold hover:bg-white transition-all duration-300
-                         hover:shadow-lg"
+                className="w-full bg-paleGreen text-deepGreen rounded-xl px-6 py-3
+                         font-SecondFont font-semibold hover:bg-white transition-colors duration-300"
               >
                 INSCREVER-SE
               </button>

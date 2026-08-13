@@ -6,9 +6,14 @@ PENDÊNCIAS DE NEGÓCIO — PLANTE VAGAS
 Problema:
   A tela "Processo Seletivo" no fluxo de cadastro de vaga
   (campos: nome do processo, data de início, duração, descrição)
-  existe visualmente mas NÃO salva nenhum dado.
-  O botão "Próximo" apenas avança para a tela de etapas
-  sem coletar ou persistir as informações preenchidas.
+  existe visualmente e os campos já funcionam (não perdem o que foi
+  digitado enquanto a pessoa navega pelas telas do fluxo), mas
+  CONTINUA sem salvar nada no banco. O botão "Próximo" só avança
+  pra tela de etapas — não existe coluna no banco pra nome do
+  processo, data de início ou duração (ver item 2: o modelo
+  ProcessoSeletivo tem os campos errados), então não tem pra onde
+  mandar esse dado ainda. A tela já mostra um aviso explicando isso
+  pra quem estiver usando.
 
 Impacto de negócio:
   - A empresa preenche os dados do processo seletivo e eles
@@ -20,10 +25,13 @@ Impacto de negócio:
 
 O que precisa ser feito:
   - Definir quais campos o processo seletivo deve ter (alinhamento
-    com o time de negócio / diagrama de classes).
-  - Conectar o formulário ao banco de dados.
-  - Garantir que a data de encerramento e o nome do processo
-    sejam salvos e exibidos na tela de gerenciamento.
+    com o time de negócio / diagrama de classes) — ver item 2.
+  - Adicionar esses campos ao modelo ProcessoSeletivo no schema.
+  - Criar o campo correspondente no CreateVagaDto/UpdateVagaDto e
+    salvar de fato no backend.
+  - Depois disso, conectar o formulário em ProcessoSeletivo.tsx
+    (client/src/components/createVaga/ProcessoSeletivo) — os campos
+    já estão prontos e controlados, só falta o envio pro backend.
 
 
 2. MODELO ProcessoSeletivo COM CAMPOS INCORRETOS
@@ -50,3 +58,329 @@ O que precisa ser definido:
   - Ou é o processo criado pela empresa com nome, datas e etapas?
   - Esse alinhamento deve ser feito antes de continuar o desenvolvimento
     do módulo de candidaturas.
+
+
+3. MODELO Vaga SEM CAMPOS QUE A TELA DE BUSCA PRECISA
+--------------------------------------------------------
+Problema:
+  A tela de Pesquisa de Vagas (client/src/pages/Serachjob) foi feita
+  com dados mockados que incluíam campos que o modelo Vaga no Prisma
+  NÃO possui:
+    - cidade (localização da vaga)
+    - regime (Presencial / Híbrido / Remoto)
+    - contratacao (CLT, PJ, estágio etc.)
+    - pcd (flag de vaga afirmativa para pessoa com deficiência)
+    - imagem (logo da empresa)
+
+  Ao conectar a tela na API real (GET /vaga/find/all), esses campos
+  foram removidos do card de vaga (client/src/components/searchJob/jobs/vagas.tsx)
+  porque não existem no banco — hoje o card mostra só nome, cargo,
+  salário, descrição, benefícios, empresa e data de criação.
+
+  A FilterBar (client/src/components/searchJob/filterBar/filterBar.tsx)
+  também ficou com selects de região/área/modalidade com opções fixas
+  no código, sem filtrar nada de verdade, pelo mesmo motivo.
+
+  O mesmo aconteceu na página individual da vaga
+  (client/src/components/JobPage/company-job-infomation/job-information.tsx,
+  GET /vaga/find/:id): o bloco "Informações da Vaga" mostrava
+  cidade, regime e contratação/PCD fixos ("Cascavel - PR", "Presencial",
+  "CLT", "Vaga PCD") pra qualquer vaga. Foram removidos e hoje o bloco
+  só mostra "Postada há X", cargo e salário — os únicos 3 campos reais
+  disponíveis.
+
+Impacto de negócio:
+  - Candidato não consegue filtrar/ver vagas por cidade, modalidade
+    de trabalho ou tipo de contratação.
+  - Vagas afirmativas para PCD não são sinalizadas na busca.
+  - Empresa não tem como diferenciar suas vagas visualmente (logo).
+
+O que precisa ser feito:
+  - Adicionar ao modelo Vaga (ou relacionar via Address/UserCompany)
+    os campos: cidade, regime de trabalho, tipo de contratação e
+    flag de PCD.
+  - Definir se a "imagem" da vaga é o logo da empresa (UserCompany)
+    ou um campo próprio da vaga.
+  - Depois de existir no banco, atualizar CreateVagaDto/UpdateVagaDto,
+    o formulário de criação de vaga, o card de busca e a FilterBar
+    para usar os dados reais.
+
+
+4. SEM ENDPOINT PÚBLICO DE PERFIL DE EMPRESA
+-----------------------------------------------
+Problema:
+  A página da vaga (client/src/pages/JobPage) tem uma aba "Empresa"
+  que antes mostrava um perfil fictício completo (fundação, nº de
+  associados, valores da empresa etc.). Isso foi trocado por uma
+  versão simplificada só com o nome da empresa, porque o único dado
+  de empresa disponível hoje é o que vem junto da vaga
+  (GET /vaga/find/:id → empresa: { id, fantasyName, name }).
+
+  Não existe endpoint público (sem login) para buscar o perfil
+  completo de uma empresa (descrição, endereço, data de fundação
+  etc.) — o único endpoint de perfil (GET /company/profile-comapany)
+  exige login como a própria empresa.
+
+  Os links de redes sociais na página da vaga também são só
+  decorativos (href="#"), pois o modelo UserCompany não tem
+  campos de redes sociais.
+
+O que precisa ser feito:
+  - Criar endpoint público GET /company/:id (ou similar) retornando
+    dados públicos da empresa (nome, descrição, endereço).
+  - Se quiser exibir redes sociais, adicionar esses campos ao modelo
+    UserCompany.
+  - Atualizar a aba "Empresa" da página da vaga para consumir esse
+    endpoint.
+
+
+5. MODELO Vaga SEM CAMPO DE REQUISITOS/QUALIFICAÇÕES
+--------------------------------------------------------
+Problema:
+  A página individual da vaga tinha uma seção "Requisitos e
+  Qualificações" com uma lista fixa de 12 competências genéricas
+  (Comunicação Eficaz, Organização, Trabalho em Equipe etc.),
+  igual pra qualquer vaga. O modelo Vaga no Prisma não tem nenhum
+  campo pra isso (nem lista de requisitos, nem de qualificações).
+
+  Essa seção foi removida da página (job-information.tsx) — hoje
+  o espaço que ela ocupava mostra os Benefícios reais da vaga
+  (vaga.beneficios), que já existiam no banco.
+
+Impacto de negócio:
+  - Candidato não vê quais são os requisitos/qualificações
+    exigidos pela vaga antes de se candidatar.
+  - Empresa não tem como informar isso ao publicar a vaga.
+
+O que precisa ser feito:
+  - Adicionar ao modelo Vaga um campo pra requisitos (ex.: lista de
+    strings, similar ao Beneficio) ou um campo de texto livre.
+  - Incluir esse campo no formulário de criação/edição de vaga
+    (CreateVagaDto/UpdateVagaDto) e exibir na página da vaga.
+
+
+6. MODELO UserCompany COM TRÊS CAMPOS DE "NOME" SEM DEFINIÇÃO CLARA
+-----------------------------------------------------------------------
+Problema:
+  O modelo UserCompany tem três campos que soam como "nome da empresa":
+    - name
+    - socialReason (Razão Social)
+    - fantasyName (Nome Fantasia)
+
+  Não há documentação sobre a diferença de propósito entre "name" e
+  os outros dois. Na tela de cadastro (registerTwo.tsx) o campo "name"
+  chegou a ser rotulado como "Nome do Responsável" por engano — o que
+  está errado, porque no perfil da empresa (board.tsx) ele é usado como
+  FALLBACK do nome de exibição público:
+    user?.fantasyName ?? user?.name
+  Ou seja, o sistema já trata "name" como um nome da empresa, não de
+  uma pessoa. Foi corrigido para "Nome da Empresa" no formulário, mas
+  a ambiguidade estrutural no banco continua.
+
+Impacto de negócio:
+  - Risco de o campo "name" ser preenchido com um valor errado
+    (nome de pessoa) e aparecer publicamente como nome da empresa.
+  - Redundância confusa entre 3 campos de nome sem uso definido.
+
+O que precisa ser definido:
+  - "name" deveria ser removido (usar sempre fantasyName com
+    fallback pra socialReason)? Ou tem um propósito próprio
+    (ex.: nome do responsável pela conta, diferente do nome
+    público da empresa)?
+  - Esse alinhamento deve ser feito com o time de negócio antes de
+    continuar evoluindo o cadastro/perfil de empresa.
+
+
+7. CADASTRO DE EMPRESA SEM CAMPO DE DESCRIÇÃO — TELA DE EDIÇÃO EXISTE NO
+   FRONT MAS NÃO SALVA (FALTA BACKEND)
+--------------------------------------------------------------------------------
+Problema:
+  O campo "Descrição da empresa" foi removido do formulário de cadastro
+  (registerTwo.tsx, componente da empresa) de propósito — não fazia
+  sentido pedir um texto de perfil "bonito" logo no cadastro, isso é
+  mais natural numa tela de edição de perfil depois.
+
+  Essa tela de edição agora EXISTE no front:
+    client/src/pages/companyProfile/editar/index.tsx
+    client/src/components/company/profile/editProfileForm.tsx
+    rota: /empresa/editar (botão "Editar perfil" na tela principal
+    da empresa, mainCompanyProfile.tsx)
+
+  De propósito, ela tem SÓ os campos que aparecem publicamente pro
+  visitante e não têm origem no cadastro: banner (capa), logo/foto de
+  perfil (ambos upload local, só preview) e descrição. Campos que já
+  são preenchidos no cadastro (nome, nome fantasia, razão social,
+  CNPJ, telefone, data de abertura, endereço) NÃO entram aqui de
+  propósito — editar dado de cadastro é escopo de uma futura tela de
+  "Configurações", separada desta.
+
+  A prévia "Veja como os usuários enxergam seu perfil" (board.tsx)
+  já reflete isso visualmente: tem uma faixa de banner e um avatar de
+  logo sobrepondo, no mesmo estilo LinkedIn — hoje como placeholder
+  (gradiente + ícone), já que não tem imagem real vindo do banco.
+
+  O botão "Salvar alterações" não persiste nada — só mostra um
+  aviso (toast) explicando que falta o backend. Motivo: o backend só
+  tem:
+    - POST /company/singup (cria a empresa, com description obrigatório
+      no DTO, mas aceita string vazia)
+    - GET /company/profile-comapany (só leitura, exige login)
+  Não há nenhum PATCH/update de perfil de empresa, nem endpoint de
+  upload de imagem/logo.
+
+  Como consequência, toda empresa cadastrada a partir de agora nasce
+  com description = "" (string vazia) e não tem como preencher isso
+  de verdade ainda — a aba "Sobre" do perfil da empresa
+  (aboutCompany.tsx) vai aparecer vazia indefinidamente até o backend
+  ficar pronto.
+
+Impacto de negócio:
+  - Perfis de empresa ficam incompletos/vazios na aba "Sobre".
+  - Empresa não tem autonomia pra melhorar seu próprio perfil.
+  - Tela pronta no front sendo desperdiçada por falta de 1 endpoint.
+
+O que precisa ser feito:
+  - Criar endpoint PATCH /company/update-profile (ou similar) protegido
+    por auth de empresa, permitindo editar SÓ description por enquanto
+    (o que essa tela usa).
+  - Criar endpoint(s) de upload de imagem pra logo E pra banner
+    (ex.: POST /company/logo, POST /company/banner), já que hoje não
+    existe nenhum lugar pra guardar esses arquivos nem campos pra
+    eles no modelo UserCompany.
+  - Depois de existirem, conectar o handleSave() de editProfileForm.tsx
+    (hoje só mostra um toast) nesses endpoints.
+  - A tela de "Configurações" pra editar dados de cadastro (separada
+    desta) já foi criada — ver item 10.
+
+
+8. NÃO EXISTE SISTEMA DE CANDIDATURA (CANDIDATO SE APLICAR A UMA VAGA)
+--------------------------------------------------------------------------
+Problema:
+  O modelo CandidatoEtapa existe no Prisma (statusCandidato,
+  dataConclusao, observacoes, candidatoId, etapaId) — parece pensado
+  pra rastrear o candidato em cada etapa do processo seletivo. Só que
+  não existe NENHUM endpoint no backend que crie ou liste registros
+  desse modelo:
+    - Não tem POST pra um candidato se candidatar a uma vaga.
+    - Não tem GET pra empresa listar quem se candidatou a uma vaga
+      ou está em determinada etapa.
+
+  Consequências no front, encontradas ao arrumar as telas de gestão:
+    - O botão "CANDIDATAR-SE" na página da vaga
+      (client/src/components/JobPage/company-job-infomation/job-information.tsx)
+      não tem nenhum onClick — é só um botão decorativo.
+    - A tela "Ver candidatos" (client/src/components/candidates/mainCandidates.tsx),
+      acessada a partir de uma etapa em "Gerenciar processo seletivo",
+      tinha uma lista de candidatos 100% inventada (nomes, fotos de
+      um serviço de foto aleatória, habilidades tipo "React/Figma/Scrum"
+      sem nada a ver com agronegócio). Foi trocada por um estado vazio
+      explicando a limitação, em vez de fingir que os dados são reais.
+      Os componentes candidate.tsx e candidatesDisplay.tsx (que só
+      serviam pra exibir esses dados falsos) foram removidos.
+    - A tela "Processos Seletivos" do candidato
+      (client/src/components/userCandidate/selectionProcess/selectionProcess.tsx)
+      tinha 4 vagas fixas idênticas ("AUXILIAR COMERCIAL" repetido),
+      com os mesmos campos fantasma do item 3 (cidade, pcd, regime,
+      contratacao). Trocada por um estado vazio explicando a mesma
+      limitação. O componente vagasProcess.tsx (que só exibia esses
+      dados falsos) foi removido.
+
+Impacto de negócio:
+  - Candidato não consegue se candidatar a nenhuma vaga na prática.
+  - Empresa não tem como ver quem se candidatou, mesmo tendo etapas
+    de processo seletivo configuradas.
+  - É a funcionalidade central do produto (conectar candidato à vaga)
+    e ela não existe de ponta a ponta ainda.
+
+O que precisa ser feito:
+  - Criar endpoint tipo POST /vaga/:id/candidatar (auth de candidato)
+    que cria um CandidatoEtapa na primeira etapa da vaga.
+  - Criar endpoint tipo GET /vaga/:vagaId/candidatos ou
+    GET /etapa/:etapaId/candidatos (auth de empresa) que lista os
+    CandidatoEtapa de uma vaga/etapa, incluindo dados do UserCandidate
+    e do Curriculo pra empresa avaliar.
+  - Criar endpoint pra empresa mover o candidato de etapa / marcar
+    status (statusCandidato, observacoes).
+  - Depois de existirem, conectar o botão "CANDIDATAR-SE" e reescrever
+    mainCandidates.tsx pra buscar dados reais (a tela já lê vagaId e
+    etapaId da URL, só falta o fetch).
+  - Também conectar selectionProcess.tsx (candidato) pra listar os
+    processos seletivos reais em que o candidato está inscrito.
+
+
+9. BOTÃO "FECHAR ETAPA" SEM COMO NOTIFICAR CANDIDATOS (E SEM STATUS
+   EDITÁVEL NO BACKEND)
+--------------------------------------------------------------------
+Problema:
+  Adicionado o botão "Fechar etapa" no card de cada etapa
+  (client/src/components/managementProcess/etapa.tsx). Ele abre um
+  diálogo de confirmação avisando que, ao fechar a etapa, todos os
+  candidatos que não avançaram vão receber uma notificação via
+  WhatsApp. Isso é só o texto da confirmação — ao confirmar, a tela
+  mostra um aviso (toast) explicando que ainda não faz nada de
+  verdade, por dois motivos:
+    - O endpoint PATCH /vaga/etapa/:etapaId (updateEtapaService) só
+      aceita nome e descricao — não dá pra mudar o status da etapa
+      (EtapaProcessoSeletivo.status, hoje sempre "aberta").
+    - Não existe nenhuma integração com WhatsApp no backend, nem
+      como saber quem "não avançou" (depende do item 8 — sistema de
+      candidatura — existir primeiro, pra ter CandidatoEtapa reais
+      pra notificar).
+
+Impacto de negócio:
+  - Empresa não consegue formalmente encerrar uma etapa nem avisar
+    automaticamente os candidatos não selecionados.
+
+O que precisa ser feito:
+  - Depois do item 8 existir (sistema de candidatura), adicionar ao
+    endpoint de update de etapa a possibilidade de mudar o status
+    (ex.: "aberta" → "fechada").
+  - Ao fechar, disparar notificação (WhatsApp via alguma API tipo
+    Twilio/WhatsApp Business) pros CandidatoEtapa daquela etapa com
+    statusCandidato = false (não avançou).
+  - Conectar handleFecharEtapa() em etapa.tsx (hoje só mostra toast)
+    nesse fluxo.
+
+
+10. TELA DE "CONFIGURAÇÕES" DA EMPRESA CRIADA NO FRONT, SEM BACKEND
+    PRA SALVAR
+---------------------------------------------------------------------
+Problema:
+  Criada a tela de Configurações da empresa, separada da tela
+  "Editar perfil" (item 7) como planejado — essa aqui é só pra editar
+  dados de CADASTRO, não dado de perfil público:
+    client/src/pages/companyProfile/configuracoes/index.tsx
+    client/src/components/company/profile/companySettingsForm.tsx
+    rota: /empresa/configuracoes (acessível pelo menu "Minha Conta"
+    no header da empresa, headerCompany.tsx)
+
+  Campos: nome da empresa, nome fantasia, razão social, telefone,
+  data de abertura e endereço completo (com busca automática por
+  CEP). CNPJ aparece mas fica bloqueado pra edição (de propósito —
+  não faz sentido deixar mudar o identificador legal da empresa
+  livremente). Email e senha ficaram de fora por enquanto (mudança
+  de credencial normalmente pede um fluxo à parte, com confirmação
+  de senha atual).
+
+  Igual às outras telas de edição, o botão "Salvar alterações" não
+  persiste nada — só mostra um aviso (toast). Motivo: não existe
+  NENHUM endpoint de update pro UserCompany no backend (só
+  POST /company/singup na criação). Os campos de endereço também
+  começam em branco mesmo pra quem já cadastrou endereço no registro,
+  porque GET /company/profile-comapany não inclui o Address (mesma
+  lacuna já registrada no item 7).
+
+Impacto de negócio:
+  - Empresa não consegue corrigir/atualizar nome, telefone, data de
+    abertura ou endereço depois do cadastro.
+
+O que precisa ser feito:
+  - Criar endpoint PATCH /company/update-cadastro (ou similar,
+    separado do endpoint de perfil do item 7) protegido por auth de
+    empresa, permitindo editar name, fantasyName, socialReason,
+    phone, openingDate e o Address (create/update do AddressCompany).
+  - Fazer o GET /company/profile-comapany incluir o Address da
+    empresa na resposta, pra essa tela conseguir pré-preencher os
+    campos de endereço com o que já foi cadastrado.
+  - Depois de existir, conectar o handleSave() de
+    companySettingsForm.tsx (hoje só mostra um toast) nesse endpoint.

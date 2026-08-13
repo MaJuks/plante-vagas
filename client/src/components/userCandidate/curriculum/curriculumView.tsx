@@ -17,6 +17,8 @@ import {
   Wheat,
   Wrench,
   Cpu,
+  FilePlus2,
+  Upload,
 } from "lucide-react";
 
 const formatDate = (iso: string) => {
@@ -112,7 +114,12 @@ function EmptySection({ message }: { message: string }) {
   );
 }
 
-export default function CurriculumView() {
+type Props = {
+  onCreate?: () => void;
+  onImport?: () => void;
+};
+
+export default function CurriculumView({ onCreate, onImport }: Props) {
   const { curriculum, existCurriculum } = useCurriculum();
   const { UserData } = useUser();
   const { user } = UserData;
@@ -122,21 +129,40 @@ export default function CurriculumView() {
 
   if (!existCurriculum) {
     return (
-      <div className="flex flex-col items-center justify-center p-8 md:p-36 lg:p-40 w-full bg-MediumGray max-w-6xl mx-auto font-SecondFont text-center gap-4">
-        <Star className="w-12 h-12 text-deepGreen opacity-40" />
-        <h1 className="text-xl text-DeepGray">Seu currículo ainda não foi criado.</h1>
-        <p className="text-gray-500 text-sm">Preencha as seções de currículo no menu lateral para começar.</p>
+      <div className="min-h-screen bg-gray-50 flex flex-col items-center justify-center py-8 sm:py-12 px-4 sm:px-8 font-SecondFont text-center gap-4">
+        <Star className="w-12 h-12 text-deepGreen opacity-40" aria-hidden="true" />
+        <h1 className="text-xl text-gray-600">Seu currículo ainda não foi criado.</h1>
+        <p className="text-gray-500 text-sm mb-2">
+          Comece do zero ou importe um currículo em PDF pra preencher tudo automaticamente.
+        </p>
+        <div className="flex flex-col sm:flex-row gap-3">
+          <button
+            onClick={onCreate}
+            className="flex items-center justify-center gap-2 bg-deepGreen text-white px-6 py-3 rounded-xl font-medium hover:bg-mediumGreen transition-colors duration-200"
+          >
+            <FilePlus2 size={18} aria-hidden="true" />
+            Fazer meu currículo
+          </button>
+          <button
+            onClick={onImport}
+            className="flex items-center justify-center gap-2 border border-deepGreen text-deepGreen px-6 py-3 rounded-xl font-medium hover:bg-deepGreen hover:text-white transition-colors duration-200"
+          >
+            <Upload size={18} aria-hidden="true" />
+            Importar PDF
+          </button>
+        </div>
       </div>
     );
   }
 
   return (
-    <div className="flex flex-col p-8 md:p-36 lg:p-40 w-full bg-MediumGray max-w-6xl mx-auto font-SecondFont">
+    <div className="min-h-screen bg-gray-50 py-8 sm:py-12 px-4 sm:px-8">
+      <div className="max-w-4xl mx-auto bg-white p-8 sm:p-10 rounded-2xl shadow-sm border border-gray-100 font-SecondFont">
 
       {/* Cabeçalho */}
-      <div className="bg-paleGreen border border-deepGreen rounded-md p-6 mb-8">
+      <div className="bg-paleGreen/40 border border-paleGreen rounded-xl p-6 mb-8">
         <h1 className="text-2xl md:text-3xl font-semibold text-deepGreen">{user.name || "—"}</h1>
-        <div className="flex flex-wrap gap-x-6 gap-y-1 mt-3 text-sm text-DeepGray">
+        <div className="flex flex-wrap gap-x-6 gap-y-1 mt-3 text-sm text-gray-600">
           {user.email && (
             <span className="flex items-center gap-1">
               <Mail className="w-4 h-4" /> {user.email}
@@ -153,7 +179,7 @@ export default function CurriculumView() {
             </span>
           )}
         </div>
-        {user.disablePerson === "yes" && (
+        {user.disablePerson === "Sim" && (
           <span className="inline-block mt-3 text-xs px-2 py-1 bg-deepGreen text-white rounded-full">
             PcD
           </span>
@@ -163,7 +189,7 @@ export default function CurriculumView() {
       {/* Informações Pessoais */}
       <div className="mb-8">
         <SectionTitle icon={User} title="Informações Pessoais" />
-        <div className="grid grid-cols-1 sm:grid-cols-3 gap-4 text-sm text-DeepGray">
+        <div className="grid grid-cols-1 sm:grid-cols-3 gap-4 text-sm text-gray-700">
           {user.dateNasc && (
             <div>
               <span className="text-gray-400 block text-xs mb-1">Data de Nascimento</span>
@@ -173,7 +199,7 @@ export default function CurriculumView() {
           {user.gender && (
             <div>
               <span className="text-gray-400 block text-xs mb-1">Gênero</span>
-              {{ feminino: "Feminino", masculino: "Masculino", outro: "Outro", prefiroNaoDizer: "Prefiro não dizer" }[user.gender] || user.gender}
+              {user.gender}
             </div>
           )}
           {addr && (
@@ -193,10 +219,10 @@ export default function CurriculumView() {
         ) : (
           <div className="flex flex-col gap-4">
             {curriculum.experiencias.map((exp: any, i: number) => (
-              <div key={i} className="bg-paleGreen border border-deepGreen rounded-md p-4">
+              <div key={i} className="bg-gray-50 border border-gray-200 rounded-xl p-4">
                 <div className="flex flex-col sm:flex-row sm:items-start sm:justify-between gap-1">
                   <div>
-                    <p className="font-medium text-DeepGray">{exp.cargo}</p>
+                    <p className="font-medium text-gray-700">{exp.cargo}</p>
                     <p className="text-sm text-gray-600">{exp.empresa}</p>
                   </div>
                   <span className="flex items-center gap-1 text-xs text-gray-500 shrink-0">
@@ -221,10 +247,10 @@ export default function CurriculumView() {
         ) : (
           <div className="flex flex-col gap-4">
             {curriculum.formacoes.map((form: any, i: number) => (
-              <div key={i} className="bg-paleGreen border border-deepGreen rounded-md p-4">
+              <div key={i} className="bg-gray-50 border border-gray-200 rounded-xl p-4">
                 <div className="flex flex-col sm:flex-row sm:items-start sm:justify-between gap-1">
                   <div>
-                    <p className="font-medium text-DeepGray">{form.curso}</p>
+                    <p className="font-medium text-gray-700">{form.curso}</p>
                     <p className="text-sm text-gray-600">{form.nomeInstituicao}</p>
                     <p className="text-xs text-gray-500 mt-1">
                       {nivelFormacaoLabel[form.nivelFormacao] || form.nivelFormacao}
@@ -251,8 +277,8 @@ export default function CurriculumView() {
         ) : (
           <div className="flex flex-wrap gap-3">
             {curriculum.idiomas.map((idioma: any, i: number) => (
-              <div key={i} className="bg-paleGreen border border-deepGreen rounded-md px-4 py-2 text-sm">
-                <span className="font-medium text-DeepGray">{idiomaLabel[idioma.idioma] || idioma.idioma}</span>
+              <div key={i} className="bg-gray-50 border border-gray-200 rounded-xl px-4 py-2 text-sm">
+                <span className="font-medium text-gray-700">{idiomaLabel[idioma.idioma] || idioma.idioma}</span>
                 <span className="text-gray-500"> · {nivelLabel[idioma.nivel] || idioma.nivel}</span>
               </div>
             ))}
@@ -268,8 +294,8 @@ export default function CurriculumView() {
         ) : (
           <div className="flex flex-col gap-4">
             {curriculum.certificados.map((cert: any, i: number) => (
-              <div key={i} className="bg-paleGreen border border-deepGreen rounded-md p-4">
-                <p className="font-medium text-DeepGray">{cert.certificate_name}</p>
+              <div key={i} className="bg-gray-50 border border-gray-200 rounded-xl p-4">
+                <p className="font-medium text-gray-700">{cert.certificate_name}</p>
                 <p className="text-sm text-gray-600">{cert.nomeInstituicao}</p>
                 {cert.descricao && (
                   <p className="text-sm text-gray-500 mt-1">{cert.descricao}</p>
@@ -290,7 +316,7 @@ export default function CurriculumView() {
             {curriculum.diferenciais.map((dif: any, i: number) => (
               <span
                 key={i}
-                className="bg-paleGreen border border-deepGreen text-DeepGray text-sm px-3 py-1 rounded-full"
+                className="bg-paleGreen/40 border border-paleGreen text-deepGreen text-sm px-3 py-1 rounded-full"
               >
                 {dif.descricao}
               </span>
@@ -347,6 +373,7 @@ export default function CurriculumView() {
         emptyMessage="Nenhuma tecnologia cadastrada."
       />
 
+      </div>
     </div>
   );
 }

@@ -15,9 +15,19 @@ interface ConfirmDialogProps {
   title: string
   description: string
   onConfirm: () => void
+  confirmLabel?: string
+  confirmClassName?: string
 }
 
-export function ConfirmDialog({ open, onOpenChange, title, description, onConfirm }: ConfirmDialogProps) {
+export function ConfirmDialog({
+  open,
+  onOpenChange,
+  title,
+  description,
+  onConfirm,
+  confirmLabel = "Excluir",
+  confirmClassName = "bg-red-700 text-white",
+}: ConfirmDialogProps) {
   return (
     <AlertDialog open={open} onOpenChange={onOpenChange}>
       <AlertDialogContent className="font-SecondFont">
@@ -28,10 +38,10 @@ export function ConfirmDialog({ open, onOpenChange, title, description, onConfir
         <AlertDialogFooter>
           <AlertDialogCancel>Cancelar</AlertDialogCancel>
           <AlertDialogAction
-            className="bg-red-700 text-white"
+            className={confirmClassName}
             onClick={onConfirm}
           >
-            Excluir
+            {confirmLabel}
           </AlertDialogAction>
         </AlertDialogFooter>
       </AlertDialogContent>

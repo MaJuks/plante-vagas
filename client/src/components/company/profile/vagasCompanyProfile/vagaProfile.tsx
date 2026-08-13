@@ -5,7 +5,7 @@ import { Vaga } from "@/services/vaga";
 const VagaProfile = ({ vaga }: { vaga: Vaga }) => {
   const navigate = useNavigate();
   return (
-    <div className="bg-white flex flex-col md:flex-row gap-8 p-6 sm:p-8 md:p-12 rounded-lg w-full max-w-3xl mx-auto shadow-md">
+    <div className="bg-white flex flex-col md:flex-row gap-8 p-6 sm:p-8 md:p-12 rounded-2xl w-full max-w-3xl mx-auto shadow-md border border-gray-100">
       <div className="flex flex-col flex-1">
         <h1 className="font-PrimaryFont text-xl sm:text-2xl font-bold mb-4 break-words">
           {vaga.nome}

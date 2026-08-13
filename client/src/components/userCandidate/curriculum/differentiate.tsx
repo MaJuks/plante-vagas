@@ -130,80 +130,97 @@ export default function Differentiate() {
           setConfirmGroup(null);
         }}
       />
-      <div className="flex flex-col p-8  md:p-36 lg:p-40 w-full bg-MediumGray max-w-6xl mx-auto font-SecondFont">
-        <hr className="mb-6" />
+      <div className="min-h-screen bg-gray-50 py-8 sm:py-12 px-4 sm:px-8">
+        <div className="max-w-4xl mx-auto bg-white p-8 sm:p-10 rounded-2xl shadow-sm border border-gray-100 font-SecondFont">
+          <h1 className="text-2xl font-bold text-deepGreen font-PrimaryFont mb-2">
+            Diferenciais
+          </h1>
+          <p className="text-gray-600 mb-8">
+            Escreva características com base na sua personalidade, para que os empregadores
+            conheçam melhor o seu perfil.
+          </p>
 
-        <h1 className="text-xl mb-6">
-          Escreva características com base na sua personalidade, para que os
-          empregadores conheçam melhor o seu perfil
-        </h1>
+          <h2 className="text-lg font-bold text-deepGreen font-PrimaryFont mb-4">
+            Quais características você tem
+          </h2>
 
-        <h1 className="text-xl mb-4">Quais características você tem:</h1>
+          <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 gap-3 mb-6">
+            {adjetivos.map((adj, index) => {
+              const isSelected = selecionados_1.includes(adj);
+              return (
+                <button
+                  key={index}
+                  onClick={() => toggleSelecionado(adj)}
+                  className={`px-3 py-2 rounded-xl border text-sm transition-colors duration-200 ${
+                    isSelected
+                      ? "border-mediumGreen bg-paleGreen/40 text-deepGreen font-medium"
+                      : "border-gray-200 text-gray-600 hover:border-gray-300"
+                  }`}
+                >
+                  {adj}
+                </button>
+              );
+            })}
+          </div>
 
-        <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 gap-4 mb-6">
-          {adjetivos.map((adj, index) => {
-            const isSelected = selecionados_1.includes(adj);
-            return (
-              <button
-                key={index}
-                onClick={() => toggleSelecionado(adj)}
-                className={`p-2 border border-deepGreen cursor-pointer transition rounded
-                      ${
-                        isSelected
-                          ? "bg-oliveGreen"
-                          : "bg-paleGreen hover:bg-oliveGreen"
-                      }`}
-              >
-                {adj}
-              </button>
-            );
-          })}
-        </div>
+          <div className="flex justify-end gap-3 mb-10">
+            <button
+              className="flex items-center gap-2 px-5 py-2.5 bg-deepGreen text-white rounded-xl hover:bg-mediumGreen transition-colors duration-200"
+              onClick={handleSave1}
+            >
+              <Save size={18} aria-hidden="true" />
+              Salvar
+            </button>
+            <button
+              className="flex items-center gap-2 px-5 py-2.5 bg-red-600 text-white rounded-xl hover:bg-red-700 transition-colors duration-200"
+              onClick={() => setConfirmGroup(1)}
+            >
+              <Trash2 size={18} aria-hidden="true" />
+              Excluir
+            </button>
+          </div>
 
-        <div className="flex justify-end gap-3 mb-10">
-          <button className="flex items-center gap-2 px-4 py-2 bg-deepGreen text-white rounded-md cursor-pointer hover:opacity-90 transition" onClick={handleSave1}>
-            <Save size={18} />
-            <span>Salvar</span>
-          </button>
-          <button className="flex items-center gap-2 px-4 py-2 bg-red-700 text-white rounded-md cursor-pointer hover:opacity-90 transition" onClick={() => setConfirmGroup(1)}>
-            <Trash2 size={18} />
-            <span>Excluir</span>
-          </button>
-        </div>
+          <hr className="border-gray-100 mb-8" />
 
-        <h1 className="text-xl mb-4">
-          Quais características as pessoas acham que você deveria ter:
-        </h1>
+          <h2 className="text-lg font-bold text-deepGreen font-PrimaryFont mb-4">
+            Quais características as pessoas acham que você deveria ter
+          </h2>
 
-        <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 gap-4 mb-6">
-          {adjetivos.map((adj, index) => {
-            const isSelected = selecionados_2.includes(adj);
-            return (
-              <button
-                key={index}
-                onClick={() => toggleSelecionado2(adj)}
-                className={`p-2 border border-deepGreen cursor-pointer transition rounded
-                      ${
-                        isSelected
-                          ? "bg-oliveGreen"
-                          : "bg-paleGreen hover:bg-oliveGreen"
-                      }`}
-              >
-                {adj}
-              </button>
-            );
-          })}
-        </div>
+          <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 gap-3 mb-6">
+            {adjetivos.map((adj, index) => {
+              const isSelected = selecionados_2.includes(adj);
+              return (
+                <button
+                  key={index}
+                  onClick={() => toggleSelecionado2(adj)}
+                  className={`px-3 py-2 rounded-xl border text-sm transition-colors duration-200 ${
+                    isSelected
+                      ? "border-mediumGreen bg-paleGreen/40 text-deepGreen font-medium"
+                      : "border-gray-200 text-gray-600 hover:border-gray-300"
+                  }`}
+                >
+                  {adj}
+                </button>
+              );
+            })}
+          </div>
 
-        <div className="flex justify-end gap-3 mb-10">
-          <button className="flex items-center gap-2 px-4 py-2 bg-deepGreen text-white rounded-md cursor-pointer hover:opacity-90 transition" onClick={handleSave2}>
-            <Save size={18} />
-            <span>Salvar</span>
-          </button>
-          <button className="flex items-center gap-2 px-4 py-2 bg-red-700 text-white rounded-md cursor-pointer hover:opacity-90 transition" onClick={() => setConfirmGroup(2)}>
-            <Trash2 size={18} />
-            <span>Excluir</span>
-          </button>
+          <div className="flex justify-end gap-3">
+            <button
+              className="flex items-center gap-2 px-5 py-2.5 bg-deepGreen text-white rounded-xl hover:bg-mediumGreen transition-colors duration-200"
+              onClick={handleSave2}
+            >
+              <Save size={18} aria-hidden="true" />
+              Salvar
+            </button>
+            <button
+              className="flex items-center gap-2 px-5 py-2.5 bg-red-600 text-white rounded-xl hover:bg-red-700 transition-colors duration-200"
+              onClick={() => setConfirmGroup(2)}
+            >
+              <Trash2 size={18} aria-hidden="true" />
+              Excluir
+            </button>
+          </div>
         </div>
       </div>
     </>

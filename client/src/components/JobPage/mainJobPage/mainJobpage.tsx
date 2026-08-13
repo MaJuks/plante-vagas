@@ -3,8 +3,9 @@ import { Link2, Bookmark, BookmarkCheck, Briefcase, Building2, Check } from "luc
 import { toast } from "sonner";
 import JobInformation from "../company-job-infomation/job-information";
 import CompanyInfoPage from "../company-job-infomation/enterprise";
+import type { Vaga } from "@/services/vaga";
 
-const MainJobPage = () => {
+const MainJobPage = ({ vaga }: { vaga: Vaga }) => {
   const [saved, setSaved] = useState(false);
   const [copied, setCopied] = useState(false);
   const [activeTab, setActiveTab] = useState("vaga");
@@ -53,7 +54,7 @@ const MainJobPage = () => {
       <div className="p-6 sm:p-8 border-b border-gray-100">
         <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4">
           <h1 className="text-2xl sm:text-3xl font-bold text-deepGreen font-PrimaryFont">
-            AUXILIAR COMERCIAL
+            {vaga.nome}
           </h1>
 
           {/* Actions */}
@@ -113,7 +114,7 @@ const MainJobPage = () => {
 
       {/* Content */}
       <div className="p-6 sm:p-8">
-        {activeTab === "vaga" ? <JobInformation /> : <CompanyInfoPage />}
+        {activeTab === "vaga" ? <JobInformation vaga={vaga} /> : <CompanyInfoPage empresa={vaga.empresa} />}
       </div>
     </section>
   );

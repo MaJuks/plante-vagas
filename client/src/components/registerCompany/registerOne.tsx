@@ -1,7 +1,7 @@
 import { useNavigate } from "react-router-dom";
 import { useRegister } from "./RegisterContextCompany";
 import { useEffect, useState } from "react";
-import { Eye, EyeOff } from "lucide-react";
+import { Mail, Lock, Eye, EyeOff, ArrowRight } from "lucide-react";
 import { toast } from "sonner";
 import { hashPassword } from "../../utils/hashPassword";
 
@@ -61,89 +61,143 @@ const RegisterCompanyOne = () => {
   };
 
   return (
-    <>
-      <div className="grid bg-white p-6 sm:p-12 rounded-lg shadow-md font-SecondFont max-w-full sm:w-[700px] mx-auto">
-        <h1 className="text-xl  ">Passo 1 de 3</h1>
+    <form
+      onSubmit={(e) => {
+        e.preventDefault();
+        handleNext();
+      }}
+      className="w-full max-w-md mx-auto bg-white/95 backdrop-blur-sm p-8 sm:p-10 rounded-2xl shadow-xl
+               border border-white/50 font-SecondFont text-gray-800"
+    >
+      <div className="text-center mb-8">
+        <p className="uppercase text-xs tracking-[0.2em] text-mediumGreen font-semibold mb-3">
+          Passo 1 de 2
+        </p>
+        <h2 className="text-2xl font-bold text-deepGreen font-PrimaryFont">Crie sua conta</h2>
+        <p className="text-gray-600 mt-2">Comece com seu e-mail e uma senha</p>
+      </div>
 
-        <div className="grid mt-6 mb-3">
-          <label htmlFor="email" className="text-start text-lg mt-2 mb-2">
+      <div className="space-y-5">
+        {/* Email Field */}
+        <div>
+          <label htmlFor="email" className="block text-sm font-medium text-gray-700 mb-2">
             E-mail
           </label>
-          <input
-            type="email"
-            id="email"
-            name="email"
-            onChange={(e) => setEmail(e.target.value)}
-            placeholder="Insira seu E-mail aqui."
-            className="border-2 border-deepGreen rounded-lg shadow-md p-3 pl-3  text-black bg-LightGray"
-            required
-          />
+          <div className="relative">
+            <div className="absolute left-4 top-1/2 -translate-y-1/2 text-gray-400">
+              <Mail size={20} aria-hidden="true" />
+            </div>
+            <input
+              type="email"
+              id="email"
+              name="email"
+              autoComplete="email"
+              placeholder="seu@email.com"
+              className="w-full pl-12 pr-4 py-4 bg-gray-50 border border-gray-200 rounded-xl
+                       text-gray-800 placeholder-gray-400
+                       focus:outline-none focus:ring-2 focus:ring-mediumGreen focus:border-transparent
+                       transition-all duration-300"
+              value={email}
+              onChange={(e) => setEmail(e.target.value)}
+              required
+            />
+          </div>
         </div>
 
-        <div className="grid mt-3 mb-6">
-          <label className="text-start text-lg mt-2 mb-2">Senha</label>
+        {/* Password Field */}
+        <div>
+          <label htmlFor="password" className="block text-sm font-medium text-gray-700 mb-2">
+            Senha
+          </label>
           <div className="relative">
+            <div className="absolute left-4 top-1/2 -translate-y-1/2 text-gray-400">
+              <Lock size={20} aria-hidden="true" />
+            </div>
             <input
               type={showPassword ? "text" : "password"}
               id="password"
               name="password"
+              autoComplete="new-password"
+              aria-describedby="password-rules"
+              placeholder="Insira sua senha"
+              className="w-full pl-12 pr-12 py-4 bg-gray-50 border border-gray-200 rounded-xl
+                       text-gray-800 placeholder-gray-400
+                       focus:outline-none focus:ring-2 focus:ring-mediumGreen focus:border-transparent
+                       transition-all duration-300"
+              value={password}
               onChange={(e) => setPassword(e.target.value)}
-              placeholder="Insira sua senha aqui."
-              className="border-2 border-deepGreen rounded-lg shadow-md p-3 pl-3 text-black bg-LightGray w-full pr-10"
               required
             />
             <button
               type="button"
               onClick={() => setShowPassword((prev) => !prev)}
-              className="absolute right-3 top-1/2 -translate-y-1/2"
-              tabIndex={-1}
+              className="absolute right-4 top-1/2 -translate-y-1/2 text-gray-400 hover:text-gray-600
+                       transition-colors duration-200"
+              aria-label={showPassword ? "Ocultar senha" : "Mostrar senha"}
+              aria-pressed={showPassword}
             >
-              {showPassword ? <EyeOff size={20} /> : <Eye size={20} />}
+              {showPassword ? <EyeOff size={20} aria-hidden="true" /> : <Eye size={20} aria-hidden="true" />}
             </button>
           </div>
         </div>
-        <div className="grid mt-3 mb-6">
-          <label className="text-start text-lg mt-2 mb-2">
+
+        {/* Confirm Password Field */}
+        <div>
+          <label htmlFor="confirm-password" className="block text-sm font-medium text-gray-700 mb-2">
             Confirme a senha
           </label>
           <div className="relative">
+            <div className="absolute left-4 top-1/2 -translate-y-1/2 text-gray-400">
+              <Lock size={20} aria-hidden="true" />
+            </div>
             <input
               type={showConfirmPassword ? "text" : "password"}
-              id="password"
-              name="password"
+              id="confirm-password"
+              name="confirm-password"
+              autoComplete="new-password"
+              placeholder="Repita sua senha"
+              className="w-full pl-12 pr-12 py-4 bg-gray-50 border border-gray-200 rounded-xl
+                       text-gray-800 placeholder-gray-400
+                       focus:outline-none focus:ring-2 focus:ring-mediumGreen focus:border-transparent
+                       transition-all duration-300"
+              value={confirmPassword}
               onChange={(e) => setConfirmPassword(e.target.value)}
-              placeholder="Insira sua senha aqui."
-              className="border-2 border-deepGreen rounded-lg shadow-md p-3 pl-3 text-black bg-LightGray w-full pr-10"
               required
             />
             <button
               type="button"
               onClick={() => setShowConfirmPassword((prev) => !prev)}
-              className="absolute right-3 top-1/2 -translate-y-1/2"
-              tabIndex={-1}
+              className="absolute right-4 top-1/2 -translate-y-1/2 text-gray-400 hover:text-gray-600
+                       transition-colors duration-200"
+              aria-label={showConfirmPassword ? "Ocultar senha" : "Mostrar senha"}
+              aria-pressed={showConfirmPassword}
             >
-              {showConfirmPassword ? <EyeOff size={20} /> : <Eye size={20} />}
+              {showConfirmPassword ? <EyeOff size={20} aria-hidden="true" /> : <Eye size={20} aria-hidden="true" />}
             </button>
           </div>
         </div>
 
-        <div className="bg-white p-4 rounded-lg ">
-          <p className="text-green-900">• Mínimo de 8 dígitos.</p>
-          <p className="text-green-900">• Pelo menos uma letra maiúscula.</p>
-          <p className="text-green-900">• Pelo menos um número.</p>
+        {/* Password Rules */}
+        <div id="password-rules" className="bg-gray-50 border border-gray-200 rounded-xl p-4">
+          <ul className="list-none space-y-1 text-sm text-gray-600">
+            <li>• Mínimo de 8 dígitos.</li>
+            <li>• Pelo menos uma letra maiúscula.</li>
+            <li>• Pelo menos um número.</li>
+          </ul>
         </div>
 
-        <div className="grid justify-center">
-          <button
-            onClick={handleNext}
-            type="submit"
-            className="w-80 h-14 bg-deepGreen text-lg sm:text-xl text-white px-2 sm:px-4 py-1 sm:py-1 rounded-lg hover:bg-mediumGreen font-SecondFont mt-12 mb-4"
-          >
-            PRÓXIMO
-          </button>
-        </div>
+        {/* Submit Button */}
+        <button
+          type="submit"
+          className="w-full flex items-center justify-center gap-2 bg-deepGreen text-white
+                   py-4 rounded-xl font-semibold text-lg
+                   hover:bg-mediumGreen transition-colors duration-300"
+        >
+          PRÓXIMO
+          <ArrowRight size={20} aria-hidden="true" />
+        </button>
       </div>
-    </>
+    </form>
   );
 };
 

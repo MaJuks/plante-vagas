@@ -7,15 +7,22 @@ const RegisterUserTwo = () => {
       <header>
         <HeaderLogin />
       </header>
-      <main className="bg-softGreen grid justify-center">
-        <div className="grid justify-center p-6 sm:p-12 md:p-24 max-w-screen-lg w-full">
-          <h1 className="text-3xl sm:text-4xl md:text-4xl text-deepGreen font-PrimaryFont text-left">
-            Transformando o Agro
-          </h1>
-        </div>
-        <RegisterTwo />
+      <main className="min-h-screen bg-gradient-to-br from-softGreen via-paleGreen to-softGreen">
+        <div className="flex flex-col items-center justify-center px-4 py-12 sm:py-16">
+          <div className="text-center mb-8 max-w-2xl">
+            <p className="uppercase text-xs sm:text-sm tracking-[0.25em] text-mediumGreen font-SecondFont font-semibold mb-5">
+              Cadastro de candidato
+            </p>
+            <h1 className="text-4xl sm:text-5xl md:text-6xl text-deepGreen font-PrimaryFont">
+              Transformando o Agro
+            </h1>
+            <p className="text-lg text-gray-700 mt-4 font-SecondFont">
+              Só mais um passo pra você entrar na plataforma
+            </p>
+          </div>
 
-        <h1 className="text-center text-2xl m-12 cursor-pointer text-deepGreen underline"></h1>
+          <RegisterTwo />
+        </div>
       </main>
     </>
   );

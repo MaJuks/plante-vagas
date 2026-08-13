@@ -3,11 +3,12 @@ import SubHeader from "../../home-page/headers/subHeader";
 import { useUser } from "../userContext";
 import { toast } from "sonner";
 import { updateUser } from "../../../services/users";
-import { PencilLine } from "lucide-react";
+import { Info } from "lucide-react";
 
-const inputBase = "w-full border rounded-sm mt-1 p-1 pl-4 transition-all duration-200";
+const inputBase = "w-full px-4 py-3 rounded-xl border transition-all duration-200";
 const inputLocked = `${inputBase} bg-gray-100 text-gray-400 cursor-not-allowed border-gray-200`;
-const inputEditable = `${inputBase} bg-white text-gray-800 border-2 border-green-500 focus:outline-none focus:ring-2 focus:ring-green-200`;
+const inputEditable = `${inputBase} bg-white text-gray-800 border-gray-200 focus:outline-none focus:ring-2 focus:ring-mediumGreen focus:border-transparent`;
+const labelClass = "block text-sm font-medium text-gray-700 mb-2";
 
 export default function Address() {
   const { UserData, refreshUser } = useUser();
@@ -65,9 +66,11 @@ export default function Address() {
   };
 
   return (
-    <>
-      <div className="flex flex-col p-8 md:p-36 lg:p-40 w-full bg-MediumGray max-w-6xl mx-auto font-SecondFont">
+    <div className="min-h-screen bg-gray-50 py-8 sm:py-12 px-4 sm:px-8">
+      <div className="max-w-3xl mx-auto bg-white p-8 sm:p-10 rounded-2xl shadow-sm border border-gray-100 font-SecondFont">
         <SubHeader
+          title="Endereço"
+          subtitle="Onde você está localizado"
           isEditing={isEditing}
           isSaving={isSaving}
           onEdit={handleEdit}
@@ -75,25 +78,18 @@ export default function Address() {
           onCancel={handleCancel}
         />
 
-        {!isEditing && (
-          <div className="flex items-center gap-2 text-sm text-gray-500 bg-gray-50 border border-gray-200 rounded-md px-3 py-2 mb-4">
-            <PencilLine className="w-4 h-4 shrink-0" />
-            Clique em <strong>Editar</strong> para atualizar seu endereço.
-          </div>
-        )}
+        <div className="flex items-start gap-2 text-sm bg-paleGreen/20 border border-paleGreen rounded-xl px-4 py-3 mb-6">
+          <Info size={16} className="text-deepGreen flex-shrink-0 mt-0.5" aria-hidden="true" />
+          <p className="text-gray-700">
+            {isEditing
+              ? "Modo edição ativo. Preencha os campos e clique em Salvar."
+              : "Clique em Editar para atualizar seu endereço."}
+          </p>
+        </div>
 
-        {isEditing && (
-          <div className="flex items-center gap-2 text-sm text-green-700 bg-green-50 border border-green-200 rounded-md px-3 py-2 mb-4">
-            <PencilLine className="w-4 h-4 shrink-0" />
-            Modo edição ativo. Preencha os campos e clique em Salvar.
-          </div>
-        )}
-
-        <h1 className="text-xl my-4">Endereço</h1>
-
-        <div className="flex flex-col md:flex-row gap-4 md:gap-6 text-DeepGray">
-          <div className="flex flex-col w-full md:w-1/4">
-            <label>CEP *</label>
+        <div className="grid grid-cols-1 sm:grid-cols-[1fr_2fr_1fr] gap-5">
+          <div>
+            <label className={labelClass}>CEP *</label>
             <input
               type="text"
               disabled={!isEditing}
@@ -103,8 +99,8 @@ export default function Address() {
               placeholder={isEditing ? "00000-000" : ""}
             />
           </div>
-          <div className="flex flex-col w-full md:w-2/4">
-            <label>Logradouro *</label>
+          <div>
+            <label className={labelClass}>Logradouro *</label>
             <input
               type="text"
               disabled={!isEditing}
@@ -114,8 +110,8 @@ export default function Address() {
               placeholder={isEditing ? "Nome da rua" : ""}
             />
           </div>
-          <div className="flex flex-col w-full md:w-1/4">
-            <label>Número *</label>
+          <div>
+            <label className={labelClass}>Número *</label>
             <input
               type="text"
               disabled={!isEditing}
@@ -127,9 +123,9 @@ export default function Address() {
           </div>
         </div>
 
-        <div className="flex flex-col md:flex-row gap-4 md:gap-6 text-DeepGray mt-4">
-          <div className="flex flex-col w-full md:w-1/3">
-            <label>Bairro *</label>
+        <div className="grid grid-cols-1 sm:grid-cols-3 gap-5 mt-5">
+          <div>
+            <label className={labelClass}>Bairro *</label>
             <input
               type="text"
               disabled={!isEditing}
@@ -139,8 +135,8 @@ export default function Address() {
               placeholder={isEditing ? "Nome do bairro" : ""}
             />
           </div>
-          <div className="flex flex-col w-full md:w-1/3">
-            <label>Complemento</label>
+          <div>
+            <label className={labelClass}>Complemento</label>
             <input
               type="text"
               disabled={!isEditing}
@@ -150,8 +146,8 @@ export default function Address() {
               placeholder={isEditing ? "Apto, bloco..." : ""}
             />
           </div>
-          <div className="flex flex-col w-full md:w-1/3">
-            <label>Cidade *</label>
+          <div>
+            <label className={labelClass}>Cidade *</label>
             <input
               type="text"
               disabled={!isEditing}
@@ -163,9 +159,9 @@ export default function Address() {
           </div>
         </div>
 
-        <div className="flex flex-col md:flex-row gap-4 md:gap-6 text-DeepGray mt-4">
-          <div className="flex flex-col w-full md:w-1/2">
-            <label>País</label>
+        <div className="grid grid-cols-1 sm:grid-cols-2 gap-5 mt-5">
+          <div>
+            <label className={labelClass}>País</label>
             <input
               type="text"
               disabled={!isEditing}
@@ -175,8 +171,8 @@ export default function Address() {
               placeholder={isEditing ? "Ex: Brasil" : ""}
             />
           </div>
-          <div className="flex flex-col w-full md:w-1/2">
-            <label>Estado</label>
+          <div>
+            <label className={labelClass}>Estado</label>
             <input
               type="text"
               disabled={!isEditing}
@@ -188,6 +184,6 @@ export default function Address() {
           </div>
         </div>
       </div>
-    </>
+    </div>
   );
 }

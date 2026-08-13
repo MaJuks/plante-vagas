@@ -1,6 +1,6 @@
 import { useState } from "react";
 import { useNavigate } from "react-router-dom";
-import { Home, LogOut, ChevronRight, User, Search } from "lucide-react";
+import { Home, LogOut, ChevronRight, User, Search, Menu } from "lucide-react";
 import logo from "../../../assets/images/logo.png";
 import { clearSession } from "../../../services/api";
 
@@ -20,7 +20,15 @@ const tabLabels: Record<string, string> = {
   "importar-curriculo": "Importar Currículo",
 };
 
-const HeaderLogged = ({ activeTab }: { activeTab?: string }) => {
+const HeaderLogged = ({
+  activeTab,
+  onGoHome,
+  onOpenMenu,
+}: {
+  activeTab?: string;
+  onGoHome?: () => void;
+  onOpenMenu?: () => void;
+}) => {
   const navigate = useNavigate();
   const [menuOpen, setMenuOpen] = useState(false);
 
@@ -32,13 +40,20 @@ const HeaderLogged = ({ activeTab }: { activeTab?: string }) => {
   };
 
   return (
-    <header className="fixed top-0 left-0 right-0 bg-white shadow-md py-3 px-4 sm:px-6 z-30">
-      <div className="container mx-auto flex items-center justify-between">
-        <div className="flex items-center">
+    <header className="fixed top-0 left-0 right-0 md:left-72 bg-white shadow-md py-3 px-4 sm:px-6 z-30">
+      <div className="flex items-center justify-between">
+        <div className="flex items-center gap-3 md:hidden">
+          <button
+            onClick={onOpenMenu}
+            aria-label="Abrir menu"
+            className="text-deepGreen p-1 -ml-1"
+          >
+            <Menu size={24} aria-hidden="true" />
+          </button>
           <img
             src={logo}
             alt="Logo"
-            className="h-14 cursor-pointer"
+            className="h-10 cursor-pointer"
             onClick={() => navigate("/")}
           />
         </div>
@@ -46,7 +61,12 @@ const HeaderLogged = ({ activeTab }: { activeTab?: string }) => {
         <div className="hidden sm:flex items-center gap-4">
           {screenTitle && (
             <div className="flex items-center gap-2 text-gray-500 font-SecondFont text-sm">
-              <span>Início</span>
+              <button
+                onClick={onGoHome}
+                className="hover:text-deepGreen hover:underline underline-offset-2 transition-colors duration-200"
+              >
+                Início
+              </button>
               <ChevronRight size={14} className="text-gray-400" />
               <span className="text-deepGreen font-medium">{screenTitle}</span>
             </div>

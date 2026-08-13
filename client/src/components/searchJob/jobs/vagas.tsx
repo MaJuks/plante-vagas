@@ -1,18 +1,19 @@
 import { useNavigate } from "react-router-dom";
-import { MapPin, Clock, Briefcase, FileText, DollarSign, UserCheck, ArrowRight, Building2 } from "lucide-react";
+import { Clock, Briefcase, DollarSign, ArrowRight, Building2, Tag } from "lucide-react";
+import { timeAgo } from "@/utils/timeAgo";
 
 const Vagas = (props: {
-  name: string;
-  cidade: string;
-  postada: string;
-  pcd: any;
-  regime: string;
-  contratacao: string;
-  salario: any;
+  id: number;
+  nome: string;
+  cargo: string;
+  salario?: number;
   descricao: string;
-  imagem: any;
+  beneficios: { id: number; nome: string }[];
+  empresa?: { fantasyName: string; name: string };
+  createdAt: string;
 }) => {
   const navigate = useNavigate();
+  const nomeEmpresa = props.empresa?.fantasyName || props.empresa?.name;
 
   return (
     <div
@@ -24,15 +25,7 @@ const Vagas = (props: {
       <div className="flex-shrink-0 flex justify-center md:justify-start">
         <div className="w-24 h-24 md:w-28 md:h-28 bg-gray-50 rounded-2xl flex items-center justify-center
                       border border-gray-100 group-hover:border-mediumGreen/30 transition-colors duration-300 overflow-hidden">
-          {props.imagem ? (
-            <img
-              src={props.imagem}
-              alt="Logo da empresa"
-              className="w-full h-full object-contain p-2"
-            />
-          ) : (
-            <Building2 size={40} className="text-gray-300" />
-          )}
+          <Building2 size={40} className="text-gray-300" />
         </div>
       </div>
 
@@ -41,40 +34,41 @@ const Vagas = (props: {
         {/* Header */}
         <div className="mb-4">
           <h2 className="text-xl md:text-2xl font-bold text-deepGreen font-PrimaryFont group-hover:text-mediumGreen transition-colors duration-300">
-            {props.name}
+            {props.nome}
           </h2>
           <div className="flex flex-wrap justify-center md:justify-start items-center gap-4 mt-3 text-gray-600 font-SecondFont text-sm">
-            <span className="flex items-center gap-2">
-              <MapPin size={16} className="text-mediumGreen" />
-              {props.cidade}
-            </span>
+            {nomeEmpresa && (
+              <span className="flex items-center gap-2">
+                <Building2 size={16} className="text-mediumGreen" />
+                {nomeEmpresa}
+              </span>
+            )}
             <span className="flex items-center gap-2">
               <Clock size={16} className="text-mediumGreen" />
-              Postada há {props.postada} horas
+              Postada há {timeAgo(props.createdAt)}
             </span>
           </div>
         </div>
 
         {/* Tags */}
         <div className="flex flex-wrap justify-center md:justify-start gap-2 mb-4">
-          {props.pcd && (
-            <span className="inline-flex items-center gap-1.5 bg-blue-50 text-blue-700 px-3 py-1.5 rounded-full text-xs font-SecondFont font-medium">
-              <UserCheck size={14} />
-              PCD
-            </span>
-          )}
           <span className="inline-flex items-center gap-1.5 bg-paleGreen text-deepGreen px-3 py-1.5 rounded-full text-xs font-SecondFont font-medium">
             <Briefcase size={14} />
-            {props.regime}
-          </span>
-          <span className="inline-flex items-center gap-1.5 bg-gray-100 text-gray-700 px-3 py-1.5 rounded-full text-xs font-SecondFont font-medium">
-            <FileText size={14} />
-            {props.contratacao}
+            {props.cargo}
           </span>
           <span className="inline-flex items-center gap-1.5 bg-green-50 text-green-700 px-3 py-1.5 rounded-full text-xs font-SecondFont font-medium">
             <DollarSign size={14} />
-            {props.salario || "A combinar"}
+            {props.salario ? `R$ ${props.salario.toLocaleString("pt-BR")}` : "A combinar"}
           </span>
+          {props.beneficios.map((beneficio) => (
+            <span
+              key={beneficio.id}
+              className="inline-flex items-center gap-1.5 bg-gray-100 text-gray-700 px-3 py-1.5 rounded-full text-xs font-SecondFont font-medium"
+            >
+              <Tag size={14} />
+              {beneficio.nome}
+            </span>
+          ))}
         </div>
 
         {/* Description */}
@@ -86,7 +80,7 @@ const Vagas = (props: {
       {/* Action Button */}
       <div className="flex items-center justify-center md:justify-end">
         <button
-          onClick={() => navigate("/Pagina-vaga")}
+          onClick={() => navigate(`/pagina-vaga/${props.id}`)}
           className="group/btn flex items-center gap-2 bg-deepGreen text-white px-6 py-3 rounded-xl
                    font-SecondFont font-semibold hover:bg-mediumGreen transition-all duration-300
                    hover:shadow-lg hover:shadow-deepGreen/20 w-full md:w-auto justify-center"
