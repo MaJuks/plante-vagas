@@ -27,6 +27,7 @@ export interface Vaga {
   beneficios: { id: number; nome: string }[];
   etapas: EtapaProcessoSeletivo[];
   empresaId: number;
+  empresa?: { id: number; fantasyName: string; name: string };
   createdAt: string;
   updatedAt: string;
 }
@@ -42,6 +43,15 @@ export async function createVaga(data: VagaPayload): Promise<Vaga> {
   if (!response.ok) {
     const error = await response.json();
     throw new Error(error.message || "Erro ao criar vaga");
+  }
+  return response.json();
+}
+
+export async function getAllVagas(): Promise<Vaga[]> {
+  const response = await authFetch(`${VAGA_URL}/find/all`);
+  if (!response.ok) {
+    const error = await response.json();
+    throw new Error(error.message || "Erro ao buscar vagas");
   }
   return response.json();
 }

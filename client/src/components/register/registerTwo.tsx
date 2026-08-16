@@ -1,10 +1,12 @@
 import { useNavigate } from "react-router-dom";
 import { useRegister } from "./RegisterContext";
 import { useState } from "react";
+import { User, FileText, Phone, Calendar, MapPin, ArrowRight, Loader2 } from "lucide-react";
 import { cpfMask } from "../masks/cpfMask";
 import { phoneMask } from "../masks/phoneMask";
 import { toast } from "sonner";
 import { cepMask } from "../masks/cepMask";
+import { setSession } from "../../services/api";
 
 const RegisterTwo = () => {
   const navigate = useNavigate();
@@ -25,17 +27,15 @@ const RegisterTwo = () => {
   const [district, setDistrict] = useState("");
   const [city, setCity] = useState("");
   const [state, setState] = useState("");
-
-  const [filled, setFilled] = useState<Record<string, boolean>>({});
-  const markFilled = (field: string, value: string) =>
-    setFilled((prev) => ({ ...prev, [field]: !!value.trim() }));
-  const bg = (field: string) => filled[field] ? "bg-MediumGray2" : "bg-LightGray";
+  const [cepLoading, setCepLoading] = useState(false);
+  const [submitting, setSubmitting] = useState(false);
 
   const handleCepChange = async (e: React.ChangeEvent<HTMLInputElement>) => {
     const masked = cepMask(e.target.value);
     setCep(masked);
     const cleaned = masked.replace("-", "");
     if (cleaned.length === 8) {
+      setCepLoading(true);
       try {
         const res = await fetch(`https://viacep.com.br/ws/${cleaned}/json/`);
         const data = await res.json();
@@ -46,17 +46,12 @@ const RegisterTwo = () => {
           setDistrict(data.bairro || "");
           setCity(data.localidade || "");
           setState(data.uf || "");
-          setFilled((prev) => ({
-            ...prev,
-            street: !!data.logradouro,
-            district: !!data.bairro,
-            city: !!data.localidade,
-            state: !!data.uf,
-          }));
         }
       } catch {
         toast.error("Erro ao buscar CEP");
-      } 
+      } finally {
+        setCepLoading(false);
+      }
     }
   };
 
@@ -67,368 +62,366 @@ const RegisterTwo = () => {
           "Todos os campos a seguir devem ser preenchidos para realizar o cadastro",
         duration: 3000,
       });
-    } else {
-      const payload = {
-        userData: {
-          email: formData.email,
-          password: formData.password,
-          name: name,
-          dateNasc: new Date(dateNasc).toISOString(),
-          cpf: cpf,
-          phone: phone,
-          gender: gender,
-          disablePerson: disablePerson,
-          address: {
-            postalCode: cep,
-            street: street,
-            number: number,
-            complement: complement,
-            district: district,
-            city: city,
-            state: state,
-            country: "Brasil",
-          },
-        },
-      };
+      return;
+    }
 
-      try {
-        const response = await fetch("http://localhost:3000/users/signup", {
-          method: "POST",
-          headers: { "Content-Type": "application/json" },
-          body: JSON.stringify(payload),
+    setSubmitting(true);
+    const payload = {
+      userData: {
+        email: formData.email,
+        password: formData.password,
+        name: name,
+        dateNasc: new Date(dateNasc).toISOString(),
+        cpf: cpf,
+        phone: phone,
+        gender: gender,
+        disablePerson: disablePerson,
+        address: {
+          postalCode: cep,
+          street: street,
+          number: number,
+          complement: complement,
+          district: district,
+          city: city,
+          state: state,
+          country: "Brasil",
+        },
+      },
+    };
+
+    try {
+      const response = await fetch("http://localhost:3000/users/signup", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify(payload),
+      });
+
+      const result = await response.json();
+
+      if (response.ok) {
+        toast.success("Cadastro realizado com sucesso", {
+          duration: 3000,
         });
 
-        const result = await response.json();
+        try {
+          const loginRes = await fetch("http://localhost:3000/auth/login", {
+            method: "POST",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify({ email: formData.email, password: formData.password }),
+          });
 
-        if (response.ok) {
-          toast.success("Cadastro Realizado com sucesso", {
-            duration: 3000,
-          });
-          navigate("/login");
-        } else {
-          toast.error("Erro ao realizar caastro", {
-            description: result.message,
-            duration: 3000,
-          });
+          if (loginRes.ok) {
+            const session = await loginRes.json();
+            setSession(session);
+            navigate("/candidato/pagina-inicial");
+            return;
+          }
+        } catch {
+          // se o login automático falhar, cai no fallback abaixo
         }
-      } catch (error: any) {
-        toast.error("Erro ao realizar caastro", {
-          description: error,
+
+        navigate("/login");
+      } else {
+        toast.error("Erro ao realizar cadastro", {
+          description: result.message,
           duration: 3000,
         });
       }
+    } catch (error: any) {
+      toast.error("Erro ao realizar cadastro", {
+        description: error,
+        duration: 3000,
+      });
+    } finally {
+      setSubmitting(false);
     }
   };
 
+  const inputClass =
+    "w-full pl-12 pr-4 py-4 bg-gray-50 border border-gray-200 rounded-xl text-gray-800 placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-mediumGreen focus:border-transparent transition-all duration-300";
+  const plainInputClass =
+    "w-full px-4 py-4 bg-gray-50 border border-gray-200 rounded-xl text-gray-800 placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-mediumGreen focus:border-transparent transition-all duration-300";
+  const labelClass = "block text-sm font-medium text-gray-700 mb-2";
+  const pillClass = (active: boolean) =>
+    `flex items-center gap-2 cursor-pointer select-none px-4 py-2.5 rounded-xl border transition-colors duration-200 ${
+      active ? "border-mediumGreen bg-paleGreen/40 text-deepGreen font-medium" : "border-gray-200 text-gray-600 hover:border-gray-300"
+    }`;
+
   return (
-    <>
-      <div className="grid bg-white p-6 sm:p-12 rounded-lg shadow-md font-SecondFont max-w-full sm:w-[700px] mx-auto">
-        <h1 className="text-xl  ">Passo 2 de 3</h1>
+    <form
+      onSubmit={(e) => {
+        e.preventDefault();
+        handleSubmit();
+      }}
+      className="w-full max-w-2xl mx-auto bg-white/95 backdrop-blur-sm p-8 sm:p-10 rounded-2xl shadow-xl
+               border border-white/50 font-SecondFont text-gray-800"
+    >
+      <div className="text-center mb-8">
+        <p className="uppercase text-xs tracking-[0.2em] text-mediumGreen font-semibold mb-3">
+          Passo 2 de 2
+        </p>
+        <h2 className="text-2xl font-bold text-deepGreen font-PrimaryFont">Dados pessoais</h2>
+        <p className="text-gray-600 mt-2">Só mais alguns dados pra finalizar</p>
+      </div>
 
-        <div className="grid mt-6 mb-3">
-          <label htmlFor="nome" className="text-start text-lg mt-2 mb-2">
-            Nome Completo
-          </label>
-          <input
-            type="text"
-            id="nome"
-            name="nome"
-            value={name}
-            onChange={(e) => setName(e.target.value)}
-            onBlur={(e) => markFilled("name", e.target.value)}
-            placeholder="Insira seu nome aqui."
-            className={`border-2 border-deepGreen rounded-lg shadow-md p-3 pl-3 text-black transition-colors ${bg("name")}`}
-          />
-        </div>
-
-        <div className="grid mt-3 mb-6">
-          <label className="text-start text-lg mt-2 mb-2">CPF</label>
-          <input
-            type="text"
-            id="CPF"
-            name="CPF"
-            value={cpf}
-            onChange={(e) => setCpf(cpfMask(e.target.value))}
-            onBlur={(e) => markFilled("cpf", e.target.value)}
-            placeholder="000.000.000-00"
-            className={`border-2 border-deepGreen rounded-lg shadow-md p-3 pl-3 text-left text-black w-full transition-colors ${bg("cpf")}`}
-          />
-        </div>
-
-        <div className="grid grid-cols-2 gap-4 mt-3 mb-6">
-          <div>
-            <label className="text-start text-lg mt-2 mb-2">
-              Telefone/Celular
-            </label>
+      <div className="space-y-5">
+        <div>
+          <label htmlFor="nome" className={labelClass}>Nome completo</label>
+          <div className="relative">
+            <div className="absolute left-4 top-1/2 -translate-y-1/2 text-gray-400">
+              <User size={20} aria-hidden="true" />
+            </div>
             <input
-              type="tel"
-              id="telephone"
-              name="telephone"
-              value={phone}
-              onChange={(e) => setPhone(phoneMask(e.target.value))}
-              onBlur={(e) => markFilled("phone", e.target.value)}
-              placeholder="99 99 99999-9999"
-              className={`border-2 border-deepGreen rounded-lg shadow-md p-3 pl-3 text-black w-full transition-colors ${bg("phone")}`}
+              type="text"
+              id="nome"
+              name="nome"
+              autoComplete="name"
+              value={name}
+              onChange={(e) => setName(e.target.value)}
+              placeholder="Seu nome completo"
+              className={inputClass}
             />
           </div>
+        </div>
 
+        <div className="grid grid-cols-1 sm:grid-cols-2 gap-5">
           <div>
-            <label className="text-start text-lg mt-2 mb-2">
-              Data de nascimento
-            </label>
+            <label htmlFor="CPF" className={labelClass}>CPF</label>
+            <div className="relative">
+              <div className="absolute left-4 top-1/2 -translate-y-1/2 text-gray-400">
+                <FileText size={20} aria-hidden="true" />
+              </div>
+              <input
+                type="text"
+                id="CPF"
+                name="CPF"
+                value={cpf}
+                onChange={(e) => setCpf(cpfMask(e.target.value))}
+                placeholder="000.000.000-00"
+                className={inputClass}
+              />
+            </div>
+          </div>
+          <div>
+            <label htmlFor="telephone" className={labelClass}>Telefone/Celular</label>
+            <div className="relative">
+              <div className="absolute left-4 top-1/2 -translate-y-1/2 text-gray-400">
+                <Phone size={20} aria-hidden="true" />
+              </div>
+              <input
+                type="tel"
+                id="telephone"
+                name="telephone"
+                autoComplete="tel"
+                value={phone}
+                onChange={(e) => setPhone(phoneMask(e.target.value))}
+                placeholder="99 99999-9999"
+                className={inputClass}
+              />
+            </div>
+          </div>
+        </div>
+
+        <div>
+          <label htmlFor="date" className={labelClass}>Data de nascimento</label>
+          <div className="relative">
+            <div className="absolute left-4 top-1/2 -translate-y-1/2 text-gray-400">
+              <Calendar size={20} aria-hidden="true" />
+            </div>
             <input
               type="date"
               id="date"
               name="date"
               value={dateNasc}
               onChange={(e) => setDateNasc(e.target.value)}
-              onBlur={(e) => markFilled("dateNasc", e.target.value)}
-              placeholder="00/00/0000"
-              className={`border-2 border-deepGreen rounded-lg shadow-md p-3 pl-3 text-black w-full transition-colors ${bg("dateNasc")}`}
+              className={inputClass}
             />
           </div>
         </div>
 
-        <div className="text-start text-lg mt-2 mb-2">
-          <h1 className="text-green-900 text-2xl">Qual seu gênero?</h1>
-        </div>
+        <fieldset>
+          <legend className={labelClass}>Qual seu gênero?</legend>
+          <div className="flex flex-wrap gap-3">
+            {[
+              { id: "genero-mulher", label: "Mulher", value: "Mulher" },
+              { id: "genero-homem", label: "Homem", value: "Homem" },
+              { id: "genero-outro", label: "Outro", value: "Outro" },
+              { id: "genero-prefiro-nao-dizer", label: "Prefiro não dizer", value: "Prefiro Não Dizer" },
+            ].map((option) => (
+              <label key={option.id} htmlFor={option.id} className={pillClass(gender === option.value)}>
+                <input
+                  type="radio"
+                  id={option.id}
+                  name="generos"
+                  value={option.value}
+                  checked={gender === option.value}
+                  onChange={(e) => setGender(e.target.value)}
+                  className="accent-mediumGreen"
+                />
+                {option.label}
+              </label>
+            ))}
+          </div>
+        </fieldset>
 
-        <div className="space-y-4 mb-6">
-          <div className="flex items-center space-x-2">
-            <input
-              type="radio"
-              id="option1"
-              name="generos"
-              onChange={(e) => {
-                setGender(e.target.value);
-              }}
-              value="Mulher"
-              className="form-radio text-deepGreen border-2 border-deepGreen rounded"
-            />
-            <label htmlFor="Mulher" className="text-lg text-gray-700">
-              Mulher
-            </label>
+        <fieldset>
+          <legend className={labelClass}>Você é portador de alguma deficiência?</legend>
+          <div className="flex gap-3">
+            {[{ id: "pcd-sim", label: "Sim", value: "Sim" }, { id: "pcd-nao", label: "Não", value: "Não" }].map((option) => (
+              <label key={option.id} htmlFor={option.id} className={pillClass(disablePerson === option.value)}>
+                <input
+                  type="radio"
+                  id={option.id}
+                  name="opcoes"
+                  value={option.value}
+                  checked={disablePerson === option.value}
+                  onChange={(e) => setDisablePerson(e.target.value)}
+                  className="accent-mediumGreen"
+                />
+                {option.label}
+              </label>
+            ))}
+          </div>
+        </fieldset>
+
+        {/* Endereço */}
+        <div className="pt-2">
+          <div className="flex items-center gap-2 text-deepGreen font-semibold mb-4">
+            <MapPin size={18} aria-hidden="true" />
+            <h3 className="font-PrimaryFont text-lg">Endereço</h3>
           </div>
 
-          <div className="flex items-center space-x-2">
-            <input
-              type="radio"
-              id="option2"
-              name="generos"
-              onChange={(e) => {
-                setGender(e.target.value);
-              }}
-              value="Homem"
-              className="form-radio text-deepGreen border-2 border-deepGreen rounded"
-            />
-            <label htmlFor="Homem" className="text-lg text-gray-700">
-              Homem
-            </label>
-          </div>
+          <div className="space-y-5">
+            <div>
+              <label htmlFor="cep" className={labelClass}>CEP</label>
+              <div className="relative">
+                <input
+                  type="text"
+                  id="cep"
+                  name="cep"
+                  autoComplete="postal-code"
+                  value={cep}
+                  onChange={handleCepChange}
+                  placeholder="00000-000"
+                  className={plainInputClass}
+                />
+                {cepLoading && (
+                  <span className="absolute right-4 top-1/2 -translate-y-1/2 text-sm text-gray-500">
+                    Buscando...
+                  </span>
+                )}
+              </div>
+            </div>
 
-          <div className="flex items-center space-x-2">
-            <input
-              type="radio"
-              id="option3"
-              name="generos"
-              onChange={(e) => {
-                setGender(e.target.value);
-              }}
-              value="Outro"
-              className="form-radio text-deepGreen border-2 border-deepGreen rounded"
-            />
-            <label htmlFor="Outro" className="text-lg text-gray-700">
-              Outro
-            </label>
-          </div>
+            <div className="grid grid-cols-1 sm:grid-cols-[2fr_1fr] gap-5">
+              <div>
+                <label htmlFor="street" className={labelClass}>Rua</label>
+                <input
+                  type="text"
+                  id="street"
+                  name="street"
+                  autoComplete="address-line1"
+                  value={street}
+                  onChange={(e) => setStreet(e.target.value)}
+                  placeholder="Nome da rua"
+                  className={plainInputClass}
+                />
+              </div>
+              <div>
+                <label htmlFor="number" className={labelClass}>Número</label>
+                <input
+                  type="text"
+                  id="number"
+                  name="number"
+                  value={number}
+                  onChange={(e) => setNumber(e.target.value)}
+                  placeholder="Nº"
+                  className={plainInputClass}
+                />
+              </div>
+            </div>
 
-          <div className="flex items-center space-x-2">
-            <input
-              type="radio"
-              id="option3"
-              name="generos"
-              value="Prefiro Não Dizer"
-              onChange={(e) => {
-                setGender(e.target.value);
-              }}
-              className="form-radio text-deepGreen border-2 border-deepGreen rounded"
-            />
-            <label htmlFor="Prefiro não dize" className="text-lg text-gray-700">
-              Prefiro não dizer
-            </label>
-          </div>
-        </div>
+            <div>
+              <label htmlFor="complement" className={labelClass}>Complemento (opcional)</label>
+              <input
+                type="text"
+                id="complement"
+                name="complement"
+                value={complement}
+                onChange={(e) => setComplement(e.target.value)}
+                placeholder="Apto, bloco, etc."
+                className={plainInputClass}
+              />
+            </div>
 
-        <div className="text-start text-lg mt-2 mb-2">
-          <h1 className="text-green-900 text-2xl">
-            Você é portador de alguma deficiência?
-          </h1>
-        </div>
+            <div>
+              <label htmlFor="district" className={labelClass}>Bairro</label>
+              <input
+                type="text"
+                id="district"
+                name="district"
+                value={district}
+                onChange={(e) => setDistrict(e.target.value)}
+                placeholder="Nome do bairro"
+                className={plainInputClass}
+              />
+            </div>
 
-        <div className="space-y-4">
-          <div className="flex items-center space-x-2">
-            <input
-              type="radio"
-              id="option1"
-              name="opcoes"
-              onChange={(e) => {
-                setDisablePerson(e.target.value);
-              }}
-              value="Sim"
-              className="form-radio text-deepGreen border-2 border-deepGreen rounded"
-            />
-            <label htmlFor="Sim" className="text-lg text-gray-700">
-              Sim
-            </label>
-          </div>
-
-          <div className="flex items-center space-x-2">
-            <input
-              type="radio"
-              id="option2"
-              name="opcoes"
-              onChange={(e) => {
-                setDisablePerson(e.target.value);
-              }}
-              value="Não"
-              className="form-radio text-deepGreen border-2 border-deepGreen rounded"
-            />
-            <label htmlFor="Não" className="text-lg text-gray-700">
-              Não
-            </label>
-          </div>
-        </div>
-
-        {/* Seção de Endereço */}
-        <div className="text-start text-lg mt-6 mb-2">
-          <h1 className="text-green-900 text-2xl">Endereço</h1>
-        </div>
-
-        <div className="grid mt-3 mb-3">
-          <label htmlFor="cep" className="text-start text-lg mt-2 mb-2">
-            CEP
-          </label>
-            <input
-              type="text"
-              id="cep"
-              name="cep"
-              value={cep}
-              onChange={handleCepChange}
-              onBlur={(e) => markFilled("cep", e.target.value)}
-              placeholder="00000-000"
-              className={`border-2 border-deepGreen rounded-lg shadow-md p-3 pl-3 text-black transition-colors ${bg("cep")}`}
-            />
-        </div>
-
-        <div className="grid grid-cols-2 gap-4 mt-3 mb-3">
-          <div>
-            <label htmlFor="street" className="text-start text-lg mt-2 mb-2">
-              Rua
-            </label>
-            <input
-              type="text"
-              id="street"
-              name="street"
-              value={street}
-              onChange={(e) => setStreet(e.target.value)}
-              onBlur={(e) => markFilled("street", e.target.value)}
-              placeholder="Nome da rua"
-              className={`border-2 border-deepGreen rounded-lg shadow-md p-3 pl-3 text-black w-full transition-colors ${bg("street")}`}
-            />
-          </div>
-          <div>
-            <label htmlFor="number" className="text-start text-lg mt-2 mb-2">
-              Número
-            </label>
-            <input
-              type="text"
-              id="number"
-              name="number"
-              value={number}
-              onChange={(e) => setNumber(e.target.value)}
-              onBlur={(e) => markFilled("number", e.target.value)}
-              placeholder="Nº"
-              className={`border-2 border-deepGreen rounded-lg shadow-md p-3 pl-3 text-black w-full transition-colors ${bg("number")}`}
-            />
+            <div className="grid grid-cols-1 sm:grid-cols-2 gap-5">
+              <div>
+                <label htmlFor="city" className={labelClass}>Cidade</label>
+                <input
+                  type="text"
+                  id="city"
+                  name="city"
+                  autoComplete="address-level2"
+                  value={city}
+                  onChange={(e) => setCity(e.target.value)}
+                  placeholder="Nome da cidade"
+                  className={plainInputClass}
+                />
+              </div>
+              <div>
+                <label htmlFor="state" className={labelClass}>Estado</label>
+                <input
+                  type="text"
+                  id="state"
+                  name="state"
+                  autoComplete="address-level1"
+                  value={state}
+                  onChange={(e) => setState(e.target.value)}
+                  placeholder="UF"
+                  className={plainInputClass}
+                />
+              </div>
+            </div>
           </div>
         </div>
 
-        <div className="grid mt-3 mb-3">
-          <label htmlFor="complement" className="text-start text-lg mt-2 mb-2">
-            Complemento (opcional)
-          </label>
-          <input
-            type="text"
-            id="complement"
-            name="complement"
-            value={complement}
-            onChange={(e) => setComplement(e.target.value)}
-            onBlur={(e) => markFilled("complement", e.target.value)}
-            placeholder="Apto, bloco, etc."
-            className={`border-2 border-deepGreen rounded-lg shadow-md p-3 pl-3 text-black transition-colors ${bg("complement")}`}
-          />
-        </div>
-
-        <div className="grid mt-3 mb-3">
-          <label htmlFor="district" className="text-start text-lg mt-2 mb-2">
-            Bairro
-          </label>
-          <input
-            type="text"
-            id="district"
-            name="district"
-            value={district}
-            onChange={(e) => setDistrict(e.target.value)}
-            onBlur={(e) => markFilled("district", e.target.value)}
-            placeholder="Nome do bairro"
-            className={`border-2 border-deepGreen rounded-lg shadow-md p-3 pl-3 text-black transition-colors ${bg("district")}`}
-          />
-        </div>
-
-        <div className="grid grid-cols-2 gap-4 mt-3 mb-3">
-          <div>
-            <label htmlFor="city" className="text-start text-lg mt-2 mb-2">
-              Cidade
-            </label>
-            <input
-              type="text"
-              id="city"
-              name="city"
-              value={city}
-              onChange={(e) => setCity(e.target.value)}
-              onBlur={(e) => markFilled("city", e.target.value)}
-              placeholder="Nome da cidade"
-              className={`border-2 border-deepGreen rounded-lg shadow-md p-3 pl-3 text-black w-full transition-colors ${bg("city")}`}
-            />
-          </div>
-          <div>
-            <label htmlFor="state" className="text-start text-lg mt-2 mb-2">
-              Estado
-            </label>
-            <input
-              type="text"
-              id="state"
-              name="state"
-              value={state}
-              onChange={(e) => setState(e.target.value)}
-              onBlur={(e) => markFilled("state", e.target.value)}
-              placeholder="UF"
-              className={`border-2 border-deepGreen rounded-lg shadow-md p-3 pl-3 text-black w-full transition-colors ${bg("state")}`}
-            />
-          </div>
-        </div>
-
-        <div className="grid justify-center">
-          <button
-            onClick={handleSubmit}
-            type="submit"
-            className="w-80 h-14 bg-deepGreen text-lg sm:text-xl text-white px-2 sm:px-4 py-1 sm:py-1 rounded-lg hover:bg-mediumGreen font-SecondFont mt-12 mb-4"
-          >
-            Cadastrar-se
-          </button>
-        </div>
+        {/* Submit Button */}
+        <button
+          type="submit"
+          disabled={submitting}
+          aria-busy={submitting}
+          className="w-full flex items-center justify-center gap-2 bg-deepGreen text-white
+                   py-4 rounded-xl font-semibold text-lg
+                   hover:bg-mediumGreen transition-colors duration-300
+                   disabled:opacity-70 disabled:cursor-not-allowed"
+        >
+          {submitting ? (
+            <>
+              <Loader2 size={20} className="animate-spin" aria-hidden="true" />
+              Cadastrando...
+            </>
+          ) : (
+            <>
+              CADASTRAR-SE
+              <ArrowRight size={20} aria-hidden="true" />
+            </>
+          )}
+        </button>
       </div>
-    </>
+    </form>
   );
 };
 

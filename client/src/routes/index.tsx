@@ -15,6 +15,8 @@ import { RegisterProviderCompany } from "@/components/registerCompany/RegisterCo
 import PageRegisterCompanyOne from "@/pages/registerCompany/register-1";
 import PageRegisterCompanyTwo from "@/pages/registerCompany/register-2";
 import CompanyProfile from "@/pages/companyProfile";
+import EditCompanyProfile from "@/pages/companyProfile/editar";
+import CompanySettings from "@/pages/companyProfile/configuracoes";
 import CompanyVagas from "@/pages/companyVagas";
 import ManagementProcess from "@/pages/managementProcess";
 import Candidates from "@/pages/candidates";
@@ -31,7 +33,7 @@ export default function Router() {
             <Route path="/" element={<HomePage />} />
             <Route path="/home" element={<HomePage />} />
             <Route path="/login" element={<Login />} />
-            <Route path="/pagina-vaga" element={<JobPage />} />
+            <Route path="/pagina-vaga/:id" element={<JobPage />} />
             <Route path="/pesquisa-de-vagas" element={<SearchJobs />} />
             <Route path="/register" element={<RegisterUserOne />} />
             <Route path="/register-2" element={<RegisterUserTwo />} />
@@ -65,6 +67,8 @@ export default function Router() {
               }
             >
               <Route path="/empresa" element={<CompanyProfile />} />
+              <Route path="/empresa/editar" element={<EditCompanyProfile />} />
+              <Route path="/empresa/configuracoes" element={<CompanySettings />} />
               <Route path="/vagas-empresa" element={<CompanyVagas />} />
               <Route
                 path="/gerenciar-processo"

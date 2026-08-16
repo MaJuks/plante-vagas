@@ -1,20 +1,22 @@
 import * as React from "react";
-import { User, Clipboard, AlignJustify, Briefcase, UserCheck, LogOut, Eye, Upload, Search } from "lucide-react";
+import { LogOut, Search } from "lucide-react";
 import { useNavigate } from "react-router-dom";
 
-import { NavMain } from "@/components/ui/nav-main";
+import { NavMain, type NavItem } from "@/components/ui/nav-main";
 import { NavUser } from "@/components/ui/nav-user";
 
 import { Sidebar, SidebarContent, SidebarFooter, SidebarMenu, SidebarMenuButton, SidebarMenuItem, SidebarRail } from "@/components/ui/sidebar";
 import { clearSession } from "@/services/api";
 
 export function AppSidebar({
+  items,
   activeTab,
-  setActiveTab,
+  onSelectTab,
   ...props
 }: {
+  items: NavItem[];
   activeTab: string;
-  setActiveTab: (tab: string) => void;
+  onSelectTab: (value: string) => void;
 } & React.ComponentProps<typeof Sidebar>) {
   const navigate = useNavigate();
 
@@ -22,134 +24,14 @@ export function AppSidebar({
     clearSession();
     navigate("/login");
   };
-  const data = {
-    user: {
-      name: "shadcn",
-      email: "m@example.com",
-      avatar: "/avatars/shadcn.jpg",
-    },
-
-    navMain: [
-      {
-        title: "Perfil",
-        url: "/profile",
-        icon: User,
-        onClick: () => setActiveTab("Perfil"),
-        items: [
-          {
-            title: "Meus Dados",
-            url: "#",
-            onClick: () => setActiveTab("meus-dados"),
-          },
-          {
-            title: "Endereço",
-            url: "#",
-            onClick: () => setActiveTab("endereco"),
-          },
-          {
-            title: "Informações de login",
-            url: "#",
-            onClick: () => setActiveTab("informacoes-login"),
-          },
-        ],
-      },
-      {
-        title: "Curriculo",
-        url: "#",
-        icon: Clipboard,
-        onClick: () => setActiveTab("visualizar-curriculo"),
-        items: [
-          {
-            title: "Visualizar Currículo",
-            url: "#",
-            icon: Eye,
-            onClick: () => setActiveTab("visualizar-curriculo"),
-          },
-          {
-            title: "Importar PDF",
-            url: "#",
-            icon: Upload,
-            onClick: () => setActiveTab("importar-curriculo"),
-          },
-          {
-            title: "Informações Pessoais",
-            url: "#",
-            onClick: () => setActiveTab("informacoes-pessoais"),
-          },
-          {
-            title: "Formação Academica",
-            url: "#",
-            onClick: () => setActiveTab("formacao-academica"),
-          },
-          {
-            title: "Experiência Profissional",
-            url: "#",
-            onClick: () => setActiveTab("experiencia-profissional"),
-          },
-          {
-            title: "Idioma",
-            url: "#",
-            onClick: () => setActiveTab("idioma"),
-          },
-          {
-            title: "Certificados",
-            url: "#",
-            onClick: () => setActiveTab("certificados"),
-          },
-          {
-            title: "Diferenciais",
-            url: "#",
-            onClick: () => setActiveTab("diferenciais"),
-          },
-          {
-            title: "Operações Agrícolas",
-            url: "#",
-            onClick: () => setActiveTab("operacoes-agricolas"),
-          },
-          {
-            title: "Operações Pecuárias",
-            url: "#",
-            onClick: () => setActiveTab("operacoes-pecuarias"),
-          },
-          {
-            title: "Operações Florestais",
-            url: "#",
-            onClick: () => setActiveTab("operacoes-florestais"),
-          },
-          {
-            title: "Culturas",
-            url: "#",
-            onClick: () => setActiveTab("culturas"),
-          },
-          {
-            title: "Máquinas",
-            url: "#",
-            onClick: () => setActiveTab("maquinas"),
-          },
-          {
-            title: "Tecnologias",
-            url: "#",
-            onClick: () => setActiveTab("tecnologias"),
-          },
-        ],
-      },
-      {
-        title: "Processos Seletivos",
-        url: "#",
-        icon: AlignJustify,
-        onClick: () => setActiveTab("processos-seletivos"),
-      },
-    ],
-  };
-
   return (
     <Sidebar
-      className="flex top-20 h-[calc(100svh-5rem)] font-SecondFont"
+      className="flex top-20 h-[calc(100svh-5rem)] font-SecondFont border-r border-gray-100"
       collapsible="icon"
       {...props}
     >
       <SidebarContent>
-        <NavMain items={data.navMain} />
+        {items.length > 0 && <NavMain items={items} activeTab={activeTab} onSelect={onSelectTab} />}
       </SidebarContent>
 
       <SidebarFooter>
@@ -173,60 +55,6 @@ export function AppSidebar({
           </SidebarMenuItem>
         </SidebarMenu>
       </SidebarFooter>
-
-      <SidebarRail />
-    </Sidebar>
-  );
-}
-
-
-export function AppSidebarCreate({
-  activeTab,
-  setActiveTab,
-  ...props
-}: {
-  activeTab: string;
-  setActiveTab: (tab: string) => void;
-} & React.ComponentProps<typeof Sidebar>) {
-  const data = {
-    user: {
-      name: "shadcn",
-      email: "m@example.com",
-      avatar: "/avatars/shadcn.jpg",
-    },
-
-    navMain: [
-      {
-        title: "Dado da vaga",
-        url: "/criar-vaga",
-        icon: Briefcase,
-        onClick: () => setActiveTab("criarVaga"),
-      },
-      {
-        title: "Processo seletivo",
-        url: "#",
-        icon:UserCheck,
-        onClick: () => setActiveTab("processoSeletivo"),
-        items: [
-          {
-            title: "Etapas",
-            url: "#",
-            onClick: () => setActiveTab("etapas"),
-          }
-        ],
-      }
-    ],
-  };
-
-  return (
-    <Sidebar
-      className="flex top-20 h-[calc(100svh-5rem)] font-SecondFont"
-      collapsible="icon"
-      {...props}
-    >
-      <SidebarContent>
-        <NavMain items={data.navMain} />
-      </SidebarContent>
 
       <SidebarRail />
     </Sidebar>

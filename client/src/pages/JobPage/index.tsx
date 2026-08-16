@@ -1,19 +1,37 @@
+import { useEffect, useState } from "react";
+import { useParams, useNavigate } from "react-router-dom";
 import Footer from "@/components/home-page/footer/footer";
 import Header from "@/components/home-page/headers/header";
 import MainJobPage from "@/components/JobPage/mainJobPage/mainJobpage";
-import { Facebook, Instagram, Linkedin, Globe, ArrowLeft, Building2, MapPin, Clock } from "lucide-react";
-import { useNavigate } from "react-router-dom";
-import logoEmpresa from "../../assets/images/empresas.png";
+import { Facebook, Instagram, Linkedin, Globe, ArrowLeft, Building2, Clock, Loader2 } from "lucide-react";
+import { getVagaById, type Vaga } from "@/services/vaga";
+import { timeAgo } from "@/utils/timeAgo";
+
+const socialLinks = [
+  { icon: Facebook, href: "#", label: "Facebook", color: "hover:bg-blue-600" },
+  { icon: Instagram, href: "#", label: "Instagram", color: "hover:bg-pink-600" },
+  { icon: Linkedin, href: "#", label: "LinkedIn", color: "hover:bg-blue-700" },
+  { icon: Globe, href: "#", label: "Website", color: "hover:bg-gray-600" },
+];
 
 const JobPage = () => {
   const navigate = useNavigate();
+  const { id } = useParams<{ id: string }>();
 
-  const socialLinks = [
-    { icon: Facebook, href: "#", label: "Facebook", color: "hover:bg-blue-600" },
-    { icon: Instagram, href: "#", label: "Instagram", color: "hover:bg-pink-600" },
-    { icon: Linkedin, href: "#", label: "LinkedIn", color: "hover:bg-blue-700" },
-    { icon: Globe, href: "#", label: "Website", color: "hover:bg-gray-600" },
-  ];
+  const [vaga, setVaga] = useState<Vaga | null>(null);
+  const [loading, setLoading] = useState(true);
+  const [erro, setErro] = useState<string | null>(null);
+
+  useEffect(() => {
+    if (!id) return;
+    setLoading(true);
+    getVagaById(Number(id))
+      .then(setVaga)
+      .catch((e) => setErro(e.message || "Erro ao buscar vaga"))
+      .finally(() => setLoading(false));
+  }, [id]);
+
+  const nomeEmpresa = vaga?.empresa?.fantasyName || vaga?.empresa?.name;
 
   return (
     <>
@@ -40,63 +58,71 @@ const JobPage = () => {
               Voltar para vagas
             </button>
 
-            {/* Company Card */}
-            <div className="flex flex-col md:flex-row items-center gap-6">
-              <div className="w-28 h-28 bg-white rounded-2xl shadow-lg flex items-center justify-center overflow-hidden">
-                <img
-                  src={logoEmpresa}
-                  alt="Logo da empresa"
-                  className="w-full h-full object-contain p-3"
-                />
-              </div>
-              <div className="text-center md:text-left">
-                <span className="inline-flex items-center gap-2 bg-white/20 text-white px-3 py-1 rounded-full text-xs font-SecondFont mb-3">
-                  <Building2 size={14} />
-                  Agronegócio
-                </span>
-                <h1 className="text-2xl sm:text-3xl md:text-4xl font-bold text-white font-PrimaryFont">
-                  Nome da Empresa
-                </h1>
-                <div className="flex flex-wrap justify-center md:justify-start gap-4 mt-3 text-white/80 font-SecondFont text-sm">
-                  <span className="flex items-center gap-2">
-                    <MapPin size={16} />
-                    Cascavel - PR
+            {vaga && (
+              <div className="flex flex-col md:flex-row items-center gap-6">
+                <div className="w-28 h-28 bg-white rounded-2xl shadow-lg flex items-center justify-center overflow-hidden">
+                  <Building2 size={48} className="text-gray-300" />
+                </div>
+                <div className="text-center md:text-left">
+                  <span className="inline-flex items-center gap-2 bg-white/20 text-white px-3 py-1 rounded-full text-xs font-SecondFont mb-3">
+                    <Building2 size={14} />
+                    Agronegócio
                   </span>
-                  <span className="flex items-center gap-2">
-                    <Clock size={16} />
-                    Postada há 2 horas
-                  </span>
+                  <h1 className="text-2xl sm:text-3xl md:text-4xl font-bold text-white font-PrimaryFont">
+                    {nomeEmpresa || vaga.nome}
+                  </h1>
+                  <div className="flex flex-wrap justify-center md:justify-start gap-4 mt-3 text-white/80 font-SecondFont text-sm">
+                    <span className="flex items-center gap-2">
+                      <Clock size={16} />
+                      Postada há {timeAgo(vaga.createdAt)}
+                    </span>
+                  </div>
                 </div>
               </div>
-            </div>
+            )}
           </div>
         </div>
 
         {/* Main Content */}
         <div className="max-w-6xl mx-auto px-4 sm:px-6 py-8 sm:py-12">
-          <MainJobPage />
-
-          {/* Social Links Section */}
-          <div className="mt-12 pt-8 border-t border-gray-200">
-            <h3 className="text-xl font-bold text-deepGreen font-PrimaryFont mb-6">
-              Redes Sociais da Empresa
-            </h3>
-            <div className="flex flex-wrap gap-3">
-              {socialLinks.map((social) => (
-                <a
-                  key={social.label}
-                  href={social.href}
-                  aria-label={social.label}
-                  className={`flex items-center gap-2 bg-gray-100 text-gray-700 px-4 py-3 rounded-xl
-                           font-SecondFont font-medium transition-all duration-300
-                           hover:text-white hover:shadow-lg ${social.color}`}
-                >
-                  <social.icon size={20} />
-                  <span>{social.label}</span>
-                </a>
-              ))}
+          {loading && (
+            <div className="flex flex-col items-center justify-center py-20 text-gray-500 font-SecondFont">
+              <Loader2 size={32} className="animate-spin text-mediumGreen mb-3" />
+              Carregando vaga...
             </div>
-          </div>
+          )}
+
+          {!loading && erro && (
+            <div className="text-center py-20 text-red-600 font-SecondFont">{erro}</div>
+          )}
+
+          {!loading && !erro && vaga && (
+            <>
+              <MainJobPage vaga={vaga} />
+
+              {/* Social Links Section */}
+              <div className="mt-12 pt-8 border-t border-gray-200">
+                <h3 className="text-xl font-bold text-deepGreen font-PrimaryFont mb-6">
+                  Redes Sociais da Empresa
+                </h3>
+                <div className="flex flex-wrap gap-3">
+                  {socialLinks.map((social) => (
+                    <a
+                      key={social.label}
+                      href={social.href}
+                      aria-label={social.label}
+                      className={`flex items-center gap-2 bg-gray-100 text-gray-700 px-4 py-3 rounded-xl
+                               font-SecondFont font-medium transition-all duration-300
+                               hover:text-white hover:shadow-lg ${social.color}`}
+                    >
+                      <social.icon size={20} />
+                      <span>{social.label}</span>
+                    </a>
+                  ))}
+                </div>
+              </div>
+            </>
+          )}
         </div>
       </main>
 

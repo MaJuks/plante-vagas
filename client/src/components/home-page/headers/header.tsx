@@ -83,12 +83,11 @@ export default function Header() {
         <div className="hidden lg:flex items-center space-x-3">
           <button
             onClick={handleLoginClick}
-            className="group flex items-center space-x-2 bg-deepGreen text-white px-5 py-2.5 rounded-full
+            className="flex items-center space-x-2 border border-deepGreen text-deepGreen px-5 py-2.5 rounded-full
                        font-SecondFont font-medium text-sm tracking-wide
-                       hover:bg-mediumGreen transition-all duration-300
-                       hover:shadow-lg hover:shadow-deepGreen/20 hover:scale-105"
+                       hover:bg-deepGreen hover:text-white transition-colors duration-300"
           >
-            <User size={18} className="transition-transform group-hover:scale-110" />
+            <User size={16} />
             <span>{token ? "MEU PERFIL" : "ENTRAR"}</span>
           </button>
         </div>
@@ -139,7 +138,7 @@ export default function Header() {
               }}
               className="w-full flex items-center justify-center space-x-2 bg-deepGreen text-white
                          px-5 py-3 rounded-full font-SecondFont font-medium
-                         hover:bg-mediumGreen transition-all duration-300"
+                         hover:bg-mediumGreen transition-colors duration-300"
             >
               <User size={18} />
               <span>{token ? "MEU PERFIL" : "ENTRAR"}</span>

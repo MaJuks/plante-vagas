@@ -1,15 +1,19 @@
 import { useState } from "react";
 import { useNavigate } from "react-router";
+import { Loader2, Users, Lock } from "lucide-react";
+import { toast } from "sonner";
 import { EtapaProcessoSeletivo, deleteEtapa, updateEtapaService } from "@/services/vaga";
+import { ConfirmDialog } from "@/components/ui/confirm-dialog";
 
 type EtapaProps = {
   etapa: EtapaProcessoSeletivo;
+  vagaId: number;
   index: number;
   onExcluir: (id: number) => void;
   onAtualizar: (etapa: EtapaProcessoSeletivo) => void;
 };
 
-const Etapa = ({ etapa, index, onExcluir, onAtualizar }: EtapaProps) => {
+const Etapa = ({ etapa, vagaId, index, onExcluir, onAtualizar }: EtapaProps) => {
   const navigate = useNavigate();
   const [editando, setEditando] = useState(false);
   const [nome, setNome] = useState(etapa.nome);
@@ -17,6 +21,22 @@ const Etapa = ({ etapa, index, onExcluir, onAtualizar }: EtapaProps) => {
   const [salvando, setSalvando] = useState(false);
   const [excluindo, setExcluindo] = useState(false);
   const [erro, setErro] = useState("");
+  const [confirmFechar, setConfirmFechar] = useState(false);
+
+  const fechada = etapa.status !== "aberta";
+
+  const handleFecharEtapa = () => {
+    setConfirmFechar(false);
+    toast.info("Ainda não é possível fechar etapas de verdade", {
+      description:
+        "Falta um campo de status editável no backend e a integração com WhatsApp pra notificar os candidatos que não avançaram (ver pendencias.txt, item 9).",
+      duration: 6000,
+    });
+  };
+
+  const inputClass =
+    "w-full px-4 py-3 bg-gray-50 border border-gray-200 rounded-xl text-gray-800 focus:outline-none focus:ring-2 focus:ring-mediumGreen focus:border-transparent transition-all duration-300";
+  const labelClass = "block text-sm font-medium text-gray-700 mb-2";
 
   const handleSalvar = async () => {
     if (!nome.trim()) {
@@ -48,44 +68,46 @@ const Etapa = ({ etapa, index, onExcluir, onAtualizar }: EtapaProps) => {
 
   if (editando) {
     return (
-      <div className="bg-white py-10 px-4 sm:px-6 md:px-10 lg:px-20 xl:px-40 font-SecondFont w-full max-w-[1200px] mx-auto">
-        <h2 className="text-xl font-semibold mb-6">Editar etapa {index}</h2>
+      <div className="bg-white rounded-2xl shadow-sm border border-gray-100 p-6 sm:p-8 font-SecondFont">
+        <h2 className="text-lg font-bold text-deepGreen font-PrimaryFont mb-6">Editar etapa {index}</h2>
 
-        <div className="flex flex-col gap-4">
-          <div className="flex flex-col">
-            <label>Nome da etapa</label>
+        <div className="flex flex-col gap-5">
+          <div>
+            <label className={labelClass}>Nome da etapa</label>
             <input
               type="text"
               value={nome}
               onChange={(e) => setNome(e.target.value)}
-              className="border-1 rounded-sm mt-1 p-1 pl-4 bg-gray-50 shadow-sm"
+              className={inputClass}
             />
           </div>
 
-          <div className="flex flex-col">
-            <label>Descrição da etapa</label>
+          <div>
+            <label className={labelClass}>Descrição da etapa</label>
             <textarea
               value={descricao}
               onChange={(e) => setDescricao(e.target.value)}
-              className="border-1 rounded-sm mt-1 p-2 pl-4 bg-gray-50 shadow-sm h-36 resize-none"
+              rows={4}
+              className={`${inputClass} resize-none`}
             />
           </div>
 
           {erro && <p className="text-red-500 text-sm">{erro}</p>}
 
-          <div className="flex justify-end gap-4 mt-2">
+          <div className="flex justify-end gap-3">
             <button
               onClick={() => { setEditando(false); setNome(etapa.nome); setDescricao(etapa.descricao); setErro(""); }}
-              className="px-6 py-2 rounded-lg border border-gray-400 text-gray-600 hover:bg-gray-100 font-PrimaryFont"
+              className="px-6 py-2.5 rounded-xl border border-gray-200 text-gray-600 hover:bg-gray-50 transition-colors duration-200 font-SecondFont font-medium"
             >
               Cancelar
             </button>
             <button
               onClick={handleSalvar}
               disabled={salvando}
-              className="bg-deepGreen text-white px-6 py-2 rounded-lg hover:bg-green-900 font-PrimaryFont font-semibold disabled:opacity-60"
+              className="flex items-center gap-2 bg-deepGreen text-white px-6 py-2.5 rounded-xl hover:bg-mediumGreen transition-colors duration-200 font-SecondFont font-semibold disabled:opacity-60"
             >
-              {salvando ? "Salvando..." : "Salvar Alterações"}
+              {salvando && <Loader2 size={16} className="animate-spin" aria-hidden="true" />}
+              {salvando ? "Salvando..." : "Salvar alterações"}
             </button>
           </div>
         </div>
@@ -94,43 +116,64 @@ const Etapa = ({ etapa, index, onExcluir, onAtualizar }: EtapaProps) => {
   }
 
   return (
-    <div className="bg-white py-10 px-4 sm:px-6 md:px-10 lg:px-20 xl:px-40 font-SecondFont w-full max-w-[1200px] mx-auto">
-      <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-6">
-        <h1 className="text-xl break-words">{etapa.nome}</h1>
+    <div className="bg-white rounded-2xl shadow-sm border border-gray-100 p-6 sm:p-8 font-SecondFont">
+      <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4">
+        <h2 className="text-lg font-bold text-deepGreen font-PrimaryFont break-words">{etapa.nome}</h2>
 
-        <div className="flex gap-2 sm:gap-4 -translate-y-8 sm:translate-y-0">
-          <span className="bg-MediumGray p-2 rounded">{index}</span>
-          <span className="bg-lightBrown p-2 rounded text-sm">{etapa.status}</span>
+        <div className="flex gap-2 flex-shrink-0">
+          <span className="bg-gray-100 text-gray-600 text-sm px-3 py-1 rounded-full">{index}</span>
+          <span className="bg-paleGreen/50 text-deepGreen text-sm px-3 py-1 rounded-full capitalize">{etapa.status}</span>
         </div>
       </div>
 
-      <hr className="my-4" />
+      {etapa.descricao && (
+        <p className="text-gray-600 text-sm leading-relaxed mt-4 break-words">{etapa.descricao}</p>
+      )}
 
-      <p className="p-4 sm:p-6 md:p-10 break-words">{etapa.descricao}</p>
-
-      <div className="flex flex-col sm:flex-row gap-4 justify-end w-full">
+      <div className="flex flex-col sm:flex-row gap-3 justify-end mt-6">
         <button
-          onClick={() => navigate("/candidatos")}
-          className="bg-deepGreen text-sm text-white px-4 py-2 rounded-lg cursor-pointer hover:bg-green-900 font-PrimaryFont w-full sm:w-auto"
+          onClick={() => navigate(`/candidatos?vagaId=${vagaId}&etapaId=${etapa.id}`)}
+          className="flex items-center justify-center gap-2 bg-deepGreen text-sm text-white px-5 py-2.5 rounded-xl hover:bg-mediumGreen transition-colors duration-200 font-SecondFont font-semibold"
         >
-          ANALISAR RESPOSTAS
+          <Users size={16} aria-hidden="true" />
+          Ver candidatos
         </button>
 
         <button
           onClick={() => setEditando(true)}
-          className="bg-oliveGreen text-sm text-deepGreen px-4 py-2 rounded-lg cursor-pointer hover:bg-yellow-200 font-PrimaryFont w-full sm:w-auto"
+          className="text-sm text-gray-700 px-5 py-2.5 rounded-xl border border-gray-200 hover:border-deepGreen hover:text-deepGreen transition-colors duration-200 font-SecondFont font-medium"
         >
-          EDITAR ETAPA
+          Editar etapa
+        </button>
+
+        <button
+          onClick={() => setConfirmFechar(true)}
+          disabled={fechada}
+          className="flex items-center justify-center gap-2 text-sm text-amber-700 px-5 py-2.5 rounded-xl border border-amber-200 hover:bg-amber-50 transition-colors duration-200 font-SecondFont font-medium disabled:opacity-60 disabled:hover:bg-transparent"
+        >
+          <Lock size={16} aria-hidden="true" />
+          {fechada ? "Etapa fechada" : "Fechar etapa"}
         </button>
 
         <button
           onClick={handleExcluir}
           disabled={excluindo}
-          className="bg-red-900 text-sm text-white px-4 py-2 rounded-lg cursor-pointer hover:bg-red-950 font-PrimaryFont w-full sm:w-auto disabled:opacity-60"
+          className="flex items-center justify-center gap-2 text-sm text-red-600 px-5 py-2.5 rounded-xl border border-red-200 hover:bg-red-50 transition-colors duration-200 font-SecondFont font-medium disabled:opacity-60"
         >
-          {excluindo ? "EXCLUINDO..." : "EXCLUIR ETAPA"}
+          {excluindo && <Loader2 size={16} className="animate-spin" aria-hidden="true" />}
+          {excluindo ? "Excluindo..." : "Excluir etapa"}
         </button>
       </div>
+
+      <ConfirmDialog
+        open={confirmFechar}
+        onOpenChange={setConfirmFechar}
+        title="Fechar esta etapa?"
+        description={`Ao fechar "${etapa.nome}", todos os candidatos que não avançaram vão receber uma notificação automática via WhatsApp avisando que não foram selecionados. Essa ação não pode ser desfeita.`}
+        onConfirm={handleFecharEtapa}
+        confirmLabel="Fechar etapa"
+        confirmClassName="bg-amber-600 hover:bg-amber-700 text-white"
+      />
     </div>
   );
 };

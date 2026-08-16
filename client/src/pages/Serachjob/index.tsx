@@ -1,57 +1,22 @@
+import { useEffect, useState } from "react";
 import Footer from "@/components/home-page/footer/footer";
 import Header from "@/components/home-page/headers/header";
 import FilterBar from "@/components/searchJob/filterBar/filterBar";
 import Vagas from "@/components/searchJob/jobs/vagas";
-import { Briefcase, ChevronDown } from "lucide-react";
+import { getAllVagas, type Vaga } from "@/services/vaga";
+import { Briefcase, Loader2 } from "lucide-react";
 
 const SearchJobs = () => {
-  // Mock data - em produção viria da API
-  const vagasData = [
-    {
-      name: "AUXILIAR COMERCIAL",
-      cidade: "Cascavel - PR",
-      postada: "2",
-      pcd: true,
-      regime: "Presencial",
-      contratacao: "CLT",
-      salario: "R$ 2.500",
-      descricao: "Buscamos um(a) Auxiliar Comercial para atuar no setor de agronegócio, prestando suporte às atividades de vendas e atendimento ao cliente.",
-      imagem: null,
-    },
-    {
-      name: "ENGENHEIRO AGRÔNOMO",
-      cidade: "Toledo - PR",
-      postada: "5",
-      pcd: false,
-      regime: "Híbrido",
-      contratacao: "CLT",
-      salario: "R$ 8.000",
-      descricao: "Responsável pelo planejamento e acompanhamento de lavouras, análise de solo, recomendação de insumos e orientação técnica aos produtores.",
-      imagem: null,
-    },
-    {
-      name: "TÉCNICO AGRÍCOLA",
-      cidade: "Maringá - PR",
-      postada: "12",
-      pcd: false,
-      regime: "Presencial",
-      contratacao: "CLT",
-      salario: "R$ 3.500",
-      descricao: "Atuação em campo com acompanhamento de culturas, coleta de amostras, monitoramento de pragas e doenças, e suporte técnico aos agricultores.",
-      imagem: null,
-    },
-    {
-      name: "OPERADOR DE MÁQUINAS AGRÍCOLAS",
-      cidade: "Palotina - PR",
-      postada: "24",
-      pcd: false,
-      regime: "Presencial",
-      contratacao: "CLT",
-      salario: "R$ 4.200",
-      descricao: "Operação de tratores, colheitadeiras e implementos agrícolas. Experiência com agricultura de precisão será um diferencial.",
-      imagem: null,
-    },
-  ];
+  const [vagas, setVagas] = useState<Vaga[]>([]);
+  const [loading, setLoading] = useState(true);
+  const [erro, setErro] = useState<string | null>(null);
+
+  useEffect(() => {
+    getAllVagas()
+      .then(setVagas)
+      .catch((e) => setErro(e.message || "Erro ao buscar vagas"))
+      .finally(() => setLoading(false));
+  }, []);
 
   return (
     <>
@@ -63,7 +28,7 @@ const SearchJobs = () => {
           <div className="max-w-6xl mx-auto px-4 sm:px-6 text-center">
             <div className="inline-flex items-center gap-2 bg-white/20 text-white px-4 py-2 rounded-full text-sm font-SecondFont font-medium mb-4">
               <Briefcase size={16} />
-              {vagasData.length} vagas encontradas
+              {vagas.length} vaga{vagas.length !== 1 ? "s" : ""} encontrada{vagas.length !== 1 ? "s" : ""}
             </div>
             <h1 className="text-3xl sm:text-4xl md:text-5xl font-bold text-white font-PrimaryFont mb-4">
               Encontre sua vaga ideal
@@ -87,7 +52,7 @@ const SearchJobs = () => {
                   Vagas disponíveis
                 </h2>
                 <p className="text-gray-600 font-SecondFont mt-1">
-                  Mostrando {vagasData.length} resultados
+                  Mostrando {vagas.length} resultados
                 </p>
               </div>
               <div className="flex items-center gap-2">
@@ -97,41 +62,48 @@ const SearchJobs = () => {
                   <option>Mais recentes</option>
                   <option>Maior salário</option>
                   <option>Menor salário</option>
-                  <option>Mais relevantes</option>
                 </select>
               </div>
             </div>
 
-            {/* Jobs List */}
-            <div className="space-y-6">
-              {vagasData.map((vaga, index) => (
-                <Vagas
-                  key={index}
-                  name={vaga.name}
-                  cidade={vaga.cidade}
-                  postada={vaga.postada}
-                  pcd={vaga.pcd}
-                  regime={vaga.regime}
-                  contratacao={vaga.contratacao}
-                  salario={vaga.salario}
-                  descricao={vaga.descricao}
-                  imagem={vaga.imagem}
-                />
-              ))}
-            </div>
+            {/* Loading State */}
+            {loading && (
+              <div className="flex flex-col items-center justify-center py-20 text-gray-500 font-SecondFont">
+                <Loader2 size={32} className="animate-spin text-mediumGreen mb-3" />
+                Carregando vagas...
+              </div>
+            )}
 
-            {/* Load More Button */}
-            <div className="flex justify-center mt-12">
-              <button
-                className="group flex items-center gap-3 bg-white border-2 border-deepGreen text-deepGreen
-                         px-8 py-4 rounded-xl font-SecondFont font-semibold
-                         hover:bg-deepGreen hover:text-white transition-all duration-300
-                         hover:shadow-lg"
-              >
-                <span>VER MAIS VAGAS</span>
-                <ChevronDown size={20} className="transition-transform group-hover:translate-y-1" />
-              </button>
-            </div>
+            {/* Error State */}
+            {!loading && erro && (
+              <div className="text-center py-20 text-red-600 font-SecondFont">{erro}</div>
+            )}
+
+            {/* Empty State */}
+            {!loading && !erro && vagas.length === 0 && (
+              <div className="text-center py-20 text-gray-500 font-SecondFont">
+                Nenhuma vaga disponível no momento.
+              </div>
+            )}
+
+            {/* Jobs List */}
+            {!loading && !erro && vagas.length > 0 && (
+              <div className="space-y-6">
+                {vagas.map((vaga) => (
+                  <Vagas
+                    key={vaga.id}
+                    id={vaga.id}
+                    nome={vaga.nome}
+                    cargo={vaga.cargo}
+                    salario={vaga.salario}
+                    descricao={vaga.descricao}
+                    beneficios={vaga.beneficios}
+                    empresa={vaga.empresa}
+                    createdAt={vaga.createdAt}
+                  />
+                ))}
+              </div>
+            )}
           </div>
         </section>
       </main>

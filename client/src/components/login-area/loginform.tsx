@@ -66,15 +66,12 @@ const LoginForm = () => {
                border border-white/50 font-SecondFont text-gray-800"
     >
       <div className="text-center mb-8">
-        <div className="w-16 h-16 bg-paleGreen rounded-2xl flex items-center justify-center mx-auto mb-4">
-          <LogIn size={28} className="text-deepGreen" />
-        </div>
         <h2 className="text-2xl font-bold text-deepGreen font-PrimaryFont">Bem-vindo de volta</h2>
         <p className="text-gray-600 mt-2">Entre com suas credenciais</p>
       </div>
 
       {error && (
-        <div className="bg-red-50 border border-red-200 text-red-600 px-4 py-3 rounded-xl mb-6 text-center text-sm">
+        <div role="alert" className="bg-red-50 border border-red-200 text-red-600 px-4 py-3 rounded-xl mb-6 text-center text-sm">
           {error}
         </div>
       )}
@@ -87,12 +84,13 @@ const LoginForm = () => {
           </label>
           <div className="relative">
             <div className="absolute left-4 top-1/2 -translate-y-1/2 text-gray-400">
-              <Mail size={20} />
+              <Mail size={20} aria-hidden="true" />
             </div>
             <input
               type="email"
               id="email"
               name="email"
+              autoComplete="email"
               placeholder="seu@email.com"
               className="w-full pl-12 pr-4 py-4 bg-gray-50 border border-gray-200 rounded-xl
                        text-gray-800 placeholder-gray-400
@@ -112,12 +110,13 @@ const LoginForm = () => {
           </label>
           <div className="relative">
             <div className="absolute left-4 top-1/2 -translate-y-1/2 text-gray-400">
-              <Lock size={20} />
+              <Lock size={20} aria-hidden="true" />
             </div>
             <input
               type={showPassword ? "text" : "password"}
               id="password"
               name="password"
+              autoComplete="current-password"
               placeholder="Sua senha"
               className="w-full pl-12 pr-12 py-4 bg-gray-50 border border-gray-200 rounded-xl
                        text-gray-800 placeholder-gray-400
@@ -132,8 +131,10 @@ const LoginForm = () => {
               onClick={() => setShowPassword(!showPassword)}
               className="absolute right-4 top-1/2 -translate-y-1/2 text-gray-400 hover:text-gray-600
                        transition-colors duration-200"
+              aria-label={showPassword ? "Ocultar senha" : "Mostrar senha"}
+              aria-pressed={showPassword}
             >
-              {showPassword ? <EyeOff size={20} /> : <Eye size={20} />}
+              {showPassword ? <EyeOff size={20} aria-hidden="true" /> : <Eye size={20} aria-hidden="true" />}
             </button>
           </div>
         </div>
@@ -152,20 +153,20 @@ const LoginForm = () => {
         <button
           type="submit"
           disabled={isLoading}
+          aria-busy={isLoading}
           className="w-full flex items-center justify-center gap-2 bg-deepGreen text-white
                    py-4 rounded-xl font-semibold text-lg
-                   hover:bg-mediumGreen transition-all duration-300
-                   hover:shadow-lg hover:shadow-deepGreen/30
+                   hover:bg-mediumGreen transition-colors duration-300
                    disabled:opacity-70 disabled:cursor-not-allowed"
         >
           {isLoading ? (
             <>
-              <Loader2 size={20} className="animate-spin" />
+              <Loader2 size={20} className="animate-spin" aria-hidden="true" />
               Entrando...
             </>
           ) : (
             <>
-              <LogIn size={20} />
+              <LogIn size={20} aria-hidden="true" />
               ENTRAR
             </>
           )}

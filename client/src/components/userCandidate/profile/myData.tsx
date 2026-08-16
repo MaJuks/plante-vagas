@@ -5,16 +5,17 @@ import { useNavigate } from "react-router-dom";
 import { toast } from "sonner";
 import { deleteUser, updateUser } from "../../../services/users";
 import { ConfirmDialog } from "@/components/ui/confirm-dialog";
-import { Lock, PencilLine } from "lucide-react";
+import { Lock, Info } from "lucide-react";
 
-const inputBase = "w-full border rounded-sm mt-1 p-1 pl-4 transition-all duration-200";
+const inputBase = "w-full px-4 py-3 rounded-xl border transition-all duration-200";
 const inputLocked = `${inputBase} bg-gray-100 text-gray-400 cursor-not-allowed border-gray-200`;
-const inputEditable = `${inputBase} bg-white text-gray-800 border-2 border-green-500 focus:outline-none focus:ring-2 focus:ring-green-200`;
+const inputEditable = `${inputBase} bg-white text-gray-800 border-gray-200 focus:outline-none focus:ring-2 focus:ring-mediumGreen focus:border-transparent`;
+const labelClass = "block text-sm font-medium text-gray-700 mb-2";
 
 function LockedLabel() {
   return (
     <span className="flex items-center gap-1 text-xs text-gray-400 ml-1">
-      <Lock className="w-3 h-3" /> Não editável
+      <Lock className="w-3 h-3" aria-hidden="true" /> Não editável
     </span>
   );
 }
@@ -72,158 +73,132 @@ export default function MyData() {
 
   return (
     <>
-      <div className="flex flex-col p-8 md:p-36 lg:p-40 w-full bg-MediumGray max-w-6xl mx-auto font-SecondFont">
-        <SubHeader
-          isEditing={isEditing}
-          isSaving={isSaving}
-          onEdit={handleEdit}
-          onSave={handleSave}
-          onCancel={handleCancel}
-        />
+      <div className="min-h-screen bg-gray-50 py-8 sm:py-12 px-4 sm:px-8">
+        <div className="max-w-3xl mx-auto bg-white p-8 sm:p-10 rounded-2xl shadow-sm border border-gray-100 font-SecondFont">
+          <SubHeader
+            title="Meus dados"
+            subtitle="Suas informações pessoais cadastradas"
+            isEditing={isEditing}
+            isSaving={isSaving}
+            onEdit={handleEdit}
+            onSave={handleSave}
+            onCancel={handleCancel}
+          />
 
-        {!isEditing && (
-          <div className="flex items-center gap-2 text-sm text-gray-500 bg-gray-50 border border-gray-200 rounded-md px-3 py-2 mb-4">
-            <PencilLine className="w-4 h-4 shrink-0" />
-            Clique em <strong>Editar</strong> para modificar telefone e portador de deficiência.
+          <div className="flex items-start gap-2 text-sm bg-paleGreen/20 border border-paleGreen rounded-xl px-4 py-3 mb-6">
+            <Info size={16} className="text-deepGreen flex-shrink-0 mt-0.5" aria-hidden="true" />
+            <p className="text-gray-700">
+              {isEditing
+                ? "Modo edição ativo. Só telefone e portador de deficiência podem ser alterados."
+                : "Clique em Editar para atualizar telefone e portador de deficiência."}
+            </p>
           </div>
-        )}
 
-        {isEditing && (
-          <div className="flex items-center gap-2 text-sm text-green-700 bg-green-50 border border-green-200 rounded-md px-3 py-2 mb-4">
-            <PencilLine className="w-4 h-4 shrink-0" />
-            Modo edição ativo. Campos com borda verde podem ser alterados.
-          </div>
-        )}
-
-        {/* Nome */}
-        <div className="flex flex-col md:flex-row my-4 md:my-6 text-DeepGray gap-4">
-          <div className="flex flex-col w-full">
+          {/* Nome */}
+          <div className="mb-5">
             <div className="flex items-center gap-1">
-              <label>Nome completo</label>
+              <label className={labelClass}>Nome completo</label>
               {isEditing && <LockedLabel />}
             </div>
-            <input
-              type="text"
-              disabled
-              value={user.name}
-              className={inputLocked}
-            />
-          </div>
-        </div>
-
-        {/* Data e Gênero */}
-        <div className="flex flex-col md:flex-row my-4 md:my-6 text-DeepGray gap-4">
-          <div className="flex flex-col w-full md:w-1/3">
-            <div className="flex items-center gap-1">
-              <label>Data de Nascimento</label>
-              {isEditing && <LockedLabel />}
-            </div>
-            <input
-              type="date"
-              disabled
-              value={dateFormatted}
-              className={inputLocked}
-            />
+            <input type="text" disabled value={user.name} className={inputLocked} />
           </div>
 
-          <div className="flex flex-col w-full md:w-2/3">
-            <div className="flex items-center gap-1">
-              <label>Gênero</label>
-              {isEditing && <LockedLabel />}
+          {/* Data e Gênero */}
+          <div className="grid grid-cols-1 sm:grid-cols-2 gap-5 mb-5">
+            <div>
+              <div className="flex items-center gap-1">
+                <label className={labelClass}>Data de nascimento</label>
+                {isEditing && <LockedLabel />}
+              </div>
+              <input type="date" disabled value={dateFormatted} className={inputLocked} />
             </div>
-            <div className={`flex flex-wrap gap-4 mt-1 p-2 rounded-sm ${isEditing ? "opacity-50 pointer-events-none" : ""}`}>
-              {["feminino", "masculino", "outro", "prefiroNaoDizer"].map((g) => (
-                <div key={g} className="flex items-center gap-2">
+
+            <div>
+              <div className="flex items-center gap-1">
+                <label className={labelClass}>Gênero</label>
+                {isEditing && <LockedLabel />}
+              </div>
+              <div className={`flex flex-wrap gap-4 py-3 ${isEditing ? "opacity-50 pointer-events-none" : ""}`}>
+                {["Mulher", "Homem", "Outro", "Prefiro Não Dizer"].map((g) => (
+                  <div key={g} className="flex items-center gap-2">
+                    <input type="radio" id={g} name="gender" value={g} checked={user.gender === g} readOnly />
+                    <label htmlFor={g} className="text-sm text-gray-700">
+                      {g === "Prefiro Não Dizer" ? "Prefiro não dizer" : g}
+                    </label>
+                  </div>
+                ))}
+              </div>
+            </div>
+          </div>
+
+          <hr className="border-gray-100 my-6" />
+
+          {/* Portador de deficiência */}
+          <div className="mb-6">
+            <h2 className="text-lg font-bold text-deepGreen font-PrimaryFont">Portador de deficiência</h2>
+            <p className="text-gray-500 text-sm mt-1 mb-3">
+              Gostaria de se candidatar às vagas como portador de deficiência?
+            </p>
+            <div className="flex gap-3">
+              {["Sim", "Não"].map((v) => (
+                <label
+                  key={v}
+                  htmlFor={`disable-${v}`}
+                  className={`flex items-center gap-2 cursor-pointer select-none px-4 py-2.5 rounded-xl border transition-colors duration-200 ${
+                    (isEditing ? formData.disablePerson : user.disablePerson) === v
+                      ? isEditing
+                        ? "border-mediumGreen bg-paleGreen/40 text-deepGreen font-medium"
+                        : "border-gray-300 bg-gray-100 text-gray-600"
+                      : "border-gray-200 text-gray-500"
+                  } ${!isEditing ? "pointer-events-none" : ""}`}
+                >
                   <input
                     type="radio"
-                    id={g}
-                    name="gender"
-                    value={g}
-                    checked={user.gender === g}
-                    readOnly
+                    id={`disable-${v}`}
+                    name="disablePerson"
+                    value={v}
+                    checked={(isEditing ? formData.disablePerson : user.disablePerson) === v}
+                    onChange={() => isEditing && setFormData((f) => ({ ...f, disablePerson: v }))}
+                    readOnly={!isEditing}
                   />
-                  <label htmlFor={g}>
-                    {{ feminino: "Feminino", masculino: "Masculino", outro: "Outro", prefiroNaoDizer: "Prefiro não dizer" }[g]}
-                  </label>
-                </div>
+                  {v}
+                </label>
               ))}
             </div>
           </div>
-        </div>
 
-        <hr className="my-4" />
-
-        {/* Portador de deficiência */}
-        <div className="flex flex-col my-4">
-          <h1 className="text-lg md:text-xl">Portador de deficiência:</h1>
-          <p className="text-gray-500 text-sm mt-1">
-            Gostaria de se candidatar às vagas como portador de deficiência?
-          </p>
-          <div className={`flex gap-4 md:gap-8 mt-2 ${isEditing ? "text-gray-800" : "text-gray-400"}`}>
-            {["yes", "no"].map((v) => (
-              <label
-                key={v}
-                htmlFor={`disable-${v}`}
-                className={`flex items-center gap-2 cursor-pointer select-none px-4 py-2 rounded-md border transition-all duration-150 ${
-                  (isEditing ? formData.disablePerson : user.disablePerson) === v
-                    ? isEditing
-                      ? "border-green-500 bg-green-50 text-green-800 font-medium"
-                      : "border-gray-300 bg-gray-100 text-gray-600"
-                    : "border-transparent"
-                } ${!isEditing ? "pointer-events-none" : ""}`}
-              >
-                <input
-                  type="radio"
-                  id={`disable-${v}`}
-                  name="disablePerson"
-                  value={v}
-                  className="accent-green-600"
-                  checked={(isEditing ? formData.disablePerson : user.disablePerson) === v}
-                  onChange={() => isEditing && setFormData((f) => ({ ...f, disablePerson: v }))}
-                  readOnly={!isEditing}
-                />
-                {v === "yes" ? "Sim" : "Não"}
-              </label>
-            ))}
-          </div>
-        </div>
-
-        {/* Telefone e Email */}
-        <h1 className="text-lg md:text-xl mt-6 mb-2">Informações Pessoais:</h1>
-        <div className="flex flex-col md:flex-row gap-4">
-          <div className="flex flex-col w-full md:w-1/2 text-DeepGray">
-            <label>Telefone</label>
-            <input
-              type="text"
-              value={isEditing ? formData.phone : user.phone}
-              disabled={!isEditing}
-              onChange={(e) => setFormData((f) => ({ ...f, phone: e.target.value }))}
-              className={isEditing ? inputEditable : inputLocked}
-              placeholder={isEditing ? "Digite o telefone" : ""}
-            />
-          </div>
-
-          <div className="flex flex-col w-full md:w-1/2 text-DeepGray">
-            <div className="flex items-center gap-1">
-              <label>Email</label>
-              {isEditing && <LockedLabel />}
+          {/* Telefone e Email */}
+          <h2 className="text-lg font-bold text-deepGreen font-PrimaryFont mb-4">Informações pessoais</h2>
+          <div className="grid grid-cols-1 sm:grid-cols-2 gap-5">
+            <div>
+              <label className={labelClass}>Telefone</label>
+              <input
+                type="text"
+                value={isEditing ? formData.phone : user.phone}
+                disabled={!isEditing}
+                onChange={(e) => setFormData((f) => ({ ...f, phone: e.target.value }))}
+                className={isEditing ? inputEditable : inputLocked}
+                placeholder={isEditing ? "Digite o telefone" : ""}
+              />
             </div>
-            <input
-              type="text"
-              disabled
-              value={user.email}
-              className={inputLocked}
-            />
-          </div>
-        </div>
 
-        <div className="mt-10">
-          <button
-            onClick={() => setConfirmDeleteOpen(true)}
-            className="px-6 py-2 bg-red-600 text-white rounded-sm hover:bg-red-700 transition-colors"
-          >
-            Excluir conta
-          </button>
+            <div>
+              <div className="flex items-center gap-1">
+                <label className={labelClass}>Email</label>
+                {isEditing && <LockedLabel />}
+              </div>
+              <input type="text" disabled value={user.email} className={inputLocked} />
+            </div>
+          </div>
+
+          <div className="mt-10 pt-6 border-t border-gray-100">
+            <button
+              onClick={() => setConfirmDeleteOpen(true)}
+              className="px-6 py-2.5 bg-red-50 text-red-600 border border-red-200 rounded-xl hover:bg-red-100 transition-colors duration-200 font-SecondFont font-medium"
+            >
+              Excluir conta
+            </button>
+          </div>
         </div>
       </div>
 

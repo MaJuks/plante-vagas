@@ -1,71 +1,64 @@
-import CandidatesDisplay from "./candidatesDisplay";
+import { useEffect, useState } from "react";
+import { useSearchParams } from "react-router";
+import { Users, Loader2, Info } from "lucide-react";
+import { getVagaById, Vaga } from "@/services/vaga";
 
 export default function MainCandidates() {
-  type Candidato = {
-    id: number;
-    nome: string;
-    cidade: string;
-    estado: string;
-    imagem: string;
-    competencias: string[];
-    descricao: string;
-  };
+  const [searchParams] = useSearchParams();
+  const vagaId = searchParams.get("vagaId");
+  const etapaId = searchParams.get("etapaId");
 
-  const candidatos: Candidato[] = [
-    {
-      id: 1,
-      nome: "Ana Souza",
-      cidade: "São Paulo",
-      estado: "SP",
-      imagem: "https://randomuser.me/api/portraits/women/44.jpg",
-      competencias: ["React", "TypeScript", "Figma", "Scrum"],
-      descricao:
-        "Desenvolvedora frontend apaixonada por criar interfaces intuitivas e acessíveis. Atua com React e TypeScript, sempre buscando aplicar boas práticas de design de interface e experiência do usuário. Tem experiência em trabalho colaborativo com squads ágeis, utilizando metodologias como Scrum e ferramentas de prototipação como o Figma para garantir entregas consistentes e centradas no usuário.",
-    },
-    {
-      id: 2,
-      nome: "Carlos Mendes",
-      cidade: "Belo Horizonte",
-      estado: "MG",
-      imagem: "https://randomuser.me/api/portraits/men/32.jpg",
-      competencias: ["Node.js", "Python", "Docker", "PostgreSQL"],
-      descricao:
-        "Engenheiro de software com foco em backend e infraestrutura escalável. Possui experiência sólida com desenvolvimento de APIs REST em Node.js e Python, além de integração com bancos de dados relacionais como PostgreSQL. Também domina tecnologias de containerização com Docker, contribuindo para a automação de ambientes e o desempenho de aplicações em produção. Gosta de enfrentar desafios técnicos e buscar soluções robustas.",
-    },
-    {
-      id: 3,
-      nome: "Juliana Lima",
-      cidade: "Curitiba",
-      estado: "PR",
-      imagem: "https://randomuser.me/api/portraits/women/68.jpg",
-      competencias: ["UX/UI", "HTML", "CSS", "Adobe XD"],
-      descricao:
-        "Especialista em experiência do usuário, com foco em design centrado no ser humano. Trabalha na criação de fluxos e interfaces funcionais e visualmente atrativas, com forte domínio de ferramentas como Adobe XD e sólidos conhecimentos de HTML e CSS. Tem facilidade em transformar problemas complexos em soluções simples e eficazes, sempre buscando compreender as necessidades do usuário final e promover experiências digitais significativas.",
-    },
-  ];
+  const [vaga, setVaga] = useState<Vaga | null>(null);
+  const [loading, setLoading] = useState(!!vagaId);
+
+  useEffect(() => {
+    if (!vagaId) return;
+    getVagaById(Number(vagaId))
+      .then(setVaga)
+      .finally(() => setLoading(false));
+  }, [vagaId]);
+
+  const etapa = vaga?.etapas.find((e) => e.id === Number(etapaId));
 
   return (
-    <>
-      <div className="bg-paleGreen mt-20 font-SecondFont px-4 sm:px-14 md:px-20 lg:px-14 xl:px-[55px] py-6 sm:py-10">
-        <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4 sm:gap-0">
-          <h1 className="text-xl sm:text-2xl">Candidatos a vaga</h1>
-          <select
-            name=""
-            id=""
-            className="bg-oliveGreen text-white px-3 py-2 rounded-md cursor-pointer"
-          >
-            <option value="recentes">Mais recentes</option>
-            <option value="antigos">Mais antigos</option>
-            <option value="relevantes">Mais relevantes</option>
-            <option value="nome_asc">Nome (A-Z)</option>
-            <option value="nome_desc">Nome (Z-A)</option>
-          </select>
+    <div className="min-h-screen bg-gray-50 pt-20 pb-12">
+      <div className="max-w-4xl mx-auto px-4 sm:px-6">
+        <div className="py-8">
+          <h1 className="text-2xl font-bold text-deepGreen font-PrimaryFont">
+            Candidatos
+          </h1>
+          {loading ? (
+            <p className="text-gray-500 font-SecondFont mt-1 flex items-center gap-2">
+              <Loader2 size={16} className="animate-spin" aria-hidden="true" />
+              Carregando...
+            </p>
+          ) : vaga ? (
+            <p className="text-gray-600 font-SecondFont mt-1">
+              {vaga.nome} — {vaga.cargo}
+              {etapa && <> · Etapa: {etapa.nome}</>}
+            </p>
+          ) : (
+            <p className="text-gray-600 font-SecondFont mt-1">Nenhuma vaga selecionada</p>
+          )}
         </div>
 
-        <div className="px-0 sm:px-10 md:px-20 lg:px-16 xl:px-[70px] py-8 sm:py-20">
-          <CandidatesDisplay candidates={candidatos} />
+        <div className="flex flex-col items-center text-center bg-white rounded-2xl border border-gray-100 py-16 px-6">
+          <div className="w-16 h-16 bg-paleGreen/40 rounded-2xl flex items-center justify-center mb-4">
+            <Users size={28} className="text-deepGreen" aria-hidden="true" />
+          </div>
+          <p className="text-gray-700 font-SecondFont font-medium mb-2">
+            Ainda não é possível ver candidatos aqui
+          </p>
+          <div className="flex items-start gap-2 max-w-md text-left mt-2 bg-paleGreen/20 border border-paleGreen rounded-xl p-4">
+            <Info size={18} className="text-deepGreen flex-shrink-0 mt-0.5" aria-hidden="true" />
+            <p className="text-sm text-gray-600">
+              O backend ainda não tem um jeito de um candidato se candidatar a uma vaga, nem
+              de listar quem se candidatou (o botão "Candidatar-se" na página da vaga também
+              não faz nada ainda). Documentado no pendencias.txt, item 8.
+            </p>
+          </div>
         </div>
       </div>
-    </>
+    </div>
   );
 }

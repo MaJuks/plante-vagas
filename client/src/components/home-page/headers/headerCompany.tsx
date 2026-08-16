@@ -1,6 +1,6 @@
 import { useState } from "react";
 import { useNavigate } from "react-router";
-import { Menu, X, Home, LogOut, User } from "lucide-react";
+import { Menu, X, Home, LogOut, User, Settings } from "lucide-react";
 import logo from "../../../assets/images/logo.png";
 import { clearSession } from "../../../services/api";
 
@@ -60,6 +60,14 @@ export default function HeaderCompany() {
                   <Home size={16} className="text-deepGreen" />
                   Página Inicial
                 </button>
+                <button
+                  onClick={() => { navigate("/empresa/configuracoes"); setAccountMenuOpen(false); }}
+                  className="w-full flex items-center gap-3 px-4 py-3 text-gray-700 hover:bg-paleGreen/50
+                             transition-colors font-SecondFont text-sm"
+                >
+                  <Settings size={16} className="text-deepGreen" />
+                  Configurações
+                </button>
                 <div className="border-t border-gray-100" />
                 <button
                   onClick={() => { handleLogout(); setAccountMenuOpen(false); }}
@@ -92,6 +100,9 @@ export default function HeaderCompany() {
           <div className="border-t border-gray-100 w-full my-1" />
           <button onClick={() => { navigate("/"); setMenuOpen(false); }} className="flex items-center gap-2 text-gray-700 py-2 font-SecondFont text-sm">
             <Home size={16} className="text-deepGreen" /> Página Inicial
+          </button>
+          <button onClick={() => { navigate("/empresa/configuracoes"); setMenuOpen(false); }} className="flex items-center gap-2 text-gray-700 py-2 font-SecondFont text-sm">
+            <Settings size={16} className="text-deepGreen" /> Configurações
           </button>
           <button onClick={handleLogout} className="flex items-center gap-2 text-red-600 py-2 font-SecondFont text-sm">
             <LogOut size={16} /> Sair da conta

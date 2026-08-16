@@ -1,11 +1,11 @@
 import { useEffect, useState } from "react";
 import { useSearchParams } from "react-router";
+import { Loader2 } from "lucide-react";
 import VagaData from "./vagaData/vagaData";
 import Processselective from "./ProcessoSeletivo/ProcessoSeletivo";
-import { SidebarInset, SidebarProvider, SidebarTrigger } from "../ui/sidebar";
-import { AppSidebarCreate } from "../ui/app-sidebar";
 import HeaderCompany from "@/components/home-page/headers/headerCompany";
 import Etapas from "./ProcessoSeletivo/etapas/etapas";
+import Stepper from "./Stepper";
 import { VagaCreateProvider, useVagaCreate } from "./VagaCreateContext";
 import { getVagaById } from "@/services/vaga";
 
@@ -25,7 +25,7 @@ const MainCreateVagaInner = () => {
         cargo: vaga.cargo,
         descricao: vaga.descricao,
         salario: vaga.salario ? String(vaga.salario) : "",
-        beneficio: vaga.beneficios[0]?.nome ?? "",
+        beneficios: vaga.beneficios.map((b) => b.nome),
         etapas: vaga.etapas.map((e) => ({ nome: e.nome, descricao: e.descricao })),
       });
     }).finally(() => setLoading(false));
@@ -46,29 +46,24 @@ const MainCreateVagaInner = () => {
 
   if (loading) {
     return (
-      <div className="flex justify-center items-center h-screen font-SecondFont">
-        <p>Carregando dados da vaga...</p>
+      <div className="flex flex-col justify-center items-center h-screen font-SecondFont text-gray-500 gap-3">
+        <Loader2 size={32} className="animate-spin text-mediumGreen" aria-hidden="true" />
+        Carregando dados da vaga...
       </div>
     );
   }
 
   return (
-    <SidebarProvider>
-      <AppSidebarCreate activeTab={activeTab} setActiveTab={setActiveTab} />
-      <SidebarInset>
-        <header>
-          <HeaderCompany />
-        </header>
+    <>
+      <header>
+        <HeaderCompany />
+      </header>
 
-        <div className="w-full h-12 mt-20 bg-paleGreen flex items-center p-2">
-          <SidebarTrigger />
-        </div>
-
-        <div className="items-center mt-30">
-          <div className="w-full">{renderContent()}</div>
-        </div>
-      </SidebarInset>
-    </SidebarProvider>
+      <main className="pt-20">
+        <Stepper activeTab={activeTab} setActiveTab={setActiveTab} />
+        {renderContent()}
+      </main>
+    </>
   );
 };
 

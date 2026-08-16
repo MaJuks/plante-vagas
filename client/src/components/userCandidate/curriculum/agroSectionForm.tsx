@@ -16,6 +16,9 @@ const EMPTY_ITEM: AgroItem = { nome: "", nivelExperiencia: "", descricao: "" };
 const normalizeItems = (list: AgroItem[]) =>
   list.map(({ nome, nivelExperiencia, descricao }) => ({ nome, nivelExperiencia, descricao }));
 
+const inputClass = "w-full px-4 py-3 bg-white border border-gray-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-mediumGreen focus:border-transparent transition-all duration-200";
+const labelClass = "text-sm font-medium text-gray-700 mb-1.5 block";
+
 type AgroSection = "operacoesAgricolas" | "operacoesPecuarias" | "operacoesFlorestais" | "culturas" | "maquinas" | "tecnologias";
 
 type Props = {
@@ -76,81 +79,82 @@ export default function AgroSectionForm({ section, title, addLabel, nameLabel, e
         description={`Tem certeza que deseja excluir este item? Esta ação não pode ser desfeita.`}
         onConfirm={() => { if (confirmIndex !== null) { handleDelete(confirmIndex); setConfirmIndex(null) } }}
       />
-      <div className="flex flex-col p-8 md:p-36 lg:p-40 w-full bg-MediumGray max-w-6xl mx-auto font-SecondFont">
-        <hr />
-        <br />
-        <h1 className="text-xl">{title}</h1>
-        <br />
-        <br />
-        <div className="flex items-center">
+      <div className="min-h-screen bg-gray-50 py-8 sm:py-12 px-4 sm:px-8">
+        <div className="max-w-4xl mx-auto bg-white p-8 sm:p-10 rounded-2xl shadow-sm border border-gray-100 font-SecondFont">
+          <h1 className="text-2xl font-bold text-deepGreen font-PrimaryFont mb-6">
+            {title}
+          </h1>
+
           <button
-            className="cursor-pointer flex items-center gap-2 sm:gap-4 text-deepGreen"
+            className="inline-flex items-center gap-2 border border-deepGreen text-deepGreen px-4 py-2.5 rounded-xl font-medium hover:bg-deepGreen hover:text-white transition-colors duration-200 mb-6"
             onClick={() => setItems([...items, { ...EMPTY_ITEM }])}
           >
-            <PlusCircle />
-            <span>{addLabel}</span>
+            <PlusCircle size={18} aria-hidden="true" />
+            {addLabel}
           </button>
+
+          {items.map((item, index) => (
+            <div key={index} className="bg-gray-50 border border-gray-200 rounded-xl p-6 mb-6">
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mb-4">
+                <div>
+                  <label htmlFor={`nome-${section}-${index}`} className={labelClass}>{nameLabel}</label>
+                  <select
+                    id={`nome-${section}-${index}`}
+                    className={inputClass}
+                    value={item.nome}
+                    onChange={(e) => handleChange(index, "nome", e.target.value)}
+                  >
+                    <option value=""></option>
+                    {nameOptions.map((opt) => (
+                      <option key={opt.value} value={opt.value}>{opt.label}</option>
+                    ))}
+                  </select>
+                </div>
+                <div>
+                  <label htmlFor={`nivel-${section}-${index}`} className={labelClass}>Nível de experiência</label>
+                  <select
+                    id={`nivel-${section}-${index}`}
+                    className={inputClass}
+                    value={item.nivelExperiencia}
+                    onChange={(e) => handleChange(index, "nivelExperiencia", e.target.value)}
+                  >
+                    <option value=""></option>
+                    {NIVEL_EXPERIENCIA_OPTIONS.map((opt) => (
+                      <option key={opt.value} value={opt.value}>{opt.label}</option>
+                    ))}
+                  </select>
+                </div>
+              </div>
+
+              <div className="mb-4">
+                <label htmlFor={`descricao-${section}-${index}`} className={labelClass}>Descrição</label>
+                <textarea
+                  id={`descricao-${section}-${index}`}
+                  className={`${inputClass} h-28 resize-none`}
+                  value={item.descricao}
+                  onChange={(e) => handleChange(index, "descricao", e.target.value)}
+                ></textarea>
+              </div>
+
+              <div className="flex justify-end gap-3">
+                <button
+                  className="flex items-center gap-2 px-5 py-2.5 bg-deepGreen text-white rounded-xl hover:bg-mediumGreen transition-colors duration-200"
+                  onClick={() => handleSave()}
+                >
+                  <SaveAll size={18} aria-hidden="true" />
+                  Salvar
+                </button>
+                <button
+                  className="flex items-center gap-2 px-5 py-2.5 bg-red-600 text-white rounded-xl hover:bg-red-700 transition-colors duration-200"
+                  onClick={() => setConfirmIndex(index)}
+                >
+                  <Trash2 size={18} aria-hidden="true" />
+                  Excluir
+                </button>
+              </div>
+            </div>
+          ))}
         </div>
-        <br />
-        {items.map((item, index) => (
-          <div key={index} className="bg-paleGreen border border-deepGreen rounded-md p-4 md:p-6 shadow-sm mt-10">
-            <div className="flex flex-col sm:flex-row sm:items-end gap-4 mb-4">
-              <div className="flex flex-col flex-1">
-                <label className="text-sm font-medium mb-1">{nameLabel}</label>
-                <select
-                  className="bg-MediumGray border border-gray-300 rounded-md p-2 w-full focus:outline-none focus:ring-1 focus:ring-deepGreen"
-                  value={item.nome}
-                  onChange={(e) => handleChange(index, "nome", e.target.value)}
-                >
-                  <option value=""></option>
-                  {nameOptions.map((opt) => (
-                    <option key={opt.value} value={opt.value}>{opt.label}</option>
-                  ))}
-                </select>
-              </div>
-              <div className="flex flex-col flex-1">
-                <label className="text-sm font-medium mb-1">Nível de experiência</label>
-                <select
-                  className="bg-MediumGray border border-gray-300 rounded-md p-2 w-full focus:outline-none focus:ring-1 focus:ring-deepGreen"
-                  value={item.nivelExperiencia}
-                  onChange={(e) => handleChange(index, "nivelExperiencia", e.target.value)}
-                >
-                  <option value=""></option>
-                  {NIVEL_EXPERIENCIA_OPTIONS.map((opt) => (
-                    <option key={opt.value} value={opt.value}>{opt.label}</option>
-                  ))}
-                </select>
-              </div>
-            </div>
-
-            <div className="flex flex-col">
-              <label htmlFor={`descricao-${section}-${index}`}>Descrição</label>
-              <textarea
-                id={`descricao-${section}-${index}`}
-                className="bg-MediumGray border border-gray-300 rounded p-2 my-1 h-28 resize-none"
-                value={item.descricao}
-                onChange={(e) => handleChange(index, "descricao", e.target.value)}
-              ></textarea>
-            </div>
-
-            <div className="flex justify-end gap-3 mt-2">
-              <button
-                className="flex items-center gap-2 px-4 py-2 bg-deepGreen text-white rounded-md cursor-pointer hover:opacity-90 transition"
-                onClick={() => handleSave()}
-              >
-                <SaveAll size={18} />
-                <span>Salvar</span>
-              </button>
-              <button
-                className="flex items-center gap-2 px-4 py-2 bg-red-700 text-white rounded-md cursor-pointer hover:opacity-90 transition"
-                onClick={() => setConfirmIndex(index)}
-              >
-                <Trash2 size={18} />
-                <span>Excluir</span>
-              </button>
-            </div>
-          </div>
-        ))}
       </div>
     </>
   );

@@ -1,7 +1,7 @@
 import HeaderLogin from "@/components/home-page/headers/header-login";
 import Loginform from "@/components/login-area/loginform";
 import { useNavigate } from "react-router-dom";
-import { Building2, User, Leaf, ArrowRight } from "lucide-react";
+import { Building2, User, ArrowRight } from "lucide-react";
 
 const Login = () => {
   const navigate = useNavigate();
@@ -19,18 +19,13 @@ const Login = () => {
       <header>
         <HeaderLogin />
       </header>
-      <main className="min-h-screen bg-gradient-to-br from-softGreen via-paleGreen to-softGreen relative overflow-hidden">
-        {/* Decorative Elements */}
-        <div className="absolute top-0 right-0 w-96 h-96 bg-deepGreen/5 rounded-full -translate-y-1/2 translate-x-1/2" />
-        <div className="absolute bottom-0 left-0 w-64 h-64 bg-mediumGreen/10 rounded-full translate-y-1/2 -translate-x-1/2" />
-
-        <div className="relative z-10 flex flex-col items-center justify-center px-4 py-12 sm:py-16">
+      <main className="min-h-screen bg-gradient-to-br from-softGreen via-paleGreen to-softGreen">
+        <div className="flex flex-col items-center justify-center px-4 py-12 sm:py-16">
           {/* Header Section */}
           <div className="text-center mb-8 max-w-2xl">
-            <div className="inline-flex items-center gap-2 bg-white/50 backdrop-blur-sm text-deepGreen px-4 py-2 rounded-full text-sm font-SecondFont font-medium mb-6">
-              <Leaf size={16} />
+            <p className="uppercase text-xs sm:text-sm tracking-[0.25em] text-mediumGreen font-SecondFont font-semibold mb-5">
               Acesse sua conta
-            </div>
+            </p>
             <h1 className="text-4xl sm:text-5xl md:text-6xl text-deepGreen font-PrimaryFont">
               Transformando o Agro
             </h1>
@@ -56,23 +51,21 @@ const Login = () => {
                   onClick={handleCompanyRegister}
                   className="group flex items-center justify-center gap-3 bg-deepGreen text-white
                            px-6 py-4 rounded-xl font-SecondFont font-semibold
-                           hover:bg-mediumGreen transition-all duration-300
-                           hover:shadow-lg hover:shadow-deepGreen/20 hover:scale-105"
+                           hover:bg-mediumGreen transition-colors duration-300"
                 >
-                  <Building2 size={20} />
+                  <Building2 size={20} aria-hidden="true" />
                   <span>Sou Empresa</span>
-                  <ArrowRight size={18} className="transition-transform group-hover:translate-x-1" />
+                  <ArrowRight size={18} aria-hidden="true" className="transition-transform group-hover:translate-x-1" />
                 </button>
                 <button
                   onClick={handleUserRegister}
                   className="group flex items-center justify-center gap-3 border-2 border-deepGreen
                            text-deepGreen px-6 py-4 rounded-xl font-SecondFont font-semibold
-                           hover:bg-deepGreen hover:text-white transition-all duration-300
-                           hover:shadow-lg hover:scale-105"
+                           hover:bg-deepGreen hover:text-white transition-colors duration-300"
                 >
-                  <User size={20} />
+                  <User size={20} aria-hidden="true" />
                   <span>Sou Candidato</span>
-                  <ArrowRight size={18} className="transition-transform group-hover:translate-x-1" />
+                  <ArrowRight size={18} aria-hidden="true" className="transition-transform group-hover:translate-x-1" />
                 </button>
               </div>
             </div>
