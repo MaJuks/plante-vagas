@@ -35,6 +35,12 @@ import {
   Languages,
   Award,
   Star,
+  Tractor,
+  PawPrint,
+  TreePine,
+  Wheat,
+  Wrench,
+  Cpu,
 } from "lucide-react";
 
 const SECTIONS: SidebarSection[] = [
@@ -61,6 +67,12 @@ const SECTIONS: SidebarSection[] = [
       { value: "idioma", title: "Idioma", icon: Languages },
       { value: "certificados", title: "Certificados", icon: Award },
       { value: "diferenciais", title: "Diferenciais", icon: Star },
+      { value: "operacoes-agricolas", title: "Operações Agrícolas", icon: Tractor },
+      { value: "operacoes-pecuarias", title: "Operações Pecuárias", icon: PawPrint },
+      { value: "operacoes-florestais", title: "Operações Florestais", icon: TreePine },
+      { value: "culturas", title: "Culturas", icon: Wheat },
+      { value: "maquinas", title: "Máquinas", icon: Wrench },
+      { value: "tecnologias", title: "Tecnologias", icon: Cpu },
     ],
   },
   {

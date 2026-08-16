@@ -58,11 +58,10 @@ export async function updateCurriculum(data: CurriculumPayload) {
 }
 
 export async function updateCurriculumSection(section: keyof CurriculumPayload, data: unknown[]) {
-  const response = await fetch(`${BASE_URL}/update-section/${section}`, {
+  const response = await authFetch(`${CURRICULUM_URL}/update-section/${section}`, {
     method: "PATCH",
     headers: {
       "Content-Type": "application/json",
-      authorization: `bearer ${getToken()}`,
     },
     body: JSON.stringify({ data }),
   });
