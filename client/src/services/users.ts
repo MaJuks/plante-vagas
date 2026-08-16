@@ -5,6 +5,7 @@ const USERS_URL = `${BASE_URL}/users`;
 export async function updateUser(data: {
   phone?: string;
   disablePerson?: string;
+  gender?: string;
   currentPassword?: string;
   newPassword?: string;
   address?: {

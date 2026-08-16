@@ -11,7 +11,10 @@ currentPassword?: string
 newPassword?: string
 
 @IsOptional()
-disablePerson?: string 
+disablePerson?: string
+
+@IsOptional()
+gender?: string
 
 @IsOptional()
 @ValidateNested()

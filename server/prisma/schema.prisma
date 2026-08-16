@@ -145,7 +145,7 @@ model Curriculo {
   id        Int @id @default(autoincrement())
 
   usuarioId Int @unique
-  usuario   UserCandidate @relation(fields: [usuarioId], references: [id])
+  usuario   UserCandidate @relation(fields: [usuarioId], references: [id], onDelete: Cascade)
 
   experiencias   ExperienciaProfissional[]
   formacoes      FormacaoAcademica[]

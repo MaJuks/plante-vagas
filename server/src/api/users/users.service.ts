@@ -102,6 +102,7 @@ export class UserService {
        const data: any = {};
           if (userDTO.phone) data.phone = userDTO.phone;
           if (userDTO.disablePerson) data.disablePerson = userDTO.disablePerson;
+          if (userDTO.gender) data.gender = userDTO.gender;
           if (hashedPassword) data.password = hashedPassword;
           if (userDTO.address) {
             data.Address = {

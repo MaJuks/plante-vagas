@@ -28,14 +28,14 @@ export default function MyData() {
   const [isEditing, setIsEditing] = useState(false);
   const [isSaving, setIsSaving] = useState(false);
   const [confirmDeleteOpen, setConfirmDeleteOpen] = useState(false);
-  const [formData, setFormData] = useState({ phone: "", disablePerson: "" });
+  const [formData, setFormData] = useState({ phone: "", disablePerson: "", gender: "" });
 
   const dateFormatted = user.dateNasc
     ? new Date(user.dateNasc).toISOString().split("T")[0]
     : "";
 
   const handleEdit = () => {
-    setFormData({ phone: user.phone, disablePerson: user.disablePerson });
+    setFormData({ phone: user.phone, disablePerson: user.disablePerson, gender: user.gender });
     setIsEditing(true);
   };
 
@@ -48,6 +48,7 @@ export default function MyData() {
       await updateUser({
         phone: formData.phone || undefined,
         disablePerson: formData.disablePerson || undefined,
+        gender: formData.gender || undefined,
       });
       await refreshUser();
       setIsEditing(false);
@@ -89,8 +90,8 @@ export default function MyData() {
             <Info size={16} className="text-deepGreen flex-shrink-0 mt-0.5" aria-hidden="true" />
             <p className="text-gray-700">
               {isEditing
-                ? "Modo edição ativo. Só telefone e portador de deficiência podem ser alterados."
-                : "Clique em Editar para atualizar telefone e portador de deficiência."}
+                ? "Modo edição ativo. Telefone, gênero e portador de deficiência podem ser alterados."
+                : "Clique em Editar para atualizar telefone, gênero e portador de deficiência."}
             </p>
           </div>
 
@@ -114,14 +115,20 @@ export default function MyData() {
             </div>
 
             <div>
-              <div className="flex items-center gap-1">
-                <label className={labelClass}>Gênero</label>
-                {isEditing && <LockedLabel />}
-              </div>
-              <div className={`flex flex-wrap gap-4 py-3 ${isEditing ? "opacity-50 pointer-events-none" : ""}`}>
+              <label className={labelClass}>Gênero</label>
+              <div className="flex flex-wrap gap-4 py-3">
                 {["Mulher", "Homem", "Outro", "Prefiro Não Dizer"].map((g) => (
                   <div key={g} className="flex items-center gap-2">
-                    <input type="radio" id={g} name="gender" value={g} checked={user.gender === g} readOnly />
+                    <input
+                      type="radio"
+                      id={g}
+                      name="gender"
+                      value={g}
+                      checked={(isEditing ? formData.gender : user.gender) === g}
+                      onChange={() => isEditing && setFormData((f) => ({ ...f, gender: g }))}
+                      readOnly={!isEditing}
+                      disabled={!isEditing}
+                    />
                     <label htmlFor={g} className="text-sm text-gray-700">
                       {g === "Prefiro Não Dizer" ? "Prefiro não dizer" : g}
                     </label>
