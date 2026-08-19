@@ -1,6 +1,7 @@
 import { useNavigate } from "react-router-dom";
 import { useRegister } from "./RegisterContext";
 import { useState } from "react";
+import { BASE_URL } from "../../services/api";
 
 const RegisterThree = () => {
   const navigate = useNavigate();
@@ -42,7 +43,7 @@ const RegisterThree = () => {
       };
 
       try {
-        const response = await fetch("http://localhost:3000/users/singup", {
+        const response = await fetch(`${BASE_URL}/users/singup`, {
           method: "POST",
           headers: { "Content-Type": "application/json" },
           body: JSON.stringify(payload),

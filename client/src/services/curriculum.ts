@@ -1,5 +1,11 @@
 import { authFetch, BASE_URL } from "./api";
 
+export type AgroItem = {
+  nome: string;
+  nivelExperiencia: string;
+  descricao: string;
+};
+
 export type CurriculumPayload = {
   experiencias: { cargo: string; empresa: string; descricao: string; inicioData: string; fimData?: string; empregoAtual?: boolean }[];
   formacoes: { nivelFormacao: string; grauFormacao: string; curso: string; nomeInstituicao: string; status: string; inicioData: string; fimData?: string }[];

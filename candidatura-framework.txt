@@ -1,0 +1,180 @@
+FRAMEWORK DE CANDIDATURA — VÍNCULO CANDIDATO-VAGA
+===================================================
+
+Este documento registra o plano de solução para o item 8 do pendencias.txt
+(não existe sistema de candidatura) e, ao mesmo tempo, o desenho de um
+framework de ingestão de candidaturas — motivado pela necessidade real do
+produto (permitir integração futura com sistemas de RH de empresas
+clientes) e usado também como entrega da matéria da faculdade que exige a
+construção de um framework.
+
+Nada disso está implementado ainda. Este é o plano a ser seguido quando a
+implementação começar.
+
+
+1. POR QUE ISSO É UM FRAMEWORK, E NÃO SÓ CÓDIGO ORGANIZADO
+------------------------------------------------------------
+Framework, aqui, significa duas coisas juntas:
+  - um trilho fixo (pipeline) que processa toda candidatura da mesma forma,
+    não importa de onde ela veio;
+  - um contrato comum, implementado por pelo menos duas fontes de entrada
+    reais, que traduzem seus formatos de origem para o formato que o trilho
+    entende.
+
+Uma abstração dessas só se justifica quando existe mais de um consumidor
+real usando o mesmo trilho — com um consumidor só, seria só uma interface
+especulativa, adivinhando um contrato sem ter como validar se ele está
+certo. Por isso este desenho inclui, desde o início, duas fontes reais:
+
+  - o fluxo interno (candidato logado no Plante Vagas se candidatando);
+  - uma fonte de RH externo simulada (um "sistema de RH fictício" que
+    envia candidatos com um payload em formato diferente do interno,
+    exercitando de verdade a tradução entre formatos).
+
+Nenhuma das duas é hipotética — as duas devem existir e funcionar de ponta
+a ponta quando a implementação for feita. Uma integração real com um
+sistema de RH de verdade (autenticação robusta, filas, retries) fica fora
+de escopo por enquanto — ver seção 8.
+
+
+2. MODELO DE DADOS
+---------------------
+- Reaproveitar o modelo CandidatoEtapa (schema.prisma), que já liga
+  UserCandidate a EtapaProcessoSeletivo, sem depender do modelo
+  ProcessoSeletivo (esse continua ambíguo — item 2 do pendencias.txt — e
+  fica de fora deste trabalho).
+- Adicionar o campo `origem String` em CandidatoEtapa. Valores possíveis:
+  "interna" ou a chave da fonte externa (ex.: "rh-externo-mock").
+- Adicionar um campo de chave de integração por empresa em UserCompany
+  (ex.: `chaveIntegracao String? @unique`), usado para autenticar a fonte
+  externa simulada. Como essa chave é gerada/distribuída fica para definir
+  na implementação (pode ser manual/seed por enquanto).
+
+
+3. O CONTRATO DO FRAMEWORK
+------------------------------
+  interface FonteDeCandidatura {
+    readonly origem: string;
+    mapearParaCandidatura(payloadCru: unknown, contexto: unknown): Promise<CandidaturaInput>;
+  }
+
+  interface CandidaturaInput {
+    candidatoId: number;
+    vagaId: number;
+    origem: string;
+  }
+
+CandidaturaInternaFonte (origem "interna"):
+  Mapeamento trivial — candidatoId vem do JWT do candidato logado
+  (req.user.sub, mesmo padrão usado em users.controller.ts), vagaId vem da
+  URL da requisição.
+
+CandidaturaRhExternoFonte (origem "rh-externo-mock", a simulação):
+  Recebe um payload em formato propositalmente diferente do interno, por
+  exemplo:
+    {
+      "candidato": { "cpf": "12345678900" },
+      "vagaExterna": { "idNoPlanteVagas": 42 }
+    }
+  Resolve o candidato buscando o CPF em UserCandidate e resolve o vagaId a
+  partir de vagaExterna.idNoPlanteVagas. Se o CPF não corresponder a
+  nenhuma conta existente, retorna um erro claro explicando que a fonte
+  externa só aceita candidatos já cadastrados no Plante Vagas (ver limite
+  de escopo na seção 8).
+
+
+4. O ORQUESTRADOR (NÚCLEO DO FRAMEWORK)
+-------------------------------------------
+IngestaoService.ingerir(chaveFonte, payloadCru, contexto):
+  Busca a implementação de FonteDeCandidatura correspondente a chaveFonte
+  num registro simples de fontes disponíveis (ex.: um provider de
+  múltiplas injeções do próprio NestJS — { interna: ..., "rh-externo-mock":
+  ... } — sem necessidade de biblioteca externa), chama
+  mapearParaCandidatura() nela, e repassa o resultado para o pipeline fixo.
+
+CandidaturaService.aplicar(input: CandidaturaInput):
+  O pipeline fixo, chamado por ambas as fontes através do orquestrador:
+    1. valida se a vaga existe;
+    2. acha a primeira etapa da vaga (menor id — hoje não existe campo de
+       ordem no modelo EtapaProcessoSeletivo);
+    3. impede duplicidade — um candidato não pode ter mais de uma
+       CandidatoEtapa ativa para a mesma vaga;
+    4. cria o CandidatoEtapa com a origem recebida.
+
+
+5. ENDPOINTS
+---------------
+  POST   /candidatura/vaga/:id
+    Candidato se candidata (@Roles('candidate')).
+    Chama ingerir("interna", { candidatoId: req.user.sub, vagaId }).
+
+  POST   /candidatura/integracoes/:sistema
+    Entrada da fonte externa, autenticada por API key de empresa (novo
+    guard, ex.: ApiKeyGuard, resolve empresaId a partir de
+    chaveIntegracao). Chama ingerir(sistema, corpoDaRequisicao, { empresaId }).
+
+  GET    /candidatura/minhas
+    Candidato lista suas próprias candidaturas.
+
+  GET    /candidatura/vaga/:vagaId
+  GET    /candidatura/etapa/:etapaId
+    Empresa lista candidatos (@Roles('company'), valida que a vaga
+    pertence à empresa autenticada, como já é feito em vaga.service.ts).
+
+  PATCH  /candidatura/:id
+    Empresa move o candidato de etapa / muda status / adiciona observações.
+
+
+6. ORGANIZAÇÃO DE ARQUIVOS (server)
+---------------------------------------
+  server/src/api/candidatura/
+    candidatura.module.ts
+    candidatura.service.ts        (pipeline fixo: aplicar)
+    candidatura.controller.ts     (endpoints internos: candidato/empresa)
+    dto/
+    ingestao/
+      fonte-de-candidatura.interface.ts
+      candidatura-interna.fonte.ts
+      candidatura-rh-externo.fonte.ts   (a simulação)
+      ingestao.service.ts               (orquestrador)
+      ingestao.controller.ts            (POST /candidatura/integracoes/:sistema)
+      api-key.guard.ts
+
+
+7. FRONT-END
+---------------
+Reaproveitando convenções já existentes no repositório (authFetch, rotas
+protegidas por PrivateRoute com allowedRoles), sem necessidade de rotas
+novas no front:
+
+  - client/src/services/candidatura.ts (novo, mesmo padrão de vaga.ts e
+    curriculum.ts).
+  - Conectar os botões "CANDIDATAR-SE" em job-information.tsx e no
+    duplicado em enterprise.tsx (ambos em
+    client/src/components/JobPage/company-job-infomation/).
+  - selectionProcess.tsx (client/src/components/userCandidate/
+    selectionProcess/) passa a consumir GET /candidatura/minhas.
+  - mainCandidates.tsx (client/src/components/candidates/) passa a
+    consumir GET /candidatura/vaga/:vagaId — já lê vagaId/etapaId da URL
+    via useSearchParams, chegando lá a partir de
+    managementProcess/etapa.tsx e
+    company/profile/vagasCompanyProfile/vagaProfile.tsx.
+  - A fonte externa simulada não precisa de tela — é demonstrada via
+    chamada HTTP direta (curl/Postman/teste automatizado) simulando o
+    sistema de RH terceiro.
+
+
+8. FORA DE ESCOPO (registrado, não esquecido)
+--------------------------------------------------
+  - ProcessoSeletivo continua ambíguo (item 2 do pendencias.txt) e não
+    entra neste trabalho.
+  - Notificação ao fechar etapa (item 9 do pendencias.txt) depende deste
+    trabalho existir primeiro, mas não é construída agora.
+  - Autenticação de integração real (OAuth, assinatura de webhook,
+    retry/fila) fica de fora — a API key simples basta para demonstrar o
+    conceito de framework.
+  - Criar candidato "sem conta" via integração externa fica de fora — a
+    fonte externa simulada exige que o candidato já tenha conta no Plante
+    Vagas (casamento por CPF). Aceitar candidato importado sem conta exigiria
+    repensar campos hoje obrigatórios em UserCandidate (password, cpf único)
+    — fica para uma eventual integração real, se e quando existir.

@@ -3,7 +3,7 @@ import { useNavigate } from "react-router-dom";
 import { toast } from "sonner";
 import { Mail, Lock, Eye, EyeOff, LogIn, Loader2 } from "lucide-react";
 import { hashPassword } from "../../utils/hashPassword";
-import { setSession } from "../../services/api";
+import { BASE_URL, setSession } from "../../services/api";
 
 const LoginForm = () => {
   const navigate = useNavigate();
@@ -20,7 +20,7 @@ const LoginForm = () => {
 
     try {
       const hashedPassword = hashPassword(password);
-      const res = await fetch("http://localhost:3000/auth/login", {
+      const res = await fetch(`${BASE_URL}/auth/login`, {
         method: "POST",
         headers: {
           "Content-Type": "application/json",

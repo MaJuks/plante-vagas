@@ -8,7 +8,7 @@ import { toast } from "sonner";
 
 import { cnpjMask } from "../masks/cnpjMask";
 import { cepMask } from "../masks/cepMask";
-import { setSession } from "../../services/api";
+import { BASE_URL, setSession } from "../../services/api";
 
 const RegisterCompanyTwo = () => {
   const navigate = useNavigate();
@@ -133,7 +133,7 @@ const RegisterCompanyTwo = () => {
     };
 
     try {
-      const response = await fetch("http://localhost:3000/company/singup", {
+      const response = await fetch(`${BASE_URL}/company/singup`, {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify(payload),
@@ -147,7 +147,7 @@ const RegisterCompanyTwo = () => {
         });
 
         try {
-          const loginRes = await fetch("http://localhost:3000/auth/login", {
+          const loginRes = await fetch(`${BASE_URL}/auth/login`, {
             method: "POST",
             headers: { "Content-Type": "application/json" },
             body: JSON.stringify({ email: formData.email, password: formData.password }),
