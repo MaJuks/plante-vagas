@@ -6,7 +6,7 @@ import { cpfMask } from "../masks/cpfMask";
 import { phoneMask } from "../masks/phoneMask";
 import { toast } from "sonner";
 import { cepMask } from "../masks/cepMask";
-import { setSession } from "../../services/api";
+import { BASE_URL, setSession } from "../../services/api";
 
 const RegisterTwo = () => {
   const navigate = useNavigate();
@@ -90,7 +90,7 @@ const RegisterTwo = () => {
     };
 
     try {
-      const response = await fetch("http://localhost:3000/users/signup", {
+      const response = await fetch(`${BASE_URL}/users/signup`, {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify(payload),
@@ -104,7 +104,7 @@ const RegisterTwo = () => {
         });
 
         try {
-          const loginRes = await fetch("http://localhost:3000/auth/login", {
+          const loginRes = await fetch(`${BASE_URL}/auth/login`, {
             method: "POST",
             headers: { "Content-Type": "application/json" },
             body: JSON.stringify({ email: formData.email, password: formData.password }),
