@@ -49,7 +49,10 @@ const VagaProfile = ({ vaga }: { vaga: Vaga }) => {
         >
           EDITAR VAGA
         </button>
-        <button className="font-semibold font-PrimaryFont underline cursor-pointer mt-2">
+        <button
+          onClick={() => navigate(`/candidatos?vagaId=${vaga.id}`)}
+          className="font-semibold font-PrimaryFont underline cursor-pointer mt-2"
+        >
           Ver candidatos
         </button>
       </div>

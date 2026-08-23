@@ -129,7 +129,7 @@ const RegisterTwo = () => {
       }
     } catch (error: any) {
       toast.error("Erro ao realizar cadastro", {
-        description: error,
+        description: error?.message ?? "Não foi possível conectar ao servidor",
         duration: 3000,
       });
     } finally {

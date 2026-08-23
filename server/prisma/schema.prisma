@@ -54,17 +54,18 @@ model AddressCompany {
 }
 
 model UserCompany {
-  id            Int      @id @default(autoincrement())
-  email         String   @unique
-  password      String
-  name          String
-  openingDate   DateTime
-  cnpj          String   @unique
-  description   String
-  socialReason  String
-  fantasyName   String
-  phone         String
-  createdAt     DateTime @default(now())
+  id              Int      @id @default(autoincrement())
+  email           String   @unique
+  password        String
+  name            String
+  openingDate     DateTime
+  cnpj            String   @unique
+  description     String
+  socialReason    String
+  fantasyName     String
+  phone           String
+  chaveIntegracao String?  @unique
+  createdAt       DateTime @default(now())
   Address       AddressCompany?
   vagas         Vaga[]
 }
@@ -130,6 +131,7 @@ model CandidatoEtapa {
   statusCandidato  Boolean   @default(false)
   dataConclusao    DateTime?
   observacoes      String?
+  origem           String    @default("interna")
 
   candidatoId Int
   candidato   UserCandidate         @relation(fields: [candidatoId], references: [id], onDelete: Cascade)

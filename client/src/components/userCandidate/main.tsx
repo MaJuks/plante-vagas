@@ -76,7 +76,7 @@ const SECTIONS: SidebarSection[] = [
     ],
   },
   {
-    id: "processos",
+    id: "processos-seletivos",
     label: "Processos Seletivos",
     icon: ClipboardList,
     items: [],
