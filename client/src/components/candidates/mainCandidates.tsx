@@ -1,7 +1,14 @@
 import { useEffect, useState } from "react";
 import { useSearchParams } from "react-router";
-import { Users, Loader2, Info } from "lucide-react";
+import { Users, Loader2, Mail, Phone, Check, X } from "lucide-react";
+import { toast } from "sonner";
 import { getVagaById, Vaga } from "@/services/vaga";
+import {
+  getCandidatosPorEtapa,
+  getCandidatosPorVaga,
+  moverCandidatura,
+  type Candidatura,
+} from "@/services/candidatura";
 
 export default function MainCandidates() {
   const [searchParams] = useSearchParams();
@@ -9,16 +16,42 @@ export default function MainCandidates() {
   const etapaId = searchParams.get("etapaId");
 
   const [vaga, setVaga] = useState<Vaga | null>(null);
-  const [loading, setLoading] = useState(!!vagaId);
+  const [candidatos, setCandidatos] = useState<Candidatura[]>([]);
+  const [loading, setLoading] = useState(!!(vagaId || etapaId));
+  const [atualizandoId, setAtualizandoId] = useState<number | null>(null);
 
   useEffect(() => {
-    if (!vagaId) return;
-    getVagaById(Number(vagaId))
-      .then(setVaga)
-      .finally(() => setLoading(false));
+    if (vagaId) getVagaById(Number(vagaId)).then(setVaga);
   }, [vagaId]);
 
+  useEffect(() => {
+    if (etapaId) {
+      getCandidatosPorEtapa(Number(etapaId))
+        .then(setCandidatos)
+        .finally(() => setLoading(false));
+    } else if (vagaId) {
+      getCandidatosPorVaga(Number(vagaId))
+        .then(setCandidatos)
+        .finally(() => setLoading(false));
+    } else {
+      setLoading(false);
+    }
+  }, [vagaId, etapaId]);
+
   const etapa = vaga?.etapas.find((e) => e.id === Number(etapaId));
+
+  const handleAtualizarStatus = async (candidaturaId: number, statusCandidato: boolean) => {
+    setAtualizandoId(candidaturaId);
+    try {
+      const atualizada = await moverCandidatura(candidaturaId, { statusCandidato });
+      setCandidatos((prev) => prev.map((c) => (c.id === candidaturaId ? atualizada : c)));
+      toast.success(statusCandidato ? "Candidato marcado como avançado" : "Candidato marcado como não avançado");
+    } catch (e: any) {
+      toast.error(e.message || "Erro ao atualizar candidato");
+    } finally {
+      setAtualizandoId(null);
+    }
+  };
 
   return (
     <div className="min-h-screen bg-gray-50 pt-20 pb-12">
@@ -42,22 +75,85 @@ export default function MainCandidates() {
           )}
         </div>
 
-        <div className="flex flex-col items-center text-center bg-white rounded-2xl border border-gray-100 py-16 px-6">
-          <div className="w-16 h-16 bg-paleGreen/40 rounded-2xl flex items-center justify-center mb-4">
-            <Users size={28} className="text-deepGreen" aria-hidden="true" />
-          </div>
-          <p className="text-gray-700 font-SecondFont font-medium mb-2">
-            Ainda não é possível ver candidatos aqui
-          </p>
-          <div className="flex items-start gap-2 max-w-md text-left mt-2 bg-paleGreen/20 border border-paleGreen rounded-xl p-4">
-            <Info size={18} className="text-deepGreen flex-shrink-0 mt-0.5" aria-hidden="true" />
-            <p className="text-sm text-gray-600">
-              O backend ainda não tem um jeito de um candidato se candidatar a uma vaga, nem
-              de listar quem se candidatou (o botão "Candidatar-se" na página da vaga também
-              não faz nada ainda). Documentado no pendencias.txt, item 8.
+        {!loading && candidatos.length === 0 && (
+          <div className="flex flex-col items-center text-center bg-white rounded-2xl border border-gray-100 py-16 px-6">
+            <div className="w-16 h-16 bg-paleGreen/40 rounded-2xl flex items-center justify-center mb-4">
+              <Users size={28} className="text-deepGreen" aria-hidden="true" />
+            </div>
+            <p className="text-gray-700 font-SecondFont font-medium mb-2">
+              Ainda não há candidatos aqui
+            </p>
+            <p className="text-sm text-gray-500 max-w-md">
+              Assim que um candidato se candidatar a esta vaga, ele vai aparecer nesta lista.
             </p>
           </div>
-        </div>
+        )}
+
+        {!loading && candidatos.length > 0 && (
+          <div className="flex flex-col gap-4 pb-8">
+            {candidatos.map((candidatura) => (
+              <div
+                key={candidatura.id}
+                className="bg-white rounded-2xl shadow-sm border border-gray-100 p-6 font-SecondFont"
+              >
+                <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4">
+                  <div>
+                    <h2 className="text-lg font-bold text-deepGreen font-PrimaryFont">
+                      {candidatura.candidato?.name ?? "Candidato"}
+                    </h2>
+                    <div className="flex flex-wrap items-center gap-4 mt-2 text-gray-600 text-sm">
+                      {candidatura.candidato?.email && (
+                        <span className="flex items-center gap-1.5">
+                          <Mail size={14} className="text-mediumGreen" />
+                          {candidatura.candidato.email}
+                        </span>
+                      )}
+                      {candidatura.candidato?.phone && (
+                        <span className="flex items-center gap-1.5">
+                          <Phone size={14} className="text-mediumGreen" />
+                          {candidatura.candidato.phone}
+                        </span>
+                      )}
+                    </div>
+                  </div>
+
+                  <span
+                    className={`text-sm px-3 py-1 rounded-full flex-shrink-0 ${
+                      candidatura.statusCandidato
+                        ? "bg-green-100 text-green-700"
+                        : "bg-gray-100 text-gray-600"
+                    }`}
+                  >
+                    {candidatura.statusCandidato ? "Avançou" : "Em análise"}
+                  </span>
+                </div>
+
+                <div className="flex gap-3 justify-end mt-5">
+                  <button
+                    onClick={() => handleAtualizarStatus(candidatura.id, false)}
+                    disabled={atualizandoId === candidatura.id || !candidatura.statusCandidato}
+                    className="flex items-center gap-2 text-sm text-gray-600 px-4 py-2 rounded-xl border border-gray-200 hover:border-red-300 hover:text-red-600 transition-colors duration-200 disabled:opacity-50 disabled:cursor-not-allowed"
+                  >
+                    <X size={16} aria-hidden="true" />
+                    Não avançou
+                  </button>
+                  <button
+                    onClick={() => handleAtualizarStatus(candidatura.id, true)}
+                    disabled={atualizandoId === candidatura.id || candidatura.statusCandidato}
+                    className="flex items-center gap-2 text-sm text-white bg-deepGreen px-4 py-2 rounded-xl hover:bg-mediumGreen transition-colors duration-200 disabled:opacity-50 disabled:cursor-not-allowed"
+                  >
+                    {atualizandoId === candidatura.id ? (
+                      <Loader2 size={16} className="animate-spin" aria-hidden="true" />
+                    ) : (
+                      <Check size={16} aria-hidden="true" />
+                    )}
+                    Avançou
+                  </button>
+                </div>
+              </div>
+            ))}
+          </div>
+        )}
       </div>
     </div>
   );

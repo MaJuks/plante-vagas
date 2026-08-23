@@ -1,6 +1,13 @@
-import { Building2, Send, ArrowRight } from "lucide-react";
+import { Building2, Send, ArrowRight, Loader2 } from "lucide-react";
 
-const CompanyInfoPage = ({ empresa }: { empresa?: { fantasyName: string; name: string } }) => {
+type CompanyInfoPageProps = {
+  empresa?: { fantasyName: string; name: string };
+  onCandidatar: () => void;
+  candidatando: boolean;
+  candidatado: boolean;
+};
+
+const CompanyInfoPage = ({ empresa, onCandidatar, candidatando, candidatado }: CompanyInfoPageProps) => {
   const nomeEmpresa = empresa?.fantasyName || empresa?.name || "Empresa";
 
   return (
@@ -39,13 +46,17 @@ const CompanyInfoPage = ({ empresa }: { empresa?: { fantasyName: string; name: s
               </p>
             </div>
             <button
+              onClick={onCandidatar}
+              disabled={candidatando || candidatado}
               className="group flex items-center gap-3 bg-white text-deepGreen px-8 py-4 rounded-xl
                        font-SecondFont font-bold text-lg hover:bg-paleGreen transition-all duration-300
-                       hover:shadow-lg hover:scale-105 whitespace-nowrap"
+                       hover:shadow-lg hover:scale-105 whitespace-nowrap disabled:opacity-70 disabled:hover:scale-100 disabled:cursor-not-allowed"
             >
-              <Send size={20} />
-              CANDIDATAR-SE
-              <ArrowRight size={20} className="transition-transform group-hover:translate-x-1" />
+              {candidatando ? <Loader2 size={20} className="animate-spin" /> : <Send size={20} />}
+              {candidatado ? "CANDIDATURA ENVIADA" : candidatando ? "ENVIANDO..." : "CANDIDATAR-SE"}
+              {!candidatado && !candidatando && (
+                <ArrowRight size={20} className="transition-transform group-hover:translate-x-1" />
+              )}
             </button>
           </div>
         </div>

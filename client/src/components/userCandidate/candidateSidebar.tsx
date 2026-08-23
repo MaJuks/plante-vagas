@@ -32,7 +32,9 @@ export default function CandidateSidebar({ sections, activeTab, onSelectTab, mob
   const { UserData } = useUser();
   const { user } = UserData;
 
-  const activeSectionId = sections.find((s) => s.items.some((i) => i.value === activeTab))?.id ?? sections[0]?.id;
+  const activeSectionId =
+    sections.find((s) => (s.items.length > 0 ? s.items.some((i) => i.value === activeTab) : s.id === activeTab))
+      ?.id ?? sections[0]?.id;
   const [openSection, setOpenSection] = useState(activeSectionId);
 
   const initials = user.name

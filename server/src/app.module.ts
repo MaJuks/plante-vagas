@@ -9,6 +9,7 @@ import { AuthModule } from './api/auth/auth.module';
 import { CompanyModule } from './api/company/company.module';
 import { CurriculumModule } from './api/curriculum/curriculum.module';
 import { VagaModule } from './api/vaga/vaga.module';
+import { CandidaturaModule } from './api/candidatura/candidatura.module';
 
 @Module({
   imports: [
@@ -20,6 +21,7 @@ import { VagaModule } from './api/vaga/vaga.module';
     CompanyModule,
     CurriculumModule,
     VagaModule,
+    CandidaturaModule,
   ],
   controllers: [AppController],
   providers: [AppService],

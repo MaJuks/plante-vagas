@@ -1,14 +1,47 @@
 import { useState, useEffect } from "react";
+import { useNavigate } from "react-router-dom";
 import { Link2, Bookmark, BookmarkCheck, Briefcase, Building2, Check } from "lucide-react";
 import { toast } from "sonner";
 import JobInformation from "../company-job-infomation/job-information";
 import CompanyInfoPage from "../company-job-infomation/enterprise";
 import type { Vaga } from "@/services/vaga";
+import { candidatarSe } from "@/services/candidatura";
 
 const MainJobPage = ({ vaga }: { vaga: Vaga }) => {
+  const navigate = useNavigate();
   const [saved, setSaved] = useState(false);
   const [copied, setCopied] = useState(false);
   const [activeTab, setActiveTab] = useState("vaga");
+  const [candidatando, setCandidatando] = useState(false);
+  const [candidatado, setCandidatado] = useState(false);
+
+  const handleCandidatar = async () => {
+    const token = localStorage.getItem("token");
+    const userType = localStorage.getItem("userType");
+
+    if (!token) {
+      navigate("/login");
+      return;
+    }
+    if (userType !== "candidate") {
+      toast.error("Apenas candidatos podem se candidatar a vagas");
+      return;
+    }
+
+    setCandidatando(true);
+    try {
+      await candidatarSe(vaga.id);
+      setCandidatado(true);
+      toast.success("Candidatura enviada!", {
+        description: "Acompanhe o processo seletivo na sua área do candidato.",
+        duration: 4000,
+      });
+    } catch (e: any) {
+      toast.error(e.message || "Erro ao se candidatar");
+    } finally {
+      setCandidatando(false);
+    }
+  };
 
   const toggleBookmark = () => {
     const newSavedState = !saved;
@@ -114,7 +147,11 @@ const MainJobPage = ({ vaga }: { vaga: Vaga }) => {
 
       {/* Content */}
       <div className="p-6 sm:p-8">
-        {activeTab === "vaga" ? <JobInformation vaga={vaga} /> : <CompanyInfoPage empresa={vaga.empresa} />}
+        {activeTab === "vaga" ? (
+          <JobInformation vaga={vaga} onCandidatar={handleCandidatar} candidatando={candidatando} candidatado={candidatado} />
+        ) : (
+          <CompanyInfoPage empresa={vaga.empresa} onCandidatar={handleCandidatar} candidatando={candidatando} candidatado={candidatado} />
+        )}
       </div>
     </section>
   );

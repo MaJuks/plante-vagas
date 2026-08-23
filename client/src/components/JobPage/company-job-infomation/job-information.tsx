@@ -1,8 +1,15 @@
-import { Clock, Briefcase, DollarSign, CheckCircle2, Send, ArrowRight } from "lucide-react";
+import { Clock, Briefcase, DollarSign, CheckCircle2, Send, ArrowRight, Loader2 } from "lucide-react";
 import { timeAgo } from "@/utils/timeAgo";
 import type { Vaga } from "@/services/vaga";
 
-const JobInformation = ({ vaga }: { vaga: Vaga }) => {
+type JobInformationProps = {
+  vaga: Vaga;
+  onCandidatar: () => void;
+  candidatando: boolean;
+  candidatado: boolean;
+};
+
+const JobInformation = ({ vaga, onCandidatar, candidatando, candidatado }: JobInformationProps) => {
   const jobDetails = [
     { icon: Clock, label: `Postada há ${timeAgo(vaga.createdAt)}`, color: "text-blue-600 bg-blue-50" },
     { icon: Briefcase, label: vaga.cargo, color: "text-purple-600 bg-purple-50" },
@@ -84,13 +91,17 @@ const JobInformation = ({ vaga }: { vaga: Vaga }) => {
             Candidate-se agora e dê o próximo passo na sua carreira
           </p>
           <button
+            onClick={onCandidatar}
+            disabled={candidatando || candidatado}
             className="group inline-flex items-center gap-3 bg-white text-deepGreen px-8 py-4 rounded-xl
                      font-SecondFont font-bold text-lg hover:bg-paleGreen transition-all duration-300
-                     hover:shadow-lg hover:scale-105"
+                     hover:shadow-lg hover:scale-105 disabled:opacity-70 disabled:hover:scale-100 disabled:cursor-not-allowed"
           >
-            <Send size={20} />
-            CANDIDATAR-SE
-            <ArrowRight size={20} className="transition-transform group-hover:translate-x-1" />
+            {candidatando ? <Loader2 size={20} className="animate-spin" /> : <Send size={20} />}
+            {candidatado ? "CANDIDATURA ENVIADA" : candidatando ? "ENVIANDO..." : "CANDIDATAR-SE"}
+            {!candidatado && !candidatando && (
+              <ArrowRight size={20} className="transition-transform group-hover:translate-x-1" />
+            )}
           </button>
         </div>
       </section>
