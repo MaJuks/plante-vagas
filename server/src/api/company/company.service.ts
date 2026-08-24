@@ -1,6 +1,8 @@
 import { ConflictException, Injectable } from '@nestjs/common';
 import { PrismaService } from '../prisma/prisma.service';
 import { CompanyDto } from './dto/create-company-dto';
+import { UpdateCompanyProfileDto } from './dto/update-company-profile.dto';
+import { UpdateCompanyCadastroDto } from './dto/update-company-cadastro.dto';
 import { Company } from './entities/company.entity';
 import * as bcrypt from 'bcrypt';
 
@@ -34,6 +36,7 @@ export class CompanyService {
       data: {
         ...companyData,
         password: hashedPassword,
+        openingDate: new Date(companyData.openingDate),
         Address: {
           create: {
             city: address.city,
@@ -56,6 +59,7 @@ export class CompanyService {
   async getInfo(userId: number) {
     const user = await this.prisma.userCompany.findUnique({
       where: { id: userId },
+      include: { Address: true },
     });
     if (!user) {
       throw new ConflictException('Usuário não encontrado');
@@ -63,5 +67,74 @@ export class CompanyService {
     return {
       user,
     };
+  }
+
+  async getPublicProfile(companyId: number) {
+    const company = await this.prisma.userCompany.findUnique({
+      where: { id: companyId },
+      select: {
+        id: true,
+        name: true,
+        fantasyName: true,
+        description: true,
+        openingDate: true,
+        logoUrl: true,
+        bannerUrl: true,
+        facebookUrl: true,
+        instagramUrl: true,
+        linkedinUrl: true,
+        websiteUrl: true,
+        Address: { select: { city: true, state: true } },
+      },
+    });
+    if (!company) {
+      throw new ConflictException('Empresa não encontrada');
+    }
+    return company;
+  }
+
+  async updateProfile(userId: number, data: UpdateCompanyProfileDto) {
+    return this.prisma.userCompany.update({
+      where: { id: userId },
+      data,
+      include: { Address: true },
+    });
+  }
+
+  async updateCadastro(userId: number, data: UpdateCompanyCadastroDto) {
+    const { address, openingDate, ...rest } = data;
+
+    return this.prisma.userCompany.update({
+      where: { id: userId },
+      data: {
+        ...rest,
+        ...(openingDate ? { openingDate: new Date(openingDate) } : {}),
+        ...(address
+          ? {
+              Address: {
+                upsert: {
+                  create: { ...address, country: address.country || 'Brasil' },
+                  update: { ...address, country: address.country || 'Brasil' },
+                },
+              },
+            }
+          : {}),
+      },
+      include: { Address: true },
+    });
+  }
+
+  async updateLogo(userId: number, logoUrl: string) {
+    return this.prisma.userCompany.update({
+      where: { id: userId },
+      data: { logoUrl },
+    });
+  }
+
+  async updateBanner(userId: number, bannerUrl: string) {
+    return this.prisma.userCompany.update({
+      where: { id: userId },
+      data: { bannerUrl },
+    });
   }
 }

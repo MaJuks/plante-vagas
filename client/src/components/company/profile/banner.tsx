@@ -3,11 +3,16 @@ import { useUser } from "../userContextCompany";
 
 const Banner = () => {
   const { UserData } = useUser();
+  const logoUrl = UserData.user.logoUrl;
 
   return (
     <div className="bg-white rounded-2xl shadow-lg p-6 sm:p-10 flex flex-col sm:flex-row justify-between items-center gap-6 sm:gap-10 font-SecondFont">
-      <div className="w-20 h-20 sm:w-24 sm:h-24 bg-paleGreen/40 rounded-2xl flex items-center justify-center flex-shrink-0">
-        <Building2 size={36} className="text-deepGreen" aria-hidden="true" />
+      <div className="w-20 h-20 sm:w-24 sm:h-24 bg-paleGreen/40 rounded-2xl flex items-center justify-center flex-shrink-0 overflow-hidden">
+        {logoUrl ? (
+          <img src={logoUrl} alt="Logo da empresa" className="w-full h-full object-cover" />
+        ) : (
+          <Building2 size={36} className="text-deepGreen" aria-hidden="true" />
+        )}
       </div>
 
       <div className="flex flex-col items-center sm:items-start text-center sm:text-left gap-1 flex-1">
