@@ -102,12 +102,35 @@ export class CompanyService {
   }
 
   async updateCadastro(userId: number, data: UpdateCompanyCadastroDto) {
-    const { address, openingDate, ...rest } = data;
+    const { address, openingDate, currentPassword, newPassword, ...rest } = data;
+
+    const user = await this.prisma.userCompany.findFirst({ where: { id: userId } });
+
+    if (!user) {
+      throw new ConflictException('Usuário não encontrado para este usuário');
+    }
+
+    let hashedPassword: string | undefined;
+
+    if (newPassword) {
+      if (!currentPassword) {
+        throw new ConflictException('Senha atual não enviada');
+      }
+
+      const comparedPassword = await bcrypt.compare(currentPassword, user.password);
+
+      if (!comparedPassword) {
+        throw new ConflictException('Senha atual incorreta');
+      }
+
+      hashedPassword = await bcrypt.hash(newPassword, 10);
+    }
 
     return this.prisma.userCompany.update({
       where: { id: userId },
       data: {
         ...rest,
+        ...(hashedPassword ? { password: hashedPassword } : {}),
         ...(openingDate ? { openingDate: new Date(openingDate) } : {}),
         ...(address
           ? {
@@ -121,6 +144,20 @@ export class CompanyService {
           : {}),
       },
       include: { Address: true },
+    });
+  }
+
+  async delete(userId: number) {
+    const findCompany = await this.prisma.userCompany.findUnique({
+      where: { id: userId },
+    });
+
+    if (!findCompany) {
+      throw new ConflictException('Usuário não encontrado');
+    }
+
+    return this.prisma.userCompany.delete({
+      where: { id: findCompany.id },
     });
   }
 

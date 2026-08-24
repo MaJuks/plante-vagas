@@ -5,12 +5,19 @@ import { toast } from "sonner";
 import { useUser } from "../userContextCompany";
 import { phoneMask } from "../../masks/phoneMask";
 import { cepMask } from "../../masks/cepMask";
-import { updateCompanyCadastro } from "@/services/company";
+import { updateCompanyCadastro, deleteCompany } from "@/services/company";
+import { clearSession } from "@/services/api";
+import { ConfirmDialog } from "@/components/ui/confirm-dialog";
 
 const CompanySettingsForm = () => {
   const navigate = useNavigate();
   const { UserData, refreshUser } = useUser();
   const user = UserData.user;
+
+  const [currentPassword, setCurrentPassword] = useState("");
+  const [newPassword, setNewPassword] = useState("");
+  const [confirmPassword, setConfirmPassword] = useState("");
+  const [confirmDeleteOpen, setConfirmDeleteOpen] = useState(false);
 
   const [name, setName] = useState(user.name || "");
   const [fantasyName, setFantasyName] = useState(user.fantasyName || "");
@@ -57,6 +64,12 @@ const CompanySettingsForm = () => {
 
   const handleSave = async (e: React.FormEvent) => {
     e.preventDefault();
+
+    if (newPassword && newPassword !== confirmPassword) {
+      toast.error("A nova senha e a confirmação não coincidem");
+      return;
+    }
+
     setSalvando(true);
     try {
       await updateCompanyCadastro({
@@ -74,14 +87,30 @@ const CompanySettingsForm = () => {
           postalCode: cep.replace("-", ""),
           state,
         },
+        ...(newPassword ? { currentPassword, newPassword } : {}),
       });
       await refreshUser();
+      setCurrentPassword("");
+      setNewPassword("");
+      setConfirmPassword("");
       toast.success("Dados de cadastro atualizados!");
       navigate("/empresa");
     } catch (error: any) {
       toast.error(error.message || "Erro ao salvar alterações");
     } finally {
       setSalvando(false);
+    }
+  };
+
+  const handleDelete = async () => {
+    const loadingToast = toast.loading("Excluindo conta...");
+    try {
+      await deleteCompany();
+      clearSession();
+      toast.success("Conta excluída com sucesso", { id: loadingToast });
+      navigate("/login");
+    } catch (error: any) {
+      toast.error("Erro ao excluir conta", { id: loadingToast, description: error.message });
     }
   };
 
@@ -92,6 +121,7 @@ const CompanySettingsForm = () => {
   const labelClass = "block text-sm font-medium text-gray-700 mb-2";
 
   return (
+    <>
     <div className="min-h-screen bg-gray-50 pt-20">
       <div className="max-w-2xl mx-auto px-4 sm:px-8 py-12">
         <button
@@ -216,6 +246,59 @@ const CompanySettingsForm = () => {
                     value={openingDate}
                     onChange={(e) => setOpeningDate(e.target.value)}
                     className={inputClass}
+                  />
+                </div>
+              </div>
+            </div>
+
+            {/* Alterar senha */}
+            <div className="pt-2">
+              <div className="flex items-center gap-2 text-deepGreen font-semibold mb-4">
+                <Lock size={18} aria-hidden="true" />
+                <h2 className="font-PrimaryFont text-lg">Alterar Senha</h2>
+              </div>
+              <p className="text-xs text-gray-400 -mt-2 mb-4">
+                Deixe em branco se não quiser trocar a senha.
+              </p>
+
+              <div className="grid grid-cols-1 sm:grid-cols-3 gap-5">
+                <div>
+                  <label htmlFor="current-password" className={labelClass}>Senha atual</label>
+                  <input
+                    type="password"
+                    id="current-password"
+                    name="current-password"
+                    autoComplete="current-password"
+                    value={currentPassword}
+                    onChange={(e) => setCurrentPassword(e.target.value)}
+                    placeholder="Digite sua senha atual"
+                    className={plainInputClass}
+                  />
+                </div>
+                <div>
+                  <label htmlFor="new-password" className={labelClass}>Nova senha</label>
+                  <input
+                    type="password"
+                    id="new-password"
+                    name="new-password"
+                    autoComplete="new-password"
+                    value={newPassword}
+                    onChange={(e) => setNewPassword(e.target.value)}
+                    placeholder="Digite a nova senha"
+                    className={plainInputClass}
+                  />
+                </div>
+                <div>
+                  <label htmlFor="confirm-password" className={labelClass}>Confirmar nova senha</label>
+                  <input
+                    type="password"
+                    id="confirm-password"
+                    name="confirm-password"
+                    autoComplete="new-password"
+                    value={confirmPassword}
+                    onChange={(e) => setConfirmPassword(e.target.value)}
+                    placeholder="Repita a nova senha"
+                    className={plainInputClass}
                   />
                 </div>
               </div>
@@ -347,10 +430,29 @@ const CompanySettingsForm = () => {
                 CANCELAR
               </button>
             </div>
+
+            <div className="pt-6 mt-2 border-t border-gray-100">
+              <button
+                type="button"
+                onClick={() => setConfirmDeleteOpen(true)}
+                className="px-6 py-2.5 bg-red-50 text-red-600 border border-red-200 rounded-xl hover:bg-red-100 transition-colors duration-200 font-SecondFont font-medium"
+              >
+                Excluir conta
+              </button>
+            </div>
           </div>
         </form>
       </div>
     </div>
+
+    <ConfirmDialog
+      open={confirmDeleteOpen}
+      onOpenChange={setConfirmDeleteOpen}
+      title="Excluir conta"
+      description="Tem certeza que deseja excluir a conta da empresa? Essa ação não pode ser desfeita."
+      onConfirm={handleDelete}
+    />
+    </>
   );
 };
 
