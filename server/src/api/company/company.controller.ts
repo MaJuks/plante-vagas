@@ -2,6 +2,7 @@ import {
   BadRequestException,
   Body,
   Controller,
+  Delete,
   Get,
   Param,
   Patch,
@@ -97,5 +98,13 @@ export class CompanyController {
     const userId = req.user.sub;
     const bannerUrl = `data:${file.mimetype};base64,${file.buffer.toString('base64')}`;
     return this.comapanyService.updateBanner(userId, bannerUrl);
+  }
+
+  @Delete('delete/:id')
+  @UseGuards(JwtAuthGuard, RolesGuard)
+  @Roles('company')
+  async deleteCompany(@Req() req) {
+    const userId = req.user.sub;
+    return this.comapanyService.delete(userId);
   }
 }

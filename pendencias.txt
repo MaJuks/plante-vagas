@@ -504,7 +504,30 @@ O que precisa ser feito:
 
 13. EMPRESA NÃO CONSEGUE TROCAR SENHA NEM EXCLUIR A PRÓPRIA CONTA
 -----------------------------------------------------------------------
-Problema:
+[RESOLVIDO] Espelhado o padrão exato do candidato (users.service.ts
+  update()/delete()), em vez de criar endpoint novo: currentPassword/
+  newPassword viraram campos opcionais de UpdateCompanyCadastroDto,
+  tratados dentro do próprio PATCH /company/update-cadastro (busca o
+  usuário, exige currentPassword se newPassword vier preenchido,
+  compara com bcrypt, só troca a senha se bater — mesmas mensagens de
+  erro do lado do candidato: "Senha atual não enviada" / "Senha atual
+  incorreta"). Criado DELETE /company/delete/:id, idêntico ao
+  DELETE /users/delete/:id (o :id na rota não é usado — o backend pega
+  o id de quem está logado via token, não da URL — mantido assim de
+  propósito pra bater com o padrão já existente). Front: a tela de
+  Configurações (companySettingsForm.tsx) ganhou uma seção "Alterar
+  Senha" (senha atual/nova/confirmação, mesma validação de
+  cliente do infoLogin.tsx) e um botão "Excluir conta" com o mesmo
+  ConfirmDialog usado em myData.tsx.
+
+  Testado de ponta a ponta com empresa real no banco: trocar senha
+  sem enviar a atual falha (409), com a atual errada falha (409), com
+  a atual certa funciona (200) e o login com a senha antiga passa a
+  falhar enquanto o login com a nova funciona; excluir sem token falha
+  (401), excluir com token remove a empresa de verdade do banco
+  (confirmado com um GET público depois, que retorna "não encontrada").
+
+Problema (histórico):
   O candidato já tem as duas coisas: PATCH /users/update aceita
   currentPassword/newPassword (users.controller.ts,
   users/dto/update-user-deto.ts), com tela funcionando em

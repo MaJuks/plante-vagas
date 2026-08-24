@@ -85,6 +85,8 @@ export interface UpdateCadastroPayload {
   phone?: string;
   openingDate?: string;
   address?: CompanyAddress;
+  currentPassword?: string;
+  newPassword?: string;
 }
 
 export async function updateCompanyCadastro(data: UpdateCadastroPayload): Promise<Company> {
@@ -124,6 +126,18 @@ export async function uploadCompanyBanner(file: File): Promise<Company> {
   if (!response.ok) {
     const error = await response.json();
     throw new Error(error.message || "Erro ao enviar banner");
+  }
+  return response.json();
+}
+
+export async function deleteCompany() {
+  const userId = localStorage.getItem("userId");
+  const response = await authFetch(`${COMPANY_URL}/delete/${userId}`, {
+    method: "DELETE",
+  });
+  if (!response.ok) {
+    const error = await response.json();
+    throw new Error(error.message || "Erro ao deletar conta");
   }
   return response.json();
 }
