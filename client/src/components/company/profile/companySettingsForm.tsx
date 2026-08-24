@@ -1,14 +1,15 @@
 import { useState } from "react";
 import { useNavigate } from "react-router-dom";
-import { Building2, Phone, Calendar, MapPin, ArrowLeft, Info, Lock, Loader2 } from "lucide-react";
+import { Building2, Phone, Calendar, MapPin, ArrowLeft, Lock, Loader2 } from "lucide-react";
 import { toast } from "sonner";
 import { useUser } from "../userContextCompany";
 import { phoneMask } from "../../masks/phoneMask";
 import { cepMask } from "../../masks/cepMask";
+import { updateCompanyCadastro } from "@/services/company";
 
 const CompanySettingsForm = () => {
   const navigate = useNavigate();
-  const { UserData } = useUser();
+  const { UserData, refreshUser } = useUser();
   const user = UserData.user;
 
   const [name, setName] = useState(user.name || "");
@@ -19,13 +20,13 @@ const CompanySettingsForm = () => {
     user.openingDate ? user.openingDate.slice(0, 10) : ""
   );
 
-  const [cep, setCep] = useState("");
-  const [street, setStreet] = useState("");
-  const [number, setNumber] = useState("");
-  const [complement, setComplement] = useState("");
-  const [district, setDistrict] = useState("");
-  const [city, setCity] = useState("");
-  const [state, setState] = useState("");
+  const [cep, setCep] = useState(user.Address?.postalCode ? cepMask(user.Address.postalCode) : "");
+  const [street, setStreet] = useState(user.Address?.street || "");
+  const [number, setNumber] = useState(user.Address?.number || "");
+  const [complement, setComplement] = useState(user.Address?.complement || "");
+  const [district, setDistrict] = useState(user.Address?.district || "");
+  const [city, setCity] = useState(user.Address?.city || "");
+  const [state, setState] = useState(user.Address?.state || "");
   const [cepLoading, setCepLoading] = useState(false);
   const [salvando, setSalvando] = useState(false);
 
@@ -57,14 +58,31 @@ const CompanySettingsForm = () => {
   const handleSave = async (e: React.FormEvent) => {
     e.preventDefault();
     setSalvando(true);
-    setTimeout(() => {
-      setSalvando(false);
-      toast.info("Ainda não é possível salvar essas alterações", {
-        description:
-          "Não existe endpoint de edição de dados de cadastro no backend ainda (ver pendencias.txt, item 10). Essa tela está pronta pra ser conectada quando ele existir.",
-        duration: 5000,
+    try {
+      await updateCompanyCadastro({
+        name,
+        fantasyName,
+        socialReason,
+        phone: phone.replace(/\D/g, ""),
+        openingDate,
+        address: {
+          city,
+          district,
+          street,
+          number,
+          complement,
+          postalCode: cep.replace("-", ""),
+          state,
+        },
       });
-    }, 400);
+      await refreshUser();
+      toast.success("Dados de cadastro atualizados!");
+      navigate("/empresa");
+    } catch (error: any) {
+      toast.error(error.message || "Erro ao salvar alterações");
+    } finally {
+      setSalvando(false);
+    }
   };
 
   const inputClass =
@@ -92,15 +110,6 @@ const CompanySettingsForm = () => {
             <h1 className="text-2xl font-bold text-deepGreen font-PrimaryFont">Configurações</h1>
             <p className="text-gray-600 mt-2">
               Edite os dados de cadastro da sua empresa
-            </p>
-          </div>
-
-          <div className="flex items-start gap-3 bg-paleGreen/30 border border-paleGreen rounded-xl p-4 mb-8">
-            <Info size={20} className="text-deepGreen flex-shrink-0 mt-0.5" aria-hidden="true" />
-            <p className="text-sm text-gray-700">
-              Essa tela ainda não salva as alterações de verdade — falta um endpoint no backend
-              pra isso (já documentado no pendencias.txt). Por enquanto dá pra ver como o
-              formulário completo vai funcionar.
             </p>
           </div>
 

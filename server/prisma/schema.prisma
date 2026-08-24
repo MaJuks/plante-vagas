@@ -53,6 +53,10 @@ model AddressCompany {
   userCompany     UserCompany @relation(fields: [userCompanyId], references: [id], onDelete: Cascade)
 }
 
+// name: nome de exibição informado no cadastro, usado como fallback quando
+//   fantasyName não está preenchido (ver board.tsx: fantasyName ?? name).
+// fantasyName: nome fantasia, exibido publicamente com prioridade sobre name.
+// socialReason: razão social (documento legal), não exibida publicamente.
 model UserCompany {
   id              Int      @id @default(autoincrement())
   email           String   @unique
@@ -64,6 +68,12 @@ model UserCompany {
   socialReason    String
   fantasyName     String
   phone           String
+  logoUrl         String?
+  bannerUrl       String?
+  facebookUrl     String?
+  instagramUrl    String?
+  linkedinUrl     String?
+  websiteUrl      String?
   chaveIntegracao String?  @unique
   createdAt       DateTime @default(now())
   Address       AddressCompany?

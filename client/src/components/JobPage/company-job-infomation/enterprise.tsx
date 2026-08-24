@@ -1,7 +1,9 @@
-import { Building2, Send, ArrowRight, Loader2 } from "lucide-react";
+import { useEffect, useState } from "react";
+import { Building2, MapPin, Send, ArrowRight, Loader2 } from "lucide-react";
+import { getPublicCompany, PublicCompany } from "@/services/company";
 
 type CompanyInfoPageProps = {
-  empresa?: { fantasyName: string; name: string };
+  empresa?: { id: number; fantasyName: string; name: string };
   onCandidatar: () => void;
   candidatando: boolean;
   candidatado: boolean;
@@ -9,27 +11,64 @@ type CompanyInfoPageProps = {
 
 const CompanyInfoPage = ({ empresa, onCandidatar, candidatando, candidatado }: CompanyInfoPageProps) => {
   const nomeEmpresa = empresa?.fantasyName || empresa?.name || "Empresa";
+  const [perfil, setPerfil] = useState<PublicCompany | null>(null);
+  const [carregando, setCarregando] = useState(true);
+
+  useEffect(() => {
+    if (!empresa?.id) {
+      setCarregando(false);
+      return;
+    }
+    getPublicCompany(empresa.id)
+      .then(setPerfil)
+      .catch(() => setPerfil(null))
+      .finally(() => setCarregando(false));
+  }, [empresa?.id]);
 
   return (
     <div className="space-y-8">
       {/* Company Overview */}
       <section>
+        {perfil?.bannerUrl && (
+          <div className="h-24 sm:h-32 rounded-xl overflow-hidden mb-4 bg-gray-100">
+            <img src={perfil.bannerUrl} alt="Banner da empresa" className="w-full h-full object-cover" />
+          </div>
+        )}
         <div className="flex items-center gap-3 mb-4">
-          <div className="w-10 h-10 bg-paleGreen rounded-xl flex items-center justify-center">
-            <Building2 size={20} className="text-deepGreen" />
+          <div className="w-10 h-10 bg-paleGreen rounded-xl flex items-center justify-center overflow-hidden">
+            {perfil?.logoUrl ? (
+              <img src={perfil.logoUrl} alt="Logo da empresa" className="w-full h-full object-cover" />
+            ) : (
+              <Building2 size={20} className="text-deepGreen" />
+            )}
           </div>
           <h3 className="text-lg font-bold text-deepGreen font-PrimaryFont">
             Sobre a Empresa
           </h3>
         </div>
 
-        <div className="bg-gray-50 rounded-xl p-6">
+        <div className="bg-gray-50 rounded-xl p-6 space-y-3">
           <p className="font-SecondFont text-gray-700 leading-relaxed">
             Esta vaga foi publicada por <strong className="text-deepGreen">{nomeEmpresa}</strong>.
           </p>
-          <p className="font-SecondFont text-gray-500 text-sm mt-3">
-            O perfil completo da empresa ainda não está disponível nesta página.
-          </p>
+
+          {carregando ? (
+            <p className="font-SecondFont text-gray-500 text-sm">Carregando perfil...</p>
+          ) : perfil?.description ? (
+            <p className="font-SecondFont text-gray-700 leading-relaxed">{perfil.description}</p>
+          ) : (
+            <p className="font-SecondFont text-gray-500 text-sm">
+              Essa empresa ainda não preencheu uma descrição de perfil.
+            </p>
+          )}
+
+          {perfil?.Address?.city && (
+            <p className="font-SecondFont text-gray-500 text-sm flex items-center gap-2">
+              <MapPin size={14} aria-hidden="true" />
+              {perfil.Address.city}
+              {perfil.Address.state ? ` - ${perfil.Address.state}` : ""}
+            </p>
+          )}
         </div>
       </section>
 

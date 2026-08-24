@@ -108,7 +108,27 @@ O que precisa ser feito:
 
 4. SEM ENDPOINT PÚBLICO DE PERFIL DE EMPRESA
 -----------------------------------------------
-Problema:
+[RESOLVIDO] Criado GET /company/:id (sem login), retornando id, name,
+  fantasyName, description, openingDate, logoUrl, bannerUrl,
+  facebookUrl/instagramUrl/linkedinUrl/websiteUrl e Address (city,
+  state) — NUNCA email/senha/cnpj/telefone (testado explicitamente,
+  ver item 11). A aba "Empresa" da vaga (enterprise.tsx) agora busca e
+  exibe esses dados de verdade. Redes sociais: adicionados os 4
+  campos ao UserCompany (migration add_company_social_links),
+  editáveis em editProfileForm.tsx. A seção "Redes Sociais da
+  Empresa" em pages/JobPage/index.tsx, que tinha 4 ícones fixos com
+  href="#" pra qualquer empresa, agora busca o perfil público e só
+  mostra os ícones das redes que a empresa preencheu (a seção some
+  inteira se nenhuma foi preenchida). O mesmo foi replicado na aba
+  "Empresa" do PRÓPRIO perfil (aboutCompanyProfile/aboutCompany.tsx,
+  visto por quem está logado como a empresa) — antes só mostrava a
+  descrição, sem nenhuma rede social. O avatar de logo no herói da
+  página da vaga (pages/JobPage/index.tsx) e no card "Área da empresa
+  contratante" (components/company/profile/banner.tsx) mostravam um
+  ícone de prédio fixo mesmo com logo já cadastrada — corrigidos pra
+  usar a imagem real (fallback pro ícone só quando não há logo).
+
+Problema (histórico):
   A página da vaga (client/src/pages/JobPage) tem uma aba "Empresa"
   que antes mostrava um perfil fictício completo (fundação, nº de
   associados, valores da empresa etc.). Isso foi trocado por uma
@@ -161,7 +181,15 @@ O que precisa ser feito:
 
 6. MODELO UserCompany COM TRÊS CAMPOS DE "NOME" SEM DEFINIÇÃO CLARA
 -----------------------------------------------------------------------
-Problema:
+[RESOLVIDO, sem alterar o schema] Documentado em schema.prisma, acima
+  do model UserCompany: name = nome de exibição/fallback (usado quando
+  fantasyName está vazio), fantasyName = nome fantasia (exibição
+  pública prioritária, é o que GET /company/:id retorna), socialReason
+  = razão social (documento legal, nunca exposta publicamente). Os 3
+  campos continuam existindo — não é uma migration destrutiva — mas
+  agora tem propósito definido e documentado.
+
+Problema (histórico):
   O modelo UserCompany tem três campos que soam como "nome da empresa":
     - name
     - socialReason (Razão Social)
@@ -194,7 +222,47 @@ O que precisa ser definido:
 7. CADASTRO DE EMPRESA SEM CAMPO DE DESCRIÇÃO — TELA DE EDIÇÃO EXISTE NO
    FRONT MAS NÃO SALVA (FALTA BACKEND)
 --------------------------------------------------------------------------------
-Problema:
+[RESOLVIDO] Criado PATCH /company/update-profile (description) e
+  POST /company/logo, POST /company/banner — upload via multer com
+  FileInterceptor em memória (mesmo padrão de curriculum/import-pdf,
+  storage: undefined), sem gravar em disco: o buffer é convertido pra
+  data URI base64 e salvo direto em logoUrl/bannerUrl no UserCompany
+  (migration add_company_logo_banner). editProfileForm.tsx conectado
+  de verdade — salva descrição e sobe as imagens selecionadas.
+  board.tsx e a aba "Empresa" da vaga (item 4) já exibem logo/banner
+  reais quando existem.
+
+  Correções de padrão feitas depois de comparar com o resto do
+  código (o padrão foi definido por outra pessoa e não deveria ser
+  reinventado): a primeira versão do upload usava disk storage
+  (multer + pasta uploads/ + serve estático) — refeito pra seguir o
+  padrão real do projeto (curriculum.controller.ts, import-pdf:
+  FileInterceptor com storage: undefined, tudo em memória, nunca
+  grava em disco); os DTOs de update (UpdateCompanyProfileDto,
+  UpdateCompanyCadastroDto) eram classes escritas do zero — refeitos
+  pra usar PartialType/OmitType/PickType do @nestjs/mapped-types em
+  cima do CompanyDto já existente, igual ao UpdateVagaDto; o erro de
+  "empresa não encontrada" em GET /company/:id usava
+  NotFoundException (404) — trocado por ConflictException (409), que
+  é o padrão usado em TODO o resto do repo (vaga.service.ts,
+  curriculum.service.ts) pra qualquer "não encontrado", mesmo não
+  sendo o status HTTP tecnicamente mais correto; e o serviço do
+  front (client/src/services/company.ts) tinha uma função helper
+  genérica de erro — trocado pelo padrão repetido com mensagem
+  específica por ação, igual vaga.ts/curriculum.ts.
+
+  Enquanto testava esse fluxo achei e corrigi um bug pré-existente
+  não relacionado a essas mudanças: createCompany() passava
+  openingDate como string crua pro Prisma (que exige Date),
+  quebrando com 500 QUALQUER tentativa de POST /company/singup — ver
+  item 11.
+
+  A tela "Configurações" (item 10) teve o mesmo tratamento: o botão
+  "Configurações" saiu do dropdown "Minha Conta" no header
+  (headerCompany.tsx) e virou link direto no menu principal, ao lado
+  de PERFIL e VAGAS.
+
+Problema (histórico):
   O campo "Descrição da empresa" foi removido do formulário de cadastro
   (registerTwo.tsx, componente da empresa) de propósito — não fazia
   sentido pedir um texto de perfil "bonito" logo no cadastro, isso é
@@ -345,7 +413,14 @@ O que precisa ser feito:
 10. TELA DE "CONFIGURAÇÕES" DA EMPRESA CRIADA NO FRONT, SEM BACKEND
     PRA SALVAR
 ---------------------------------------------------------------------
-Problema:
+[RESOLVIDO] Criado PATCH /company/update-cadastro (name, fantasyName,
+  socialReason, phone, openingDate, address — faz upsert do
+  AddressCompany). CNPJ continua bloqueado no front, de propósito.
+  GET /company/profile-comapany agora inclui Address na resposta,
+  então companySettingsForm.tsx já chega pré-preenchido com o
+  endereço cadastrado. handleSave() conectado de verdade.
+
+Problema (histórico):
   Criada a tela de Configurações da empresa, separada da tela
   "Editar perfil" (item 7) como planejado — essa aqui é só pra editar
   dados de CADASTRO, não dado de perfil público:
@@ -384,3 +459,68 @@ O que precisa ser feito:
     campos de endereço com o que já foi cadastrado.
   - Depois de existir, conectar o handleSave() de
     companySettingsForm.tsx (hoje só mostra um toast) nesse endpoint.
+
+
+11. CADASTRO DE EMPRESA QUEBRADO (openingDate cru pro Prisma)
+-------------------------------------------------------------------
+[RESOLVIDO] company.service.ts, createCompany(): passava
+  `openingDate: companyData.openingDate` (string vinda do DTO) direto
+  pro Prisma, que exige um objeto Date pra coluna DateTime — TODA
+  tentativa de POST /company/singup retornava 500
+  (PrismaClientValidationError). Corrigido com
+  `new Date(companyData.openingDate)`. Achado ao tentar criar
+  empresas de teste pros itens 4/7/10 (ver acima) — bug pré-existente,
+  não relacionado a nenhuma dessas mudanças. Testado com 3 signups
+  reais depois da correção, todos criando a empresa e o endereço
+  corretamente.
+
+
+12. SUÍTE DE TESTES AUTOMATIZADOS DO BACKEND QUEBRADA (Jest)
+-----------------------------------------------------------------
+Problema:
+  `npm run test` (dentro de server/) falha em TODOS os specs
+  existentes (prisma.service.spec.ts, curriculum.service.spec.ts,
+  curriculum.controller.spec.ts) com o mesmo erro:
+    Cannot find module 'generated/prisma' from 'api/prisma/prisma.service.ts'
+  O Prisma Client é gerado em server/generated/prisma (fora da pasta
+  src/), e a config do Jest no package.json (rootDir: "src") não tem
+  um moduleNameMapper pra resolver esse caminho. Confirmado que é
+  falha pré-existente desde o primeiro commit do repositório — não
+  foi quebrado por nenhuma mudança recente. Nenhum outro módulo
+  (vaga, users, company) tem arquivo de teste, então não há um
+  padrão de testes sendo seguido/quebrado nos módulos novos.
+
+Impacto de negócio:
+  - Nenhuma mudança no backend tem cobertura de teste automatizada
+    rodando de verdade — a suíte inteira falha antes mesmo de
+    executar um teste.
+
+O que precisa ser feito:
+  - Adicionar um moduleNameMapper no bloco "jest" do package.json
+    mapeando "generated/prisma" pro caminho real
+    (<rootDir>/../generated/prisma), ou mover a geração do Prisma
+    Client pra dentro de src/.
+
+
+13. EMPRESA NÃO CONSEGUE TROCAR SENHA NEM EXCLUIR A PRÓPRIA CONTA
+-----------------------------------------------------------------------
+Problema:
+  O candidato já tem as duas coisas: PATCH /users/update aceita
+  currentPassword/newPassword (users.controller.ts,
+  users/dto/update-user-deto.ts), com tela funcionando em
+  infoLogin.tsx; e DELETE /users/delete/:id, com botão funcionando em
+  myData.tsx. A empresa não tem NENHUMA das duas — nem endpoint nem
+  tela. Não estava registrado neste arquivo antes; apareceu ao
+  comparar os dois lados (candidato x empresa) durante o trabalho nos
+  itens 4/7/10.
+
+Impacto de negócio:
+  - Empresa não tem como trocar a própria senha nem encerrar a conta,
+    diferente do candidato.
+
+O que precisa ser feito:
+  - Espelhar o padrão do candidato: PATCH /company/update-senha (ou
+    incluir currentPassword/newPassword no update-cadastro) e
+    DELETE /company/delete/:id, protegidos por auth de empresa.
+  - Criar as telas correspondentes (provavelmente dentro da tela de
+    Configurações já existente, empresaProfile/configuracoes).

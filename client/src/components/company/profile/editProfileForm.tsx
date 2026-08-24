@@ -1,37 +1,55 @@
 import { useState } from "react";
 import { useNavigate } from "react-router-dom";
-import { Building2, Image as ImageIcon, ArrowLeft, Info, FileText } from "lucide-react";
+import { Building2, Image as ImageIcon, ArrowLeft, FileText, Loader2, Facebook, Instagram, Linkedin, Globe } from "lucide-react";
 import { toast } from "sonner";
 import { useUser } from "../userContextCompany";
+import { updateCompanyProfile, uploadCompanyLogo, uploadCompanyBanner } from "@/services/company";
 
 const EditProfileForm = () => {
   const navigate = useNavigate();
-  const { UserData } = useUser();
+  const { UserData, refreshUser } = useUser();
   const user = UserData.user;
 
-  const [logoPreview, setLogoPreview] = useState<string | null>(null);
-  const [bannerPreview, setBannerPreview] = useState<string | null>(null);
+  const [logoFile, setLogoFile] = useState<File | null>(null);
+  const [bannerFile, setBannerFile] = useState<File | null>(null);
+  const [logoPreview, setLogoPreview] = useState<string | null>(user.logoUrl || null);
+  const [bannerPreview, setBannerPreview] = useState<string | null>(user.bannerUrl || null);
   const [description, setDescription] = useState(user.description || "");
+  const [facebookUrl, setFacebookUrl] = useState(user.facebookUrl || "");
+  const [instagramUrl, setInstagramUrl] = useState(user.instagramUrl || "");
+  const [linkedinUrl, setLinkedinUrl] = useState(user.linkedinUrl || "");
+  const [websiteUrl, setWebsiteUrl] = useState(user.websiteUrl || "");
+  const [salvando, setSalvando] = useState(false);
 
   const handleLogoChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0];
     if (!file) return;
+    setLogoFile(file);
     setLogoPreview(URL.createObjectURL(file));
   };
 
   const handleBannerChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0];
     if (!file) return;
+    setBannerFile(file);
     setBannerPreview(URL.createObjectURL(file));
   };
 
-  const handleSave = (e: React.FormEvent) => {
+  const handleSave = async (e: React.FormEvent) => {
     e.preventDefault();
-    toast.info("Ainda não é possível salvar essas alterações", {
-      description:
-        "Não existe endpoint de edição de perfil no backend ainda (ver pendencias.txt, item 7). Essa tela está pronta pra ser conectada quando ele existir.",
-      duration: 5000,
-    });
+    setSalvando(true);
+    try {
+      await updateCompanyProfile({ description, facebookUrl, instagramUrl, linkedinUrl, websiteUrl });
+      if (logoFile) await uploadCompanyLogo(logoFile);
+      if (bannerFile) await uploadCompanyBanner(bannerFile);
+      await refreshUser();
+      toast.success("Perfil atualizado!");
+      navigate("/empresa");
+    } catch (error: any) {
+      toast.error(error.message || "Erro ao salvar alterações");
+    } finally {
+      setSalvando(false);
+    }
   };
 
   const plainInputClass =
@@ -57,15 +75,6 @@ const EditProfileForm = () => {
             <h1 className="text-2xl font-bold text-deepGreen font-PrimaryFont">Editar perfil</h1>
             <p className="text-gray-600 mt-2">
               Complete a foto, o banner e a descrição que aparecem pra quem visita o perfil da sua empresa
-            </p>
-          </div>
-
-          <div className="flex items-start gap-3 bg-paleGreen/30 border border-paleGreen rounded-xl p-4 mb-8">
-            <Info size={20} className="text-deepGreen flex-shrink-0 mt-0.5" aria-hidden="true" />
-            <p className="text-sm text-gray-700">
-              Essa tela ainda não salva as alterações de verdade — falta um endpoint no backend
-              pra isso (já documentado no pendencias.txt). Por enquanto dá pra ver como o
-              formulário vai funcionar.
             </p>
           </div>
 
@@ -137,13 +146,83 @@ const EditProfileForm = () => {
               />
             </div>
 
+            {/* Redes sociais */}
+            <div className="pt-2 space-y-4">
+              <h2 className="font-PrimaryFont text-lg text-deepGreen font-semibold">Redes sociais</h2>
+
+              <div>
+                <label htmlFor="facebookUrl" className={labelClass}>
+                  <Facebook size={16} className="inline mr-1.5 -mt-0.5" aria-hidden="true" />
+                  Facebook
+                </label>
+                <input
+                  type="url"
+                  id="facebookUrl"
+                  name="facebookUrl"
+                  value={facebookUrl}
+                  onChange={(e) => setFacebookUrl(e.target.value)}
+                  placeholder="https://facebook.com/suaempresa"
+                  className={plainInputClass}
+                />
+              </div>
+
+              <div>
+                <label htmlFor="instagramUrl" className={labelClass}>
+                  <Instagram size={16} className="inline mr-1.5 -mt-0.5" aria-hidden="true" />
+                  Instagram
+                </label>
+                <input
+                  type="url"
+                  id="instagramUrl"
+                  name="instagramUrl"
+                  value={instagramUrl}
+                  onChange={(e) => setInstagramUrl(e.target.value)}
+                  placeholder="https://instagram.com/suaempresa"
+                  className={plainInputClass}
+                />
+              </div>
+
+              <div>
+                <label htmlFor="linkedinUrl" className={labelClass}>
+                  <Linkedin size={16} className="inline mr-1.5 -mt-0.5" aria-hidden="true" />
+                  LinkedIn
+                </label>
+                <input
+                  type="url"
+                  id="linkedinUrl"
+                  name="linkedinUrl"
+                  value={linkedinUrl}
+                  onChange={(e) => setLinkedinUrl(e.target.value)}
+                  placeholder="https://linkedin.com/company/suaempresa"
+                  className={plainInputClass}
+                />
+              </div>
+
+              <div>
+                <label htmlFor="websiteUrl" className={labelClass}>
+                  <Globe size={16} className="inline mr-1.5 -mt-0.5" aria-hidden="true" />
+                  Website
+                </label>
+                <input
+                  type="url"
+                  id="websiteUrl"
+                  name="websiteUrl"
+                  value={websiteUrl}
+                  onChange={(e) => setWebsiteUrl(e.target.value)}
+                  placeholder="https://suaempresa.com.br"
+                  className={plainInputClass}
+                />
+              </div>
+            </div>
+
             <div className="flex flex-col sm:flex-row gap-3 pt-2">
               <button
                 type="submit"
-                className="flex-1 flex items-center justify-center gap-2 bg-deepGreen text-white py-4 rounded-xl font-semibold text-lg hover:bg-mediumGreen transition-colors duration-300"
+                disabled={salvando}
+                className="flex-1 flex items-center justify-center gap-2 bg-deepGreen text-white py-4 rounded-xl font-semibold text-lg hover:bg-mediumGreen transition-colors duration-300 disabled:opacity-60"
               >
-                <FileText size={20} aria-hidden="true" />
-                SALVAR ALTERAÇÕES
+                {salvando ? <Loader2 size={20} className="animate-spin" aria-hidden="true" /> : <FileText size={20} aria-hidden="true" />}
+                {salvando ? "Salvando..." : "SALVAR ALTERAÇÕES"}
               </button>
               <button
                 type="button"

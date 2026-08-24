@@ -56,6 +56,22 @@ export class CompanyDto {
   @IsString()
   openingDate: string;
 
+  @IsOptional()
+  @IsString()
+  facebookUrl?: string;
+
+  @IsOptional()
+  @IsString()
+  instagramUrl?: string;
+
+  @IsOptional()
+  @IsString()
+  linkedinUrl?: string;
+
+  @IsOptional()
+  @IsString()
+  websiteUrl?: string;
+
   @ValidateNested()
   @Type(() => AddressCompanyDTO)
   @IsNotEmpty()

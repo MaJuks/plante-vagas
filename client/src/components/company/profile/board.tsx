@@ -9,6 +9,12 @@ const Board = (props: {
   descricao_longa: string;
   vagas: Vaga[];
   loadingVagas?: boolean;
+  logoUrl?: string | null;
+  bannerUrl?: string | null;
+  facebookUrl?: string | null;
+  instagramUrl?: string | null;
+  linkedinUrl?: string | null;
+  websiteUrl?: string | null;
 }) => {
   const [activeTab, setActiveTab] = useState("vaga");
 
@@ -20,12 +26,28 @@ const Board = (props: {
   return (
     <section className="bg-white rounded-2xl shadow-lg border border-gray-100 overflow-hidden font-SecondFont">
       {/* Banner */}
-      <div className="h-24 sm:h-32 bg-gray-100 border-b border-gray-200" />
+      <div className="h-24 sm:h-32 bg-gray-100 border-b border-gray-200 overflow-hidden">
+        {props.bannerUrl && (
+          <img
+            src={props.bannerUrl}
+            alt="Banner da empresa"
+            className="w-full h-full object-cover"
+          />
+        )}
+      </div>
 
       {/* Header */}
       <div className="px-6 sm:px-8 pb-6 sm:pb-8 border-b border-gray-100">
-        <div className="w-20 h-20 sm:w-24 sm:h-24 bg-white rounded-2xl shadow-sm flex items-center justify-center -mt-10 sm:-mt-12 mb-4 border-2 border-white">
-          <Building2 size={32} className="text-gray-400" aria-hidden="true" />
+        <div className="w-20 h-20 sm:w-24 sm:h-24 bg-white rounded-2xl shadow-sm flex items-center justify-center -mt-10 sm:-mt-12 mb-4 border-2 border-white overflow-hidden">
+          {props.logoUrl ? (
+            <img
+              src={props.logoUrl}
+              alt="Logo da empresa"
+              className="w-full h-full object-cover"
+            />
+          ) : (
+            <Building2 size={32} className="text-gray-400" aria-hidden="true" />
+          )}
         </div>
         <h1 className="text-2xl sm:text-3xl font-bold text-deepGreen font-PrimaryFont">
           {props.name}
@@ -63,7 +85,13 @@ const Board = (props: {
             ? <p className="text-gray-500 text-center py-8">Carregando vagas...</p>
             : <VagasCompanyProfile vagas={props.vagas} />
         ) : (
-          <AboutCompany descricao_longa={props.descricao_longa} />
+          <AboutCompany
+            descricao_longa={props.descricao_longa}
+            facebookUrl={props.facebookUrl}
+            instagramUrl={props.instagramUrl}
+            linkedinUrl={props.linkedinUrl}
+            websiteUrl={props.websiteUrl}
+          />
         )}
       </div>
     </section>

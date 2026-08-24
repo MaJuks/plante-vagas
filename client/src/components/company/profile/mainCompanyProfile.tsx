@@ -39,6 +39,12 @@ export default function MainCompanyProfile() {
           descricao_longa={user?.description ?? ""}
           vagas={vagas}
           loadingVagas={loading}
+          logoUrl={user?.logoUrl}
+          bannerUrl={user?.bannerUrl}
+          facebookUrl={user?.facebookUrl}
+          instagramUrl={user?.instagramUrl}
+          linkedinUrl={user?.linkedinUrl}
+          websiteUrl={user?.websiteUrl}
         />
       </div>
     </div>

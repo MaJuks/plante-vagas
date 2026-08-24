@@ -5,20 +5,15 @@ import Header from "@/components/home-page/headers/header";
 import MainJobPage from "@/components/JobPage/mainJobPage/mainJobpage";
 import { Facebook, Instagram, Linkedin, Globe, ArrowLeft, Building2, Clock, Loader2 } from "lucide-react";
 import { getVagaById, type Vaga } from "@/services/vaga";
+import { getPublicCompany, type PublicCompany } from "@/services/company";
 import { timeAgo } from "@/utils/timeAgo";
-
-const socialLinks = [
-  { icon: Facebook, href: "#", label: "Facebook", color: "hover:bg-blue-600" },
-  { icon: Instagram, href: "#", label: "Instagram", color: "hover:bg-pink-600" },
-  { icon: Linkedin, href: "#", label: "LinkedIn", color: "hover:bg-blue-700" },
-  { icon: Globe, href: "#", label: "Website", color: "hover:bg-gray-600" },
-];
 
 const JobPage = () => {
   const navigate = useNavigate();
   const { id } = useParams<{ id: string }>();
 
   const [vaga, setVaga] = useState<Vaga | null>(null);
+  const [empresa, setEmpresa] = useState<PublicCompany | null>(null);
   const [loading, setLoading] = useState(true);
   const [erro, setErro] = useState<string | null>(null);
 
@@ -30,6 +25,20 @@ const JobPage = () => {
       .catch((e) => setErro(e.message || "Erro ao buscar vaga"))
       .finally(() => setLoading(false));
   }, [id]);
+
+  useEffect(() => {
+    if (!vaga?.empresa?.id) return;
+    getPublicCompany(vaga.empresa.id)
+      .then(setEmpresa)
+      .catch(() => setEmpresa(null));
+  }, [vaga?.empresa?.id]);
+
+  const socialLinks = [
+    { icon: Facebook, href: empresa?.facebookUrl, label: "Facebook", color: "hover:bg-blue-600" },
+    { icon: Instagram, href: empresa?.instagramUrl, label: "Instagram", color: "hover:bg-pink-600" },
+    { icon: Linkedin, href: empresa?.linkedinUrl, label: "LinkedIn", color: "hover:bg-blue-700" },
+    { icon: Globe, href: empresa?.websiteUrl, label: "Website", color: "hover:bg-gray-600" },
+  ].filter((social): social is typeof social & { href: string } => !!social.href);
 
   const nomeEmpresa = vaga?.empresa?.fantasyName || vaga?.empresa?.name;
 
@@ -61,7 +70,11 @@ const JobPage = () => {
             {vaga && (
               <div className="flex flex-col md:flex-row items-center gap-6">
                 <div className="w-28 h-28 bg-white rounded-2xl shadow-lg flex items-center justify-center overflow-hidden">
-                  <Building2 size={48} className="text-gray-300" />
+                  {empresa?.logoUrl ? (
+                    <img src={empresa.logoUrl} alt={`Logo de ${nomeEmpresa}`} className="w-full h-full object-cover" />
+                  ) : (
+                    <Building2 size={48} className="text-gray-300" />
+                  )}
                 </div>
                 <div className="text-center md:text-left">
                   <span className="inline-flex items-center gap-2 bg-white/20 text-white px-3 py-1 rounded-full text-xs font-SecondFont mb-3">
@@ -101,26 +114,30 @@ const JobPage = () => {
               <MainJobPage vaga={vaga} />
 
               {/* Social Links Section */}
-              <div className="mt-12 pt-8 border-t border-gray-200">
-                <h3 className="text-xl font-bold text-deepGreen font-PrimaryFont mb-6">
-                  Redes Sociais da Empresa
-                </h3>
-                <div className="flex flex-wrap gap-3">
-                  {socialLinks.map((social) => (
-                    <a
-                      key={social.label}
-                      href={social.href}
-                      aria-label={social.label}
-                      className={`flex items-center gap-2 bg-gray-100 text-gray-700 px-4 py-3 rounded-xl
-                               font-SecondFont font-medium transition-all duration-300
-                               hover:text-white hover:shadow-lg ${social.color}`}
-                    >
-                      <social.icon size={20} />
-                      <span>{social.label}</span>
-                    </a>
-                  ))}
+              {socialLinks.length > 0 && (
+                <div className="mt-12 pt-8 border-t border-gray-200">
+                  <h3 className="text-xl font-bold text-deepGreen font-PrimaryFont mb-6">
+                    Redes Sociais da Empresa
+                  </h3>
+                  <div className="flex flex-wrap gap-3">
+                    {socialLinks.map((social) => (
+                      <a
+                        key={social.label}
+                        href={social.href}
+                        target="_blank"
+                        rel="noopener noreferrer"
+                        aria-label={social.label}
+                        className={`flex items-center gap-2 bg-gray-100 text-gray-700 px-4 py-3 rounded-xl
+                                 font-SecondFont font-medium transition-all duration-300
+                                 hover:text-white hover:shadow-lg ${social.color}`}
+                      >
+                        <social.icon size={20} />
+                        <span>{social.label}</span>
+                      </a>
+                    ))}
+                  </div>
                 </div>
-              </div>
+              )}
             </>
           )}
         </div>
