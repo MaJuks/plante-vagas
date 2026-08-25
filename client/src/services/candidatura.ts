@@ -8,6 +8,8 @@ export interface Candidatura {
   statusCandidato: boolean;
   dataConclusao?: string;
   observacoes?: string;
+  rejeitado: boolean;
+  motivoRejeicao?: string;
   origem: string;
   candidatoId: number;
   etapaId: number;
@@ -18,16 +20,18 @@ export interface Candidatura {
       id: number;
       nome: string;
       cargo: string;
-      empresa?: { id: number; fantasyName: string; name: string };
+      empresa?: { id: number; fantasyName: string; name: string; logoUrl?: string | null };
     };
   };
-  candidato?: { id: number; name: string; email: string; phone: string };
+  candidato?: { id: number; name: string; email: string; phone: string; photoUrl?: string | null };
 }
 
 export interface MoveCandidaturaPayload {
   etapaId?: number;
   statusCandidato?: boolean;
   observacoes?: string;
+  rejeitado?: boolean;
+  motivoRejeicao?: string;
 }
 
 async function handle<T>(response: Response): Promise<T> {

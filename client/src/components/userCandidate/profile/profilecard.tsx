@@ -15,8 +15,12 @@ export default function ProfileCard() {
     <div className="min-h-screen bg-gray-50 py-8 sm:py-12 px-4 sm:px-8">
       <div className="max-w-4xl mx-auto flex flex-col gap-6">
         <div className="bg-white rounded-2xl shadow-sm border border-gray-100 p-6 sm:p-10 flex flex-col md:flex-row items-center gap-6 md:gap-10 font-SecondFont">
-          <div className="w-24 h-24 md:w-28 md:h-28 bg-paleGreen/40 rounded-full flex items-center justify-center flex-shrink-0">
-            <UserCircle size={56} className="text-deepGreen" aria-hidden="true" />
+          <div className="w-24 h-24 md:w-28 md:h-28 bg-paleGreen/40 rounded-full flex items-center justify-center flex-shrink-0 overflow-hidden">
+            {user.photoUrl ? (
+              <img src={user.photoUrl} alt="Foto de perfil" className="w-full h-full object-cover" />
+            ) : (
+              <UserCircle size={56} className="text-deepGreen" aria-hidden="true" />
+            )}
           </div>
 
           <div className="text-center md:text-left flex-1">

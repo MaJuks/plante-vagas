@@ -12,4 +12,12 @@ export class MoveCandidaturaDto {
   @IsOptional()
   @IsString()
   observacoes?: string;
+
+  @IsOptional()
+  @IsBoolean()
+  rejeitado?: boolean;
+
+  @IsOptional()
+  @IsString()
+  motivoRejeicao?: string;
 }

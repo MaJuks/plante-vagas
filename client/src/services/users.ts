@@ -33,6 +33,20 @@ export async function updateUser(data: {
   return response.json();
 }
 
+export async function uploadUserPhoto(file: File) {
+  const formData = new FormData();
+  formData.append("file", file);
+  const response = await authFetch(`${USERS_URL}/photo`, {
+    method: "POST",
+    body: formData,
+  });
+  if (!response.ok) {
+    const error = await response.json();
+    throw new Error(error.message || "Erro ao enviar foto");
+  }
+  return response.json();
+}
+
 export async function deleteUser() {
   const userId = localStorage.getItem("userId");
   const response = await authFetch(`${USERS_URL}/delete/${userId}`, {

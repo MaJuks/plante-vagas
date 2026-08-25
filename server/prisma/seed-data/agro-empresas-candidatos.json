@@ -1,0 +1,746 @@
+{
+  "empresas": [
+    {
+      "fantasyName": "Vale do Cerrado",
+      "name": "Cooperativa Agropecuária Vale do Cerrado",
+      "socialReason": "Cooperativa Agropecuária Vale do Cerrado LTDA",
+      "cnpj": "51.503.755/8889-22",
+      "description": "Cooperativa de produtores de soja e milho atuando no sudoeste de Goiás desde 1998, com armazenagem própria e assistência técnica aos cooperados.",
+      "phone": "(64) 3611-2200",
+      "openingDate": "1998-03-14",
+      "address": {
+        "city": "Rio Verde",
+        "state": "GO",
+        "district": "Setor Industrial",
+        "street": "Avenida Presidente Vargas",
+        "number": "1450",
+        "postalCode": "75901-010"
+      },
+      "email": "valedocerrado@gmail.com",
+      "password": "Vale123@"
+    },
+    {
+      "fantasyName": "Grão Norte",
+      "name": "Grão Norte Comercial Agrícola LTDA",
+      "socialReason": "Grão Norte Comercial Agrícola LTDA",
+      "cnpj": "03.253.851/0699-24",
+      "description": "Trading de grãos (soja, milho e algodão) com operação de originação direta no produtor e exportação via portos do arco norte.",
+      "phone": "(66) 3545-3300",
+      "openingDate": "2005-07-22",
+      "address": {
+        "city": "Sorriso",
+        "state": "MT",
+        "district": "Centro",
+        "street": "Avenida Blumenau",
+        "number": "890",
+        "postalCode": "78890-000"
+      },
+      "email": "graonorte@gmail.com",
+      "password": "Grao123@"
+    },
+    {
+      "fantasyName": "AgroPrimavera",
+      "name": "AgroPrimavera Insumos e Sementes LTDA",
+      "socialReason": "AgroPrimavera Insumos e Sementes LTDA",
+      "cnpj": "45.376.465/5765-61",
+      "description": "Distribuidora de sementes certificadas e defensivos agrícolas para produtores de grãos do Médio-Norte de Mato Grosso.",
+      "phone": "(66) 3498-1177",
+      "openingDate": "2011-02-09",
+      "address": {
+        "city": "Primavera do Leste",
+        "state": "MT",
+        "district": "Jardim Europa",
+        "street": "Rua Maringá",
+        "number": "320",
+        "postalCode": "78850-000"
+      },
+      "email": "agroprimavera@gmail.com",
+      "password": "AgroPrimavera123@"
+    },
+    {
+      "fantasyName": "Boa Esperança",
+      "name": "Fazendas Reunidas Boa Esperança S/A",
+      "socialReason": "Fazendas Reunidas Boa Esperança S/A",
+      "cnpj": "86.133.195/8156-39",
+      "description": "Grupo produtor de soja, algodão e café no oeste da Bahia, com unidade própria de beneficiamento de algodão.",
+      "phone": "(77) 3614-5522",
+      "openingDate": "1989-11-03",
+      "address": {
+        "city": "Barreiras",
+        "state": "BA",
+        "district": "Vila Rica",
+        "street": "Avenida Antônio Balduíno",
+        "number": "210",
+        "postalCode": "47800-090"
+      },
+      "email": "boaesperanca@gmail.com",
+      "password": "Boa123@"
+    },
+    {
+      "fantasyName": "TerraForte",
+      "name": "TerraForte Máquinas Agrícolas LTDA",
+      "socialReason": "TerraForte Comércio de Máquinas Agrícolas LTDA",
+      "cnpj": "08.627.300/5764-08",
+      "description": "Revenda autorizada de tratores, colheitadeiras e implementos agrícolas, com oficina de manutenção e peças no oeste do Paraná.",
+      "phone": "(45) 3225-4488",
+      "openingDate": "2002-05-18",
+      "address": {
+        "city": "Cascavel",
+        "state": "PR",
+        "district": "Coqueiral",
+        "street": "Avenida Brasil",
+        "number": "5670",
+        "postalCode": "85806-001"
+      },
+      "email": "terraforte@gmail.com",
+      "password": "TerraForte123@"
+    },
+    {
+      "fantasyName": "Pampa Grãos",
+      "name": "Pampa Grãos Exportação LTDA",
+      "socialReason": "Pampa Grãos Exportação e Comércio LTDA",
+      "cnpj": "66.727.563/7073-44",
+      "description": "Comercializadora de grãos (soja e trigo) com foco em exportação, atuando na região de Passo Fundo desde a década de 90.",
+      "phone": "(54) 3311-7766",
+      "openingDate": "1994-09-01",
+      "address": {
+        "city": "Passo Fundo",
+        "state": "RS",
+        "district": "Boqueirão",
+        "street": "Rua Uruguai",
+        "number": "1200",
+        "postalCode": "99010-112"
+      },
+      "email": "pampagraos@gmail.com",
+      "password": "Pampa123@"
+    },
+    {
+      "fantasyName": "NutriCampo",
+      "name": "NutriCampo Nutrição Animal LTDA",
+      "socialReason": "NutriCampo Indústria de Nutrição Animal LTDA",
+      "cnpj": "85.183.500/4166-91",
+      "description": "Fábrica de suplementos e rações para pecuária de corte e leite, atendendo produtores do Triângulo Mineiro.",
+      "phone": "(34) 3218-6600",
+      "openingDate": "2008-01-27",
+      "address": {
+        "city": "Uberlândia",
+        "state": "MG",
+        "district": "Tibery",
+        "street": "Avenida Rondon Pacheco",
+        "number": "3800",
+        "postalCode": "38405-142"
+      },
+      "email": "nutricampo@gmail.com",
+      "password": "NutriCampo123@"
+    },
+    {
+      "fantasyName": "AgroTech Soluções",
+      "name": "AgroTech Soluções Digitais LTDA",
+      "socialReason": "AgroTech Soluções Digitais para o Agronegócio LTDA",
+      "cnpj": "81.415.953/6706-06",
+      "description": "Startup de agricultura de precisão: monitoramento de lavouras por imagem de satélite e sensores IoT em campo.",
+      "phone": "(16) 3512-9090",
+      "openingDate": "2017-04-11",
+      "address": {
+        "city": "Ribeirão Preto",
+        "state": "SP",
+        "district": "Jardim Botânico",
+        "street": "Avenida Presidente Vargas",
+        "number": "2450",
+        "postalCode": "14021-000"
+      },
+      "email": "agrotechsolucoes@gmail.com",
+      "password": "AgroTech123@"
+    },
+    {
+      "fantasyName": "Cerrado Fértil",
+      "name": "Cerrado Fértil Fertilizantes LTDA",
+      "socialReason": "Cerrado Fértil Indústria e Comércio de Fertilizantes LTDA",
+      "cnpj": "30.413.779/1559-21",
+      "description": "Formulação e mistura de fertilizantes NPK sob medida para as principais culturas de grãos do cerrado goiano.",
+      "phone": "(61) 3612-3344",
+      "openingDate": "2013-08-05",
+      "address": {
+        "city": "Cristalina",
+        "state": "GO",
+        "district": "Centro",
+        "street": "Avenida Minas Gerais",
+        "number": "580",
+        "postalCode": "73850-000"
+      },
+      "email": "cerradofertil@gmail.com",
+      "password": "Cerrado123@"
+    },
+    {
+      "fantasyName": "Rio Verde Agro",
+      "name": "Rio Verde Agronegócios LTDA",
+      "socialReason": "Rio Verde Agronegócios e Participações LTDA",
+      "cnpj": "27.783.518/1310-38",
+      "description": "Grupo produtor e prestador de serviços agrícolas (plantio e colheita terceirizada) na região sudoeste de Goiás.",
+      "phone": "(64) 3631-9900",
+      "openingDate": "2000-06-30",
+      "address": {
+        "city": "Jataí",
+        "state": "GO",
+        "district": "Jardim Goiás",
+        "street": "Rua T-7",
+        "number": "145",
+        "postalCode": "75802-020"
+      },
+      "email": "rioverdeagro@gmail.com",
+      "password": "Rio123@"
+    },
+    {
+      "fantasyName": "Ouro Verde Sementes",
+      "name": "Sementes Ouro Verde LTDA",
+      "socialReason": "Sementes Ouro Verde Produção e Comércio LTDA",
+      "cnpj": "15.992.982/1147-11",
+      "description": "Produtora e beneficiadora de sementes de soja e milho certificadas, com campos próprios de multiplicação.",
+      "phone": "(44) 3226-7711",
+      "openingDate": "1996-10-14",
+      "address": {
+        "city": "Maringá",
+        "state": "PR",
+        "district": "Zona 7",
+        "street": "Avenida Colombo",
+        "number": "4900",
+        "postalCode": "87020-000"
+      },
+      "email": "ouroverdesementes@gmail.com",
+      "password": "Ouro123@"
+    },
+    {
+      "fantasyName": "Campo Fresco",
+      "name": "Laticínios Campo Fresco LTDA",
+      "socialReason": "Laticínios Campo Fresco Indústria e Comércio LTDA",
+      "cnpj": "19.097.979/7453-53",
+      "description": "Laticínio de médio porte processando leite de produtores dos Campos Gerais, com linha de queijos e iogurtes.",
+      "phone": "(42) 3232-5500",
+      "openingDate": "2004-12-01",
+      "address": {
+        "city": "Castro",
+        "state": "PR",
+        "district": "Água Santa",
+        "street": "Rua Julia da Costa",
+        "number": "670",
+        "postalCode": "84165-000"
+      },
+      "email": "campofresco@gmail.com",
+      "password": "Campo123@"
+    },
+    {
+      "fantasyName": "Serra Dourada Avícola",
+      "name": "Avícola Serra Dourada LTDA",
+      "socialReason": "Avícola Serra Dourada Indústria e Comércio LTDA",
+      "cnpj": "58.226.486/3956-70",
+      "description": "Integradora avícola com granjas próprias e de parceiros, abate e processamento de frango no oeste catarinense.",
+      "phone": "(49) 3322-4400",
+      "openingDate": "1992-02-20",
+      "address": {
+        "city": "Chapecó",
+        "state": "SC",
+        "district": "Efapi",
+        "street": "Avenida Fernando Machado",
+        "number": "1180",
+        "postalCode": "89809-000"
+      },
+      "email": "serradouradaavicola@gmail.com",
+      "password": "Serra123@"
+    },
+    {
+      "fantasyName": "IrrigaMais",
+      "name": "IrrigaMais Sistemas de Irrigação LTDA",
+      "socialReason": "IrrigaMais Sistemas de Irrigação LTDA",
+      "cnpj": "30.331.961/5207-39",
+      "description": "Projeto, instalação e manutenção de pivôs centrais e sistemas de irrigação para lavouras irrigadas no oeste baiano.",
+      "phone": "(77) 3628-1122",
+      "openingDate": "2009-03-16",
+      "address": {
+        "city": "Luís Eduardo Magalhães",
+        "state": "BA",
+        "district": "Centro",
+        "street": "Avenida JK",
+        "number": "990",
+        "postalCode": "47850-000"
+      },
+      "email": "irrigamais@gmail.com",
+      "password": "IrrigaMais123@"
+    },
+    {
+      "fantasyName": "Algodoeira Cristalina",
+      "name": "Algodoeira Cristalina Beneficiamento LTDA",
+      "socialReason": "Algodoeira Cristalina Beneficiamento de Algodão LTDA",
+      "cnpj": "31.607.174/4348-17",
+      "description": "Usina de beneficiamento de algodão em pluma, prestando serviço a produtores da região de Rondonópolis.",
+      "phone": "(66) 3421-8800",
+      "openingDate": "2001-07-09",
+      "address": {
+        "city": "Rondonópolis",
+        "state": "MT",
+        "district": "Vila Aurora",
+        "street": "Avenida Marechal Rondon",
+        "number": "3300",
+        "postalCode": "78735-030"
+      },
+      "email": "algodoeiracristalina@gmail.com",
+      "password": "Algodoeira123@"
+    },
+    {
+      "fantasyName": "Serra Alta Café",
+      "name": "Café Serra Alta Exportadora LTDA",
+      "socialReason": "Café Serra Alta Comércio e Exportação LTDA",
+      "cnpj": "19.606.256/6574-76",
+      "description": "Exportadora de café especial do Cerrado Mineiro, trabalhando diretamente com cafeicultores certificados.",
+      "phone": "(34) 3831-2255",
+      "openingDate": "1985-05-25",
+      "address": {
+        "city": "Patrocínio",
+        "state": "MG",
+        "district": "Centro",
+        "street": "Rua Coronel Sales",
+        "number": "415",
+        "postalCode": "38740-000"
+      },
+      "email": "serraaltacafe@gmail.com",
+      "password": "Serra123@"
+    },
+    {
+      "fantasyName": "Cana Doce Bioenergia",
+      "name": "Usina Cana Doce Bioenergia S/A",
+      "socialReason": "Usina Cana Doce Bioenergia S/A",
+      "cnpj": "07.810.321/7028-04",
+      "description": "Usina de processamento de cana-de-açúcar para etanol e açúcar, com cogeração de energia a partir do bagaço.",
+      "phone": "(16) 3946-3300",
+      "openingDate": "1978-01-10",
+      "address": {
+        "city": "Sertãozinho",
+        "state": "SP",
+        "district": "Vila Trabalhadora",
+        "street": "Rodovia Cândido Portinari",
+        "number": "S/N",
+        "postalCode": "14170-000"
+      },
+      "email": "canadocebioenergia@gmail.com",
+      "password": "Cana123@"
+    },
+    {
+      "fantasyName": "AgroLog",
+      "name": "AgroLog Transportes e Logística LTDA",
+      "socialReason": "AgroLog Transportes e Logística LTDA",
+      "cnpj": "41.985.521/2155-95",
+      "description": "Transportadora especializada em cargas de grãos e insumos agrícolas, com frota própria e armazéns intermediários.",
+      "phone": "(67) 3411-6650",
+      "openingDate": "2006-09-19",
+      "address": {
+        "city": "Dourados",
+        "state": "MS",
+        "district": "Jardim América",
+        "street": "Avenida Marcelino Pires",
+        "number": "2900",
+        "postalCode": "79802-060"
+      },
+      "email": "agrolog@gmail.com",
+      "password": "AgroLog123@"
+    },
+    {
+      "fantasyName": "VetCampo",
+      "name": "VetCampo Saúde Animal LTDA",
+      "socialReason": "VetCampo Comércio de Produtos Veterinários LTDA",
+      "cnpj": "62.501.293/6990-10",
+      "description": "Distribuidora de medicamentos veterinários e vacinas para pecuária de corte, atendendo o Tocantins e entorno.",
+      "phone": "(63) 3215-4470",
+      "openingDate": "2014-11-27",
+      "address": {
+        "city": "Palmas",
+        "state": "TO",
+        "district": "Plano Diretor Sul",
+        "street": "Avenida LO-5",
+        "number": "260",
+        "postalCode": "77020-030"
+      },
+      "email": "vetcampo@gmail.com",
+      "password": "VetCampo123@"
+    },
+    {
+      "fantasyName": "Precision Farm",
+      "name": "Precision Farm Tecnologia Agrícola LTDA",
+      "socialReason": "Precision Farm Tecnologia Agrícola LTDA",
+      "cnpj": "08.974.196/4773-65",
+      "description": "Consultoria e software de agricultura de precisão, mapeamento de solo e recomendação de plantio a taxa variável.",
+      "phone": "(65) 3541-2233",
+      "openingDate": "2016-06-02",
+      "address": {
+        "city": "Lucas do Rio Verde",
+        "state": "MT",
+        "district": "Jardim das Palmeiras",
+        "street": "Avenida Rio Grande do Sul",
+        "number": "710",
+        "postalCode": "78455-000"
+      },
+      "email": "precisionfarm@gmail.com",
+      "password": "Precision123@"
+    }
+  ],
+  "candidatos": [
+    {
+      "name": "João Pedro Almeida",
+      "gender": "Homem",
+      "dateNasc": "1996-03-12",
+      "phone": "(66) 99911-2233",
+      "disablePerson": "Não",
+      "address": {
+        "city": "Sorriso",
+        "state": "MT",
+        "district": "Centro",
+        "street": "Rua das Palmeiras",
+        "number": "120",
+        "postalCode": "78890-000"
+      },
+      "email": "joao@gmail.com",
+      "password": "Joao123@",
+      "cpf": "208.508.080-49"
+    },
+    {
+      "name": "Maria Eduarda Santos",
+      "gender": "Mulher",
+      "dateNasc": "1993-07-25",
+      "phone": "(64) 99822-3344",
+      "disablePerson": "Não",
+      "address": {
+        "city": "Rio Verde",
+        "state": "GO",
+        "district": "Popular",
+        "street": "Rua Bahia",
+        "number": "340",
+        "postalCode": "75901-140"
+      },
+      "email": "maria@gmail.com",
+      "password": "Maria123@",
+      "cpf": "968.979.876-62"
+    },
+    {
+      "name": "Carlos Henrique Oliveira",
+      "gender": "Homem",
+      "dateNasc": "1988-11-02",
+      "phone": "(45) 99733-4455",
+      "disablePerson": "Não",
+      "address": {
+        "city": "Cascavel",
+        "state": "PR",
+        "district": "Centro",
+        "street": "Rua Paraná",
+        "number": "980",
+        "postalCode": "85810-010"
+      },
+      "email": "carlos@gmail.com",
+      "password": "Carlos123@",
+      "cpf": "858.289.671-93"
+    },
+    {
+      "name": "Ana Beatriz Costa",
+      "gender": "Mulher",
+      "dateNasc": "1999-01-18",
+      "phone": "(54) 99644-5566",
+      "disablePerson": "Não",
+      "address": {
+        "city": "Passo Fundo",
+        "state": "RS",
+        "district": "Petrópolis",
+        "street": "Rua Teixeira Soares",
+        "number": "540",
+        "postalCode": "99010-080"
+      },
+      "email": "ana@gmail.com",
+      "password": "Ana123@",
+      "cpf": "408.758.945-50"
+    },
+    {
+      "name": "Lucas Gabriel Ferreira",
+      "gender": "Homem",
+      "dateNasc": "1995-05-30",
+      "phone": "(34) 99555-6677",
+      "disablePerson": "Não",
+      "address": {
+        "city": "Uberlândia",
+        "state": "MG",
+        "district": "Santa Mônica",
+        "street": "Avenida João Naves de Ávila",
+        "number": "2100",
+        "postalCode": "38408-100"
+      },
+      "email": "lucas@gmail.com",
+      "password": "Lucas123@",
+      "cpf": "967.875.465-72"
+    },
+    {
+      "name": "Juliana Aparecida Souza",
+      "gender": "Mulher",
+      "dateNasc": "1990-09-08",
+      "phone": "(16) 99466-7788",
+      "disablePerson": "Sim",
+      "address": {
+        "city": "Ribeirão Preto",
+        "state": "SP",
+        "district": "Sumarezinho",
+        "street": "Rua Duque de Caxias",
+        "number": "1230",
+        "postalCode": "14025-220"
+      },
+      "email": "juliana@gmail.com",
+      "password": "Juliana123@",
+      "cpf": "108.482.233-49"
+    },
+    {
+      "name": "Rafael Augusto Lima",
+      "gender": "Homem",
+      "dateNasc": "1985-12-21",
+      "phone": "(61) 99377-8899",
+      "disablePerson": "Não",
+      "address": {
+        "city": "Cristalina",
+        "state": "GO",
+        "district": "Centro",
+        "street": "Rua Goiás",
+        "number": "210",
+        "postalCode": "73850-000"
+      },
+      "email": "rafael@gmail.com",
+      "password": "Rafael123@",
+      "cpf": "625.526.356-87"
+    },
+    {
+      "name": "Camila Fernanda Rocha",
+      "gender": "Mulher",
+      "dateNasc": "1997-04-14",
+      "phone": "(64) 99288-9900",
+      "disablePerson": "Não",
+      "address": {
+        "city": "Jataí",
+        "state": "GO",
+        "district": "Setor Sul",
+        "street": "Rua T-10",
+        "number": "88",
+        "postalCode": "75802-100"
+      },
+      "email": "camila@gmail.com",
+      "password": "Camila123@",
+      "cpf": "925.307.166-41"
+    },
+    {
+      "name": "Pedro Henrique Martins",
+      "gender": "Homem",
+      "dateNasc": "1992-06-19",
+      "phone": "(44) 99199-0011",
+      "disablePerson": "Não",
+      "address": {
+        "city": "Maringá",
+        "state": "PR",
+        "district": "Zona 3",
+        "street": "Avenida Cerro Azul",
+        "number": "760",
+        "postalCode": "87013-060"
+      },
+      "email": "pedro@gmail.com",
+      "password": "Pedro123@",
+      "cpf": "030.744.671-93"
+    },
+    {
+      "name": "Larissa Cristina Pereira",
+      "gender": "Mulher",
+      "dateNasc": "1994-08-27",
+      "phone": "(42) 99090-1122",
+      "disablePerson": "Não",
+      "address": {
+        "city": "Castro",
+        "state": "PR",
+        "district": "Centro",
+        "street": "Rua Coronel Claudino",
+        "number": "310",
+        "postalCode": "84165-050"
+      },
+      "email": "larissa@gmail.com",
+      "password": "Larissa123@",
+      "cpf": "271.190.628-08"
+    },
+    {
+      "name": "Gustavo Henrique Barbosa",
+      "gender": "Homem",
+      "dateNasc": "1987-02-05",
+      "phone": "(49) 98981-2233",
+      "disablePerson": "Não",
+      "address": {
+        "city": "Chapecó",
+        "state": "SC",
+        "district": "Centro",
+        "street": "Avenida Getúlio Vargas",
+        "number": "1450",
+        "postalCode": "89802-210"
+      },
+      "email": "gustavo@gmail.com",
+      "password": "Gustavo123@",
+      "cpf": "219.735.022-67"
+    },
+    {
+      "name": "Fernanda Beatriz Ribeiro",
+      "gender": "Mulher",
+      "dateNasc": "2000-10-11",
+      "phone": "(77) 98872-3344",
+      "disablePerson": "Não",
+      "address": {
+        "city": "Barreiras",
+        "state": "BA",
+        "district": "Morada Nobre",
+        "street": "Avenida Rio Grande do Norte",
+        "number": "150",
+        "postalCode": "47806-120"
+      },
+      "email": "fernanda@gmail.com",
+      "password": "Fernanda123@",
+      "cpf": "077.684.028-20"
+    },
+    {
+      "name": "Bruno César Carvalho",
+      "gender": "Homem",
+      "dateNasc": "1991-01-23",
+      "phone": "(66) 98763-4455",
+      "disablePerson": "Não",
+      "address": {
+        "city": "Primavera do Leste",
+        "state": "MT",
+        "district": "Centro",
+        "street": "Rua Curitiba",
+        "number": "410",
+        "postalCode": "78850-000"
+      },
+      "email": "bruno@gmail.com",
+      "password": "Bruno123@",
+      "cpf": "083.271.125-03"
+    },
+    {
+      "name": "Patrícia Helena Gomes",
+      "gender": "Mulher",
+      "dateNasc": "1986-07-07",
+      "phone": "(66) 98654-5566",
+      "disablePerson": "Não",
+      "address": {
+        "city": "Rondonópolis",
+        "state": "MT",
+        "district": "Centro",
+        "street": "Avenida Amazonas",
+        "number": "2200",
+        "postalCode": "78700-070"
+      },
+      "email": "patricia@gmail.com",
+      "password": "Patricia123@",
+      "cpf": "867.198.302-10"
+    },
+    {
+      "name": "Diego Vinícius Araújo",
+      "gender": "Homem",
+      "dateNasc": "1998-03-29",
+      "phone": "(34) 98545-6677",
+      "disablePerson": "Sim",
+      "address": {
+        "city": "Patrocínio",
+        "state": "MG",
+        "district": "Centro",
+        "street": "Rua Coronel Sales",
+        "number": "90",
+        "postalCode": "38740-000"
+      },
+      "email": "diego@gmail.com",
+      "password": "Diego123@",
+      "cpf": "176.937.588-01"
+    },
+    {
+      "name": "Vanessa Regina Nascimento",
+      "gender": "Mulher",
+      "dateNasc": "1989-05-16",
+      "phone": "(16) 98436-7788",
+      "disablePerson": "Não",
+      "address": {
+        "city": "Sertãozinho",
+        "state": "SP",
+        "district": "Centro",
+        "street": "Rua XV de Novembro",
+        "number": "600",
+        "postalCode": "14160-030"
+      },
+      "email": "vanessa@gmail.com",
+      "password": "Vanessa123@",
+      "cpf": "606.059.885-44"
+    },
+    {
+      "name": "Thiago Matheus Cardoso",
+      "gender": "Homem",
+      "dateNasc": "1993-12-03",
+      "phone": "(67) 98327-8899",
+      "disablePerson": "Não",
+      "address": {
+        "city": "Dourados",
+        "state": "MS",
+        "district": "Centro",
+        "street": "Avenida Weimar Gonçalves Torres",
+        "number": "1800",
+        "postalCode": "79804-030"
+      },
+      "email": "thiago@gmail.com",
+      "password": "Thiago123@",
+      "cpf": "089.773.027-57"
+    },
+    {
+      "name": "Beatriz Vitória Teixeira",
+      "gender": "Mulher",
+      "dateNasc": "2001-02-14",
+      "phone": "(63) 98218-9900",
+      "disablePerson": "Não",
+      "address": {
+        "city": "Palmas",
+        "state": "TO",
+        "district": "Plano Diretor Norte",
+        "street": "Avenida NS-1",
+        "number": "340",
+        "postalCode": "77001-020"
+      },
+      "email": "beatriz@gmail.com",
+      "password": "Beatriz123@",
+      "cpf": "543.204.213-45"
+    },
+    {
+      "name": "Rodrigo Alves Monteiro",
+      "gender": "Homem",
+      "dateNasc": "1984-09-09",
+      "phone": "(65) 98109-0011",
+      "disablePerson": "Não",
+      "address": {
+        "city": "Lucas do Rio Verde",
+        "state": "MT",
+        "district": "Centro",
+        "street": "Avenida Mato Grosso",
+        "number": "520",
+        "postalCode": "78455-000"
+      },
+      "email": "rodrigo@gmail.com",
+      "password": "Rodrigo123@",
+      "cpf": "330.335.054-06"
+    },
+    {
+      "name": "Isabela Cristina Dias",
+      "gender": "Mulher",
+      "dateNasc": "1996-11-30",
+      "phone": "(77) 98990-1122",
+      "disablePerson": "Não",
+      "address": {
+        "city": "Luís Eduardo Magalhães",
+        "state": "BA",
+        "district": "Centro",
+        "street": "Avenida JK",
+        "number": "410",
+        "postalCode": "47850-000"
+      },
+      "email": "isabela@gmail.com",
+      "password": "Isabela123@",
+      "cpf": "700.147.293-00"
+    }
+  ]
+}

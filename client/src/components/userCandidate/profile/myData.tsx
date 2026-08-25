@@ -1,11 +1,11 @@
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import SubHeader from "../../home-page/headers/subHeader";
 import { useUser } from "../userContext";
 import { useNavigate } from "react-router-dom";
 import { toast } from "sonner";
-import { deleteUser, updateUser } from "../../../services/users";
+import { deleteUser, updateUser, uploadUserPhoto } from "../../../services/users";
 import { ConfirmDialog } from "@/components/ui/confirm-dialog";
-import { Lock, Info } from "lucide-react";
+import { Lock, Info, UserCircle, Image as ImageIcon } from "lucide-react";
 
 const inputBase = "w-full px-4 py-3 rounded-xl border transition-all duration-200";
 const inputLocked = `${inputBase} bg-gray-100 text-gray-400 cursor-not-allowed border-gray-200`;
@@ -29,6 +29,12 @@ export default function MyData() {
   const [isSaving, setIsSaving] = useState(false);
   const [confirmDeleteOpen, setConfirmDeleteOpen] = useState(false);
   const [formData, setFormData] = useState({ phone: "", disablePerson: "", gender: "" });
+  const [photoFile, setPhotoFile] = useState<File | null>(null);
+  const [photoPreview, setPhotoPreview] = useState<string | null>(user.photoUrl || null);
+
+  useEffect(() => {
+    if (!photoFile) setPhotoPreview(user.photoUrl || null);
+  }, [user.photoUrl, photoFile]);
 
   const dateFormatted = user.dateNasc
     ? new Date(user.dateNasc).toISOString().split("T")[0]
@@ -39,7 +45,18 @@ export default function MyData() {
     setIsEditing(true);
   };
 
-  const handleCancel = () => setIsEditing(false);
+  const handleCancel = () => {
+    setIsEditing(false);
+    setPhotoFile(null);
+    setPhotoPreview(user.photoUrl || null);
+  };
+
+  const handlePhotoChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    if (!file) return;
+    setPhotoFile(file);
+    setPhotoPreview(URL.createObjectURL(file));
+  };
 
   const handleSave = async () => {
     setIsSaving(true);
@@ -50,6 +67,10 @@ export default function MyData() {
         disablePerson: formData.disablePerson || undefined,
         gender: formData.gender || undefined,
       });
+      if (photoFile) {
+        await uploadUserPhoto(photoFile);
+        setPhotoFile(null);
+      }
       await refreshUser();
       setIsEditing(false);
       toast.success("Dados atualizados com sucesso", { id: loadingToast });
@@ -93,6 +114,41 @@ export default function MyData() {
                 ? "Modo edição ativo. Telefone, gênero e portador de deficiência podem ser alterados."
                 : "Clique em Editar para atualizar telefone, gênero e portador de deficiência."}
             </p>
+          </div>
+
+          {/* Foto de perfil */}
+          <div className="mb-6">
+            <label className={labelClass}>
+              Foto de perfil <span className="text-gray-400 font-normal">(opcional)</span>
+            </label>
+            <div className="flex items-center gap-5">
+              <div className="w-20 h-20 bg-paleGreen/40 rounded-full flex items-center justify-center overflow-hidden flex-shrink-0">
+                {photoPreview ? (
+                  <img src={photoPreview} alt="Pré-visualização da foto de perfil" className="w-full h-full object-cover" />
+                ) : (
+                  <UserCircle size={40} className="text-deepGreen" aria-hidden="true" />
+                )}
+              </div>
+              {isEditing && (
+                <>
+                  <label
+                    htmlFor="photo"
+                    className="cursor-pointer inline-flex items-center gap-2 border border-deepGreen text-deepGreen px-4 py-2.5 rounded-xl font-medium text-sm hover:bg-deepGreen hover:text-white transition-colors duration-200"
+                  >
+                    <ImageIcon size={16} aria-hidden="true" />
+                    Escolher imagem
+                  </label>
+                  <input
+                    type="file"
+                    id="photo"
+                    name="photo"
+                    accept="image/*"
+                    onChange={handlePhotoChange}
+                    className="hidden"
+                  />
+                </>
+              )}
+            </div>
           </div>
 
           {/* Nome */}
