@@ -1,4 +1,4 @@
-import { BadRequestException, ConflictException, Injectable, InternalServerErrorException } from '@nestjs/common';
+import { BadRequestException, ConflictException, Injectable, InternalServerErrorException, NotFoundException } from '@nestjs/common';
 import { CreateCurriculumDto, CURRICULUM_SECTION_MODEL } from './dto/create-curriculum.dto';
 import { UpdateCurriculumDto } from './dto/update-curriculum.dto';
 import { PrismaService } from '../prisma/prisma.service';
@@ -104,6 +104,54 @@ export class CurriculumService {
 
 
     return curriculum
+  }
+
+  async findOneForCompany(candidatoId: number, empresaId: number) {
+    const candidatura = await this.prisma.candidatoEtapa.findFirst({
+      where: { candidatoId, etapa: { vaga: { empresaId } } },
+    });
+    if (!candidatura) {
+      throw new ConflictException(
+        'Sem permissão para ver o currículo deste candidato',
+      );
+    }
+
+    const [usuario, curriculo] = await Promise.all([
+      this.prisma.userCandidate.findUnique({
+        where: { id: candidatoId },
+        select: {
+          id: true,
+          name: true,
+          email: true,
+          phone: true,
+          dateNasc: true,
+          gender: true,
+          disablePerson: true,
+          Address: true,
+        },
+      }),
+      this.prisma.curriculo.findFirst({
+        where: { usuarioId: candidatoId },
+        include: {
+          experiencias: true,
+          formacoes: true,
+          idiomas: true,
+          certificados: true,
+          diferenciais: true,
+          operacoesAgricolas: true,
+          operacoesPecuarias: true,
+          operacoesFlorestais: true,
+          culturas: true,
+          maquinas: true,
+          tecnologias: true,
+        },
+      }),
+    ]);
+    if (!usuario) {
+      throw new NotFoundException('Candidato não encontrado');
+    }
+
+    return { usuario, curriculo };
   }
 
   async update(userId: number, curriculumDto: CreateCurriculumDto) {

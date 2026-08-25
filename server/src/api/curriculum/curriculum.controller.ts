@@ -35,6 +35,17 @@ export class CurriculumController {
     return this.curriculumService.findOne( userId);
   }
 
+  @Get('candidato/:candidatoId')
+  @UseGuards(JwtAuthGuard, RolesGuard)
+  @Roles('company')
+  async findOneForCompany(
+    @Param('candidatoId') candidatoId: string,
+    @Req() req: any,
+  ) {
+    const empresaId = req.user.sub;
+    return this.curriculumService.findOneForCompany(Number(candidatoId), empresaId);
+  }
+
   @Patch('update')
   @UseGuards(JwtAuthGuard, RolesGuard)
   @Roles('candidate')
