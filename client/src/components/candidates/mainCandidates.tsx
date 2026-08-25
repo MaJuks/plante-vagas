@@ -1,6 +1,6 @@
 import { useEffect, useState } from "react";
 import { useNavigate, useSearchParams } from "react-router";
-import { ArrowLeft, Users, Loader2, Mail, Phone, Check, X } from "lucide-react";
+import { ArrowLeft, Users, Loader2, Mail, Phone, Check, X, FileText } from "lucide-react";
 import { toast } from "sonner";
 import { getVagaById, Vaga } from "@/services/vaga";
 import {
@@ -138,6 +138,13 @@ export default function MainCandidates() {
                 </div>
 
                 <div className="flex gap-3 justify-end mt-5">
+                  <button
+                    onClick={() => navigate(`/candidatos/curriculo/${candidatura.candidatoId}?${searchParams.toString()}`)}
+                    className="flex items-center gap-2 text-sm text-deepGreen px-4 py-2 rounded-xl border border-deepGreen/30 hover:bg-paleGreen/40 transition-colors duration-200 mr-auto"
+                  >
+                    <FileText size={16} aria-hidden="true" />
+                    Ver currículo
+                  </button>
                   <button
                     onClick={() => handleAtualizarStatus(candidatura.id, false)}
                     disabled={atualizandoId === candidatura.id || !candidatura.statusCandidato}

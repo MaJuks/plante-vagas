@@ -22,6 +22,40 @@ export type CurriculumPayload = {
 
 const CURRICULUM_URL = `${BASE_URL}/curriculum`;
 
+export type CandidateResumeUser = {
+  id: number;
+  name: string;
+  email: string;
+  phone: string;
+  dateNasc: string;
+  gender: string;
+  disablePerson: string;
+  Address?: {
+    street: string;
+    number: string;
+    district: string;
+    city: string;
+    state?: string;
+    complement?: string;
+  } | null;
+};
+
+export type CandidateResume = {
+  usuario: CandidateResumeUser;
+  curriculo: (CurriculumPayload & { id: number }) | null;
+};
+
+export async function getCurriculumForCompany(candidatoId: number): Promise<CandidateResume> {
+  const response = await authFetch(`${CURRICULUM_URL}/candidato/${candidatoId}`, {
+    method: "GET",
+  });
+  if (!response.ok) {
+    const error = await response.json();
+    throw new Error(error.message || "Erro na requisição");
+  }
+  return response.json();
+}
+
 export async function getCurriculum() {
   const response = await authFetch(`${CURRICULUM_URL}/find/me`, {
     method: "GET",
