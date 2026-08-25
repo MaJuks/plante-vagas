@@ -9,6 +9,7 @@ interface VagaCreateData {
   nome: string;
   cargo: string;
   beneficios: string[];
+  requisitos: string[];
   salario: string;
   descricao: string;
   etapas: EtapaData[];
@@ -26,6 +27,7 @@ export function VagaCreateProvider({ children }: { children: ReactNode }) {
     nome: "",
     cargo: "",
     beneficios: [],
+    requisitos: [],
     salario: "",
     descricao: "",
     etapas: [],

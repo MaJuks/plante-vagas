@@ -22,6 +22,7 @@ const Etapa = ({ etapa, vagaId, index, onExcluir, onAtualizar }: EtapaProps) => 
   const [excluindo, setExcluindo] = useState(false);
   const [erro, setErro] = useState("");
   const [confirmFechar, setConfirmFechar] = useState(false);
+  const [confirmExcluir, setConfirmExcluir] = useState(false);
 
   const fechada = etapa.status !== "aberta";
 
@@ -57,6 +58,7 @@ const Etapa = ({ etapa, vagaId, index, onExcluir, onAtualizar }: EtapaProps) => 
   };
 
   const handleExcluir = async () => {
+    setConfirmExcluir(false);
     setExcluindo(true);
     try {
       await deleteEtapa(etapa.id);
@@ -156,7 +158,7 @@ const Etapa = ({ etapa, vagaId, index, onExcluir, onAtualizar }: EtapaProps) => 
         </button>
 
         <button
-          onClick={handleExcluir}
+          onClick={() => setConfirmExcluir(true)}
           disabled={excluindo}
           className="flex items-center justify-center gap-2 text-sm text-red-600 px-5 py-2.5 rounded-xl border border-red-200 hover:bg-red-50 transition-colors duration-200 font-SecondFont font-medium disabled:opacity-60"
         >
@@ -173,6 +175,15 @@ const Etapa = ({ etapa, vagaId, index, onExcluir, onAtualizar }: EtapaProps) => 
         onConfirm={handleFecharEtapa}
         confirmLabel="Fechar etapa"
         confirmClassName="bg-amber-600 hover:bg-amber-700 text-white"
+      />
+
+      <ConfirmDialog
+        open={confirmExcluir}
+        onOpenChange={setConfirmExcluir}
+        title="Excluir esta etapa?"
+        description={`Tem certeza que deseja excluir "${etapa.nome}"? Essa ação não pode ser desfeita.`}
+        onConfirm={handleExcluir}
+        confirmLabel="Excluir etapa"
       />
     </div>
   );

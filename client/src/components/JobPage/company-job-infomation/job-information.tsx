@@ -1,4 +1,4 @@
-import { Clock, Briefcase, DollarSign, CheckCircle2, Send, ArrowRight, Loader2 } from "lucide-react";
+import { Clock, Briefcase, DollarSign, CheckCircle2, ListChecks, Send, ArrowRight, Loader2 } from "lucide-react";
 import { timeAgo } from "@/utils/timeAgo";
 import type { Vaga } from "@/services/vaga";
 
@@ -57,6 +57,29 @@ const JobInformation = ({ vaga, onCandidatar, candidatando, candidatado }: JobIn
           ))}
         </div>
       </section>
+
+      {/* Requisitos e Qualificações */}
+      {vaga.requisitos.length > 0 && (
+        <section>
+          <h3 className="text-lg font-bold text-deepGreen font-PrimaryFont mb-4">
+            Requisitos e Qualificações
+          </h3>
+          <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+            {vaga.requisitos.map((requisito) => (
+              <div
+                key={requisito.id}
+                className="flex items-center gap-3 p-3 bg-blue-50 rounded-xl
+                         hover:bg-blue-100 transition-colors duration-300"
+              >
+                <div className="w-6 h-6 bg-blue-600 rounded-full flex items-center justify-center flex-shrink-0">
+                  <ListChecks size={14} className="text-white" />
+                </div>
+                <span className="font-SecondFont text-gray-700">{requisito.nome}</span>
+              </div>
+            ))}
+          </div>
+        </section>
+      )}
 
       {/* Benefícios */}
       {vaga.beneficios.length > 0 && (

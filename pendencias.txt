@@ -156,7 +156,46 @@ O que precisa ser feito:
 
 5. MODELO Vaga SEM CAMPO DE REQUISITOS/QUALIFICAÇÕES
 --------------------------------------------------------
-Problema:
+[RESOLVIDO] Criado o modelo Requisito no schema (migration
+  add_vaga_requisitos), idêntico ao Beneficio (id, nome, vagaId) —
+  igual à sugestão original deste item. CreateVagaDto ganhou
+  requisitos: RequisitoDto[] com os mesmos decorators de beneficios;
+  como UpdateVagaDto é PartialType(CreateVagaDto), passou a aceitar
+  o campo automaticamente, sem precisar editar esse DTO. Em
+  vaga.service.ts: create() salva os requisitos junto (createMany);
+  update() segue o mesmo padrão de beneficios/etapas (deleta os
+  antigos e recria quando o campo vem preenchido, dentro da mesma
+  transação); findAll/findByEmpresa/findOne passaram a incluir
+  requisitos na resposta.
+
+  Front: a tela de criar/editar vaga (vagaData.tsx) ganhou uma seção
+  "Requisitos e Qualificações" idêntica em comportamento à de
+  Benefícios (adicionar por Enter/botão, remover com X, mesmo
+  estilo). etapas.tsx (que é quem de fato cria a vaga nova, no fim
+  do wizard) e mainCreateVaga.tsx (que carrega uma vaga existente pra
+  editar) foram ajustados pra levar esse campo também.
+  job-information.tsx voltou a mostrar "Requisitos e Qualificações"
+  na página da vaga — só que agora com os requisitos reais que a
+  empresa cadastrou, em vez da lista fixa de 12 itens genéricos que
+  tinha antes; a seção some se a vaga não tiver nenhum requisito.
+
+  Achado no caminho: `npx tsc --noEmit -p .` dentro de client/ NÃO
+  detecta erro nenhum nesse repo — o tsconfig.json raiz é
+  "solution-style" (files: [], só referências), e sem a flag `-b`
+  (build mode) o TypeScript não percorre os projetos referenciados,
+  então o comando roda "limpo" mesmo com erro de tipo real no código.
+  Só descobri isso porque o `npm run build` (que roda `tsc -b &&
+  vite build`) pegou um erro de verdade que o --noEmit não viu. Pra
+  checar tipo nesse front, usar sempre `npm run build` ou
+  `npx tsc -b`, nunca `npx tsc --noEmit -p .` sozinho.
+
+  Testado de ponta a ponta com vaga real no banco: criar vaga com 2
+  requisitos, conferir que GET /vaga/find/:id e GET /vaga/find/all
+  trazem os dois, editar trocando por um requisito diferente (confere
+  que o antigo é substituído, não acumulado) e apagar a vaga de teste
+  no final.
+
+Problema (histórico):
   A página individual da vaga tinha uma seção "Requisitos e
   Qualificações" com uma lista fixa de 12 competências genéricas
   (Comunicação Eficaz, Organização, Trabalho em Equipe etc.),
@@ -323,7 +362,22 @@ O que precisa ser feito:
 
 8. NÃO EXISTE SISTEMA DE CANDIDATURA (CANDIDATO SE APLICAR A UMA VAGA)
 --------------------------------------------------------------------------
-Problema:
+[RESOLVIDO] Este item ficou desatualizado — o sistema de candidatura
+  já existe de ponta a ponta no código (server/src/api/candidatura/,
+  seguindo o plano documentado em candidatura-framework.txt): POST
+  /candidatura/vaga/:id, GET /candidatura/minhas, GET
+  /candidatura/vaga/:vagaId, GET /candidatura/etapa/:etapaId, PATCH
+  /candidatura/:id, mais o framework de ingestão externa
+  (POST /candidatura/integracoes/:sistema). O botão "CANDIDATAR-SE"
+  (job-information.tsx) já chama candidatarSe() de verdade.
+  mainCandidates.tsx já busca candidatos reais via
+  getCandidatosPorEtapa/getCandidatosPorVaga e permite mover status
+  (moverCandidatura). selectionProcess.tsx (candidato) já lista as
+  candidaturas reais via getMinhasCandidaturas(). Não fui eu quem
+  implementou isso — só encontrei que já estava pronto e o
+  pendencias.txt nunca tinha sido atualizado pra refletir isso.
+
+Problema (histórico):
   O modelo CandidatoEtapa existe no Prisma (statusCandidato,
   dataConclusao, observacoes, candidatoId, etapaId) — parece pensado
   pra rastrear o candidato em cada etapa do processo seletivo. Só que
@@ -547,3 +601,60 @@ O que precisa ser feito:
     DELETE /company/delete/:id, protegidos por auth de empresa.
   - Criar as telas correspondentes (provavelmente dentro da tela de
     Configurações já existente, empresaProfile/configuracoes).
+
+
+14. TELA "VER CANDIDATOS" SEM BOTÃO DE VOLTAR
+-----------------------------------------------
+[RESOLVIDO] mainCandidates.tsx (rota /candidatos) não tinha nenhum
+  jeito de voltar pra tela de onde a pessoa veio — só dava pra sair
+  usando o botão "voltar" do navegador. Adicionado um botão "Voltar
+  para o processo seletivo" no topo (ícone ArrowLeft, mesmo estilo
+  já usado em companySettingsForm.tsx/editProfileForm.tsx/
+  pages/JobPage/index.tsx), navegando de volta pra
+  /gerenciar-processo?vagaId=... — a mesma vaga de onde o botão
+  "Ver candidatos" (etapa.tsx) leva pra cá.
+
+
+15. "EXCLUIR ETAPA" APAGAVA NA HORA, SEM CONFIRMAÇÃO
+-------------------------------------------------------
+[RESOLVIDO] O botão "Excluir etapa" (managementProcess/etapa.tsx)
+  chamava handleExcluir() direto no onClick — um clique sem querer
+  apagava a etapa (e o histórico de candidatos dela) sem chance de
+  voltar atrás. O botão "Fechar etapa", do lado, já usava um
+  ConfirmDialog pra essa mesma decisão. Adicionado um segundo
+  ConfirmDialog (mesmo componente compartilhado,
+  components/ui/confirm-dialog.tsx) pedindo confirmação antes de
+  excluir de verdade, igual ao padrão já usado pra excluir conta
+  (myData.tsx, companySettingsForm.tsx).
+
+
+16. NAVEGAÇÃO REPETIDA REFAZIA A MESMA REQUISIÇÃO TODA VEZ (SEM CACHE)
+---------------------------------------------------------------------------
+[RESOLVIDO] Voltar pra uma vaga já vista, pro perfil público de uma
+  empresa já visto, ou pra lista de vagas (própria ou pública) sempre
+  refazia a requisição do zero, mostrando o spinner de novo mesmo com
+  o dado já carregado segundos antes — ficava perceptivelmente lento.
+  Um caso concreto que isso escondia: a página da vaga busca o
+  perfil público da empresa DUAS vezes na mesma visita (uma pra seção
+  de redes sociais, outra pra aba "Empresa"), sem nenhum motivo pra
+  não reaproveitar a primeira resposta.
+
+  Adicionado um cache simples em memória (um Map por módulo, sem
+  biblioteca nova) em client/src/services/vaga.ts
+  (getVagaById/getAllVagas/getVagasByEmpresa) e
+  client/src/services/company.ts (getPublicCompany). O cache é
+  invalidado automaticamente em toda mutação que afeta o dado
+  cacheado: criar/editar/excluir vaga e criar/editar/excluir etapa
+  limpam os caches de lista e o cache da vaga individual; editar
+  perfil/cadastro da empresa ou subir logo/banner invalida o cache do
+  perfil público da PRÓPRIA empresa (via userId salvo no
+  localStorage).
+
+  Limitação conhecida, registrada de propósito: não tem TTL nem
+  invalidação entre abas/sessões — se a empresa A está com o
+  navegador aberto vendo o perfil público da empresa B, e a empresa B
+  edita o perfil dela em outra sessão, a aba da empresa A vai
+  continuar mostrando a versão em cache até recarregar a página. Pra
+  esse tamanho de aplicação isso foi um tradeoff aceito (o cache
+  inteiro também é limpo a cada reload da página, já que vive só em
+  memória, não em localStorage/sessionStorage).

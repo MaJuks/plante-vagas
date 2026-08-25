@@ -26,6 +26,7 @@ const MainCreateVagaInner = () => {
         descricao: vaga.descricao,
         salario: vaga.salario ? String(vaga.salario) : "",
         beneficios: vaga.beneficios.map((b) => b.nome),
+        requisitos: vaga.requisitos.map((r) => r.nome),
         etapas: vaga.etapas.map((e) => ({ nome: e.nome, descricao: e.descricao })),
       });
     }).finally(() => setLoading(false));
