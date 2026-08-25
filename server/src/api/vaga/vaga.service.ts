@@ -26,7 +26,7 @@ export class VagaService {
       include: {
         beneficios: true,
         requisitos: true,
-        empresa: { select: { id: true, fantasyName: true, name: true } },
+        empresa: { select: { id: true, fantasyName: true, name: true, logoUrl: true } },
       },
       orderBy: { createdAt: 'desc' },
     });
@@ -47,7 +47,7 @@ export class VagaService {
         beneficios: true,
         requisitos: true,
         etapas: true,
-        empresa: { select: { id: true, fantasyName: true, name: true } },
+        empresa: { select: { id: true, fantasyName: true, name: true, logoUrl: true } },
       },
     });
 

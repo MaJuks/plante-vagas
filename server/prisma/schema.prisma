@@ -34,6 +34,7 @@ model UserCandidate {
   phone         String
   gender        String
   disablePerson String
+  photoUrl      String?
   createdAt     DateTime @default(now())
   Address         Address?
   curriculo       Curriculo?
@@ -152,6 +153,8 @@ model CandidatoEtapa {
   dataConclusao    DateTime?
   observacoes      String?
   origem           String    @default("interna")
+  rejeitado        Boolean   @default(false)
+  motivoRejeicao   String?
 
   candidatoId Int
   candidato   UserCandidate         @relation(fields: [candidatoId], references: [id], onDelete: Cascade)

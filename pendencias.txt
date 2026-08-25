@@ -658,3 +658,190 @@ O que precisa ser feito:
   esse tamanho de aplicação isso foi um tradeoff aceito (o cache
   inteiro também é limpo a cada reload da página, já que vive só em
   memória, não em localStorage/sessionStorage).
+
+
+17. NÃO EXISTIA REJEIÇÃO DE CANDIDATO DE VERDADE, SÓ "NÃO AVANÇOU"
+-----------------------------------------------------------------------
+[RESOLVIDO] O sistema de candidatura (item 8) só tinha um booleano
+  statusCandidato (avançou/não avançou) — não existia um estado
+  "rejeitado" distinto nem forma de registrar o motivo. Clicar em
+  "Não avançou" só voltava o candidato pro mesmo estado inicial
+  ("Em análise"), sem nada permanente nem visível pro candidato.
+
+  Adicionados 2 campos no CandidatoEtapa (migration
+  add_candidatura_rejeicao): `rejeitado Boolean @default(false)` e
+  `motivoRejeicao String?`. PATCH /candidatura/:id (MoveCandidaturaDto)
+  aceita os dois; ao rejeitar, o backend força statusCandidato=false
+  junto (não faz sentido um candidato estar avançado E rejeitado ao
+  mesmo tempo — testado explicitamente: avançar, depois rejeitar,
+  confirma que desfaz o avançou automaticamente).
+
+  Front (empresa, mainCandidates.tsx): botão "Rejeitar candidato"
+  (vermelho, ao lado de Avançou/Não avançou) abre um diálogo de
+  confirmação com um campo de motivo opcional — se deixado em branco,
+  usa uma mensagem padrão pré-definida (MENSAGEM_PADRAO_REJEICAO). Os
+  outros dois botões ficam desabilitados depois de rejeitado, pra não
+  dar pra "avançar" alguém já rejeitado. O motivo registrado também
+  aparece pra empresa no próprio card do candidato.
+
+  Front (candidato, selectionProcess.tsx — "Processos seletivos"): a
+  candidatura rejeitada aparece com badge "Não selecionado(a)"
+  (linguagem mais suave que "Rejeitado", que é o que a empresa vê) e
+  mostra o motivo registrado. Essa tela já é a "notificação" — o
+  candidato descobre ao entrar na área dele. NÃO foi implementado
+  envio de mensagem por WhatsApp/email/SMS de verdade — isso depende
+  de escolher e configurar um provedor externo (mesma dependência já
+  registrada no item 9), fora de escopo aqui.
+
+  Testado de ponta a ponta com uma candidatura real do banco: rejeitar
+  com motivo customizado (persiste, aparece pra empresa E pro
+  candidato via /candidatura/minhas), avançar e depois rejeitar
+  (confirma que desfaz o avançou), e devolvido ao estado original no
+  final de cada teste.
+
+
+18. CANDIDATO NÃO TINHA COMO CADASTRAR FOTO DE PERFIL
+---------------------------------------------------------
+[RESOLVIDO] UserCandidate não tinha nenhum campo de imagem — o card
+  de perfil do candidato (profilecard.tsx) sempre mostrava um ícone
+  genérico (UserCircle), e a empresa via a mesma coisa ao listar
+  candidatos. Adicionado `photoUrl String?` (migration
+  add_candidate_photo). Upload via POST /users/photo, mesmo padrão já
+  usado pro logo/banner da empresa (FileInterceptor em memória,
+  storage: undefined, converte pra data URI base64 — sem gravar em
+  disco, sem endpoint novo de storage).
+
+  Front: a tela "Meus dados" (myData.tsx), que já tinha o padrão de
+  editar/salvar com SubHeader, ganhou uma seção "Foto de perfil"
+  (opcional) — o input de arquivo só fica clicável em modo de edição,
+  e a imagem só é enviada quando a pessoa aperta "Salvar" (mesmo
+  fluxo do upload de logo da empresa: escolhe o arquivo, fica em
+  preview local, sobe de verdade só no submit). profilecard.tsx
+  (Perfil do candidato) e mainCandidates.tsx (lista de candidatos que
+  a empresa vê) mostram a foto real quando existe, com fallback pro
+  ícone genérico quando não.
+
+  Fora de escopo, de propósito: a tela "Ver currículo"
+  (candidateResumeView.tsx) que a empresa acessa a partir da lista de
+  candidatos é uma feature nova de outra pessoa do time (com backend
+  próprio, getCurriculumForCompany), ainda não mostra a foto — não
+  mexi lá pra não arriscar conflito com quem está desenvolvendo isso
+  agora. Se quiser, dá pra adicionar depois (é só incluir photoUrl no
+  select de usuario que o endpoint já retorna).
+
+  Testado de ponta a ponta com um candidato real do banco: upload
+  vira data URI, aparece em /users/profile (candidato) e em
+  /candidatura/vaga/:id (empresa vendo o candidato), upload sem token
+  falha (401), upload de arquivo que não é imagem falha (400). A foto
+  de teste foi removida do candidato real depois do teste.
+
+
+19. LOGO DA EMPRESA NÃO APARECIA NO CARD DA BUSCA PÚBLICA DE VAGAS
+-----------------------------------------------------------------------
+[RESOLVIDO] O card de vaga em pages/Serachjob (componente
+  searchJob/jobs/vagas.tsx, usado em "Vagas disponíveis") tinha um
+  ícone fixo de prédio no lugar da logo, mesmo quando a empresa já
+  tinha logo cadastrada. Causa: vaga.service.ts (findAll E findOne)
+  selecionava só { id, fantasyName, name } da empresa — nunca
+  logoUrl, então o dado nem chegava no front pra ser exibido.
+  Corrigido nos dois métodos (findAll é o que a busca pública usa;
+  findOne também, mesma lacuna). Front: tipo Vaga.empresa
+  (services/vaga.ts) e o card (vagas.tsx) passaram a aceitar/exibir
+  logoUrl, com fallback pro ícone quando a empresa não tem logo.
+
+
+20. LOGO DA EMPRESA TAMBÉM FALTAVA NA VISÃO DO CANDIDATO SOBRE A
+    PRÓPRIA CANDIDATURA
+---------------------------------------------------------------------------
+[RESOLVIDO] Mesma lacuna do item 19, em outro lugar: a tela
+  "Processos seletivos" do candidato (selectionProcess.tsx) mostrava
+  só um ícone genérico ao lado do nome da empresa em cada
+  candidatura. Causa: EMPRESA_SELECT em candidatura.service.ts (usado
+  por GET /candidatura/minhas, entre outros) também não incluía
+  logoUrl. Corrigido o select, o tipo Candidatura (services/
+  candidatura.ts) e a tela, que agora mostra a logo real da empresa.
+  Testado criando e apagando uma candidatura de teste: logoUrl chega
+  certinho no payload de /candidatura/minhas.
+
+
+21. BOTÃO "AVANÇOU" NÃO MOVIA O CANDIDATO PRA PRÓXIMA ETAPA DE VERDADE
+---------------------------------------------------------------------------
+[RESOLVIDO] Bug real de comportamento, não só de exibição: o botão
+  "Avançou" em mainCandidates.tsx só chamava
+  moverCandidatura(id, { statusCandidato: true }) — isso marcava a
+  candidatura como "avançada" mas ela continuava com o mesmo etapaId
+  de antes, nunca aparecendo na lista da próxima etapa
+  (getCandidatosPorEtapa). Ou seja, empresa clicava "avançar pra
+  entrevista" e o candidato ficava preso na "Triagem" pra sempre.
+
+  Corrigido: adicionado getProximaEtapa() em mainCandidates.tsx, que
+  ordena vaga.etapas por id (mesma convenção de "ordem = id
+  ascendente" já usada em candidatura.service.ts/aplicar()) e acha a
+  etapa seguinte à atual da candidatura. O botão agora chama
+  moverCandidatura(id, { etapaId: proximaEtapa.id, statusCandidato:
+  false }) quando existe próxima etapa — o candidato realmente muda de
+  etapa e some da lista da etapa antiga, já que não está mais nela. Quando não tem próxima etapa (última etapa do processo), cai
+  no comportamento antigo (statusCandidato: true), tratando como
+  aprovação final. O texto do botão muda de "Avançar etapa" pra
+  "Avançou" dependendo do caso, pra ficar claro o que vai acontecer.
+
+  Testado de ponta a ponta com uma candidatura temporária numa vaga
+  com 2 etapas: avançar de "Triagem de currículos" pra "Entrevista"
+  muda o etapaId de verdade; avançar de novo (já na última etapa) só
+  marca statusCandidato=true e mantém o etapaId. Candidatura de teste
+  removida depois.
+
+
+22. LISTA DE REQUISITOS DA EMPRESA (TRELLO) — O QUE JÁ ESTÁ FEITO E O
+    QUE AINDA FALTA
+---------------------------------------------------------------------------
+Origem: export do board "Plante Vagas Dev" no Trello, lista "Empresa".
+  Nota: no board tem DUAS listas chamadas "Empresa" — a original e uma
+  cópia criada em 25/08 com os mesmos 9 cards pendentes, arquivada
+  logo em seguida. São os mesmos requisitos duplicados, não itens
+  novos — contados uma vez só aqui.
+
+JÁ FEITO (card já está em "Testes" ou "Concluído" no Trello, e eu
+confirmei que existe no código):
+  - RF046 Cadastro de conta (signup da empresa)
+  - RF048 Login
+  - RF049 Editar dados / RF006 Alterar senha empresa / RF007 Excluir
+    conta empresa → ver itens 10 e 13 aqui no pendencias
+  - RF055/RF056/RF057/RF058 Visualizar/Cadastrar/Editar/Excluir vaga
+  - RF071 Visualizar candidatos no processo seletivo → ver item 8
+  - RF066 Definir etapas do processo seletivo (as etapas em si salvam
+    de verdade)
+
+
+DIVERGÊNCIA ENTRE TRELLO E CÓDIGO (o Trello marca como "Concluído",
+mas eu não encontrei essa funcionalidade implementada — vale
+confirmar com o time se foi feito em outro branch ou se o card foi
+movido cedo demais):
+  - RF059 Finalizar vaga (encerrar vaga, impedir novas candidaturas)
+    — não existe nenhum campo de status na Vaga (só a etapa tem
+    status), não achei rota nem serviço pra isso.
+  - RF062/RF063/RF064 Criar/Alterar/Excluir processo seletivo — bate
+    de frente com o item 1 aqui no pendencias: a tela de "Processo
+    Seletivo" no cadastro de vaga (nome, data de início, duração)
+    continua sem salvar nada, porque o modelo ProcessoSeletivo no
+    banco tem os campos errados (ver item 2). Só as ETAPAS salvam
+    (RF066, esse sim de verdade).
+
+AINDA FALTA (cards continuam na lista "Empresa", não implementado):
+  - RF052 Pesquisar vagas (da própria empresa, na área dela)
+  - RF053 Filtrar vagas (da própria empresa)
+  - RF054 Ordenar vagas (da própria empresa)
+  - RF060 Reabrir vaga
+  - RF061 Duplicar vaga
+  - RF067 Definir tempo/prazo de cada etapa do processo seletivo
+  - RF068 Alterar etapas do processo seletivo (edição de nome/
+    descrição de uma etapa já existe — updateEtapaService — mas o
+    Trello pode estar pedindo algo mais amplo, tipo reordenar tipo de
+    etapa ou trocar o fluxo; vale confirmar o escopo real do card)
+  - RF069 Reordenar etapas do processo seletivo
+  - RF070 Encerrar processo seletivo (com notificação por WhatsApp
+    pros candidatos não avançados) → já registrado no item 9, mesma
+    dependência de escolher provedor de WhatsApp
+
+Nada disso foi implementado agora — é só a lista organizada pra
+saber o que falta. Se quiser que eu comece algum desses, é só pedir.

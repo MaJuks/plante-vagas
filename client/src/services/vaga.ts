@@ -29,7 +29,7 @@ export interface Vaga {
   requisitos: { id: number; nome: string }[];
   etapas: EtapaProcessoSeletivo[];
   empresaId: number;
-  empresa?: { id: number; fantasyName: string; name: string };
+  empresa?: { id: number; fantasyName: string; name: string; logoUrl?: string | null };
   createdAt: string;
   updatedAt: string;
 }

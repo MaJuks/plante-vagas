@@ -9,7 +9,7 @@ const Vagas = (props: {
   salario?: number;
   descricao: string;
   beneficios: { id: number; nome: string }[];
-  empresa?: { fantasyName: string; name: string };
+  empresa?: { fantasyName: string; name: string; logoUrl?: string | null };
   createdAt: string;
 }) => {
   const navigate = useNavigate();
@@ -25,7 +25,11 @@ const Vagas = (props: {
       <div className="flex-shrink-0 flex justify-center md:justify-start">
         <div className="w-24 h-24 md:w-28 md:h-28 bg-gray-50 rounded-2xl flex items-center justify-center
                       border border-gray-100 group-hover:border-mediumGreen/30 transition-colors duration-300 overflow-hidden">
-          <Building2 size={40} className="text-gray-300" />
+          {props.empresa?.logoUrl ? (
+            <img src={props.empresa.logoUrl} alt={nomeEmpresa ? `Logo de ${nomeEmpresa}` : "Logo da empresa"} className="w-full h-full object-cover" />
+          ) : (
+            <Building2 size={40} className="text-gray-300" />
+          )}
         </div>
       </div>
 

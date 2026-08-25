@@ -55,16 +55,25 @@ export default function SelectionProcess() {
                   onClick={() => vaga && navigate(`/pagina-vaga/${vaga.id}`)}
                 >
                   <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4">
-                    <div>
-                      <h2 className="text-lg font-bold text-deepGreen font-PrimaryFont">
-                        {vaga?.nome ?? "Vaga"}
-                      </h2>
-                      {nomeEmpresa && (
-                        <span className="flex items-center gap-2 text-gray-600 text-sm mt-2">
-                          <Building2 size={14} className="text-mediumGreen" />
-                          {nomeEmpresa}
-                        </span>
-                      )}
+                    <div className="flex items-center gap-4">
+                      <div className="w-12 h-12 bg-paleGreen/40 rounded-xl flex items-center justify-center flex-shrink-0 overflow-hidden">
+                        {vaga?.empresa?.logoUrl ? (
+                          <img src={vaga.empresa.logoUrl} alt={nomeEmpresa ? `Logo de ${nomeEmpresa}` : "Logo da empresa"} className="w-full h-full object-cover" />
+                        ) : (
+                          <Building2 size={20} className="text-deepGreen" aria-hidden="true" />
+                        )}
+                      </div>
+                      <div>
+                        <h2 className="text-lg font-bold text-deepGreen font-PrimaryFont">
+                          {vaga?.nome ?? "Vaga"}
+                        </h2>
+                        {nomeEmpresa && (
+                          <span className="flex items-center gap-2 text-gray-600 text-sm mt-2">
+                            <Building2 size={14} className="text-mediumGreen" />
+                            {nomeEmpresa}
+                          </span>
+                        )}
+                      </div>
                     </div>
                     <ArrowRight size={18} className="text-gray-400 flex-shrink-0" />
                   </div>
@@ -75,17 +84,25 @@ export default function SelectionProcess() {
                     </span>
                     <span
                       className={`text-sm px-3 py-1 rounded-full ${
-                        candidatura.statusCandidato
+                        candidatura.rejeitado
+                          ? "bg-red-100 text-red-700"
+                          : candidatura.statusCandidato
                           ? "bg-green-100 text-green-700"
                           : "bg-gray-100 text-gray-600"
                       }`}
                     >
-                      {candidatura.statusCandidato ? "Avançou" : "Em análise"}
+                      {candidatura.rejeitado ? "Não selecionado(a)" : candidatura.statusCandidato ? "Avançou" : "Em análise"}
                     </span>
                     <span className="text-gray-400 text-xs">
                       Candidatura enviada há {timeAgo(candidatura.createdAt)}
                     </span>
                   </div>
+
+                  {candidatura.rejeitado && candidatura.motivoRejeicao && (
+                    <p className="text-red-700 bg-red-50 border border-red-100 rounded-xl p-3 text-sm mt-4">
+                      {candidatura.motivoRejeicao}
+                    </p>
+                  )}
 
                   {candidatura.observacoes && (
                     <p className="text-gray-600 text-sm mt-4 break-words">{candidatura.observacoes}</p>

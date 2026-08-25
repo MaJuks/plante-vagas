@@ -3,7 +3,8 @@ import { JwtAuthGuard } from '../auth/guards/jwt.auth.guard';
 import { RolesGuard } from '../auth/guards/roles.guard';
 import { UserService } from './users.service';
 
-import { Body, Controller, Delete, Get, Param, Patch, Post, Req, UseGuards } from '@nestjs/common';
+import { BadRequestException, Body, Controller, Delete, Get, Param, Patch, Post, Req, UseGuards, UseInterceptors, UploadedFile } from '@nestjs/common';
+import { FileInterceptor } from '@nestjs/platform-express';
 import { use } from 'passport';
 import { CreateUserDTO } from './dto/create-user-dto';
 import { UpdateUserDTO } from './dto/update-user-deto';
@@ -43,6 +44,25 @@ export class UsersController {
       const userID = req.user.sub;
       return this.userService.update(userID, UpdateUserDTO)
     }
+
+@Post('photo')
+@UseGuards(JwtAuthGuard, RolesGuard)
+@Roles('candidate')
+@UseInterceptors(FileInterceptor('file', { storage: undefined }))
+async uploadPhoto(
+  @UploadedFile() file: { buffer: Buffer; originalname: string; mimetype: string },
+  @Req() req,
+) {
+  if (!file) {
+    throw new BadRequestException('Nenhum arquivo enviado');
+  }
+  if (!file.mimetype.startsWith('image/')) {
+    throw new BadRequestException('O arquivo deve ser uma imagem');
+  }
+  const userId = req.user.sub;
+  const photoUrl = `data:${file.mimetype};base64,${file.buffer.toString('base64')}`;
+  return this.userService.updatePhoto(userId, photoUrl);
+}
 
 @Delete('delete/:id')
 @UseGuards(JwtAuthGuard, RolesGuard)

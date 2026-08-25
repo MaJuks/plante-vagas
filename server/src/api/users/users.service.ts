@@ -124,6 +124,13 @@ export class UserService {
     
     }
 
+  async updatePhoto(userId: number, photoUrl: string) {
+    return this.prisma.userCandidate.update({
+      where: { id: userId },
+      data: { photoUrl },
+    });
+  }
+
   async delete(userId: number){
 
     const findUser = await this.prisma.userCandidate.findUnique({

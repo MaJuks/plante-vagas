@@ -19,6 +19,7 @@ interface UserContextType {
       phone: string;
       gender: string;
       disablePerson: string;
+      photoUrl?: string | null;
       createdAt: string;
       Address: {
         postalCode: string;
@@ -74,6 +75,7 @@ export const UserProvider = ({ children }: { children: ReactNode }) => {
       phone: "",
       gender: "",
       disablePerson: "",
+      photoUrl: null as string | null,
       createdAt: "",
       Address: null as {
         postalCode: string;

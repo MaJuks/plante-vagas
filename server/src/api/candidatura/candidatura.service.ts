@@ -7,8 +7,8 @@ import { PrismaService } from '../prisma/prisma.service';
 import { CandidaturaInput } from './ingestao/fonte-de-candidatura.interface';
 import { MoveCandidaturaDto } from './dto/move-candidatura.dto';
 
-const CANDIDATO_SELECT = { id: true, name: true, email: true, phone: true };
-const EMPRESA_SELECT = { id: true, fantasyName: true, name: true };
+const CANDIDATO_SELECT = { id: true, name: true, email: true, phone: true, photoUrl: true };
+const EMPRESA_SELECT = { id: true, fantasyName: true, name: true, logoUrl: true };
 
 @Injectable()
 export class CandidaturaService {
@@ -115,6 +115,15 @@ export class CandidaturaService {
           statusCandidato: dto.statusCandidato,
         }),
         ...(dto.observacoes !== undefined && { observacoes: dto.observacoes }),
+        ...(dto.rejeitado !== undefined && {
+          rejeitado: dto.rejeitado,
+          // rejeitar um candidato desfaz um eventual "avançou" anterior —
+          // os dois estados não fazem sentido juntos
+          ...(dto.rejeitado && { statusCandidato: false }),
+        }),
+        ...(dto.motivoRejeicao !== undefined && {
+          motivoRejeicao: dto.motivoRejeicao,
+        }),
       },
       include: { etapa: true, candidato: { select: CANDIDATO_SELECT } },
     });
