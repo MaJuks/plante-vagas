@@ -45,6 +45,7 @@ const Etapas = ({ vagaId }: { vagaId?: number }) => {
           ? parseFloat(data.salario.replace(/[^0-9,.]/g, "").replace(",", "."))
           : undefined,
         beneficios: data.beneficios.map((nome) => ({ nome })),
+        requisitos: data.requisitos.map((nome) => ({ nome })),
         etapas: etapas.map((e) => ({ nome: e.nome.trim(), descricao: e.descricao.trim() })),
       };
 

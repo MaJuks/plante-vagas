@@ -6,6 +6,11 @@ class BeneficioDto {
   nome: string;
 }
 
+class RequisitoDto {
+  @IsString()
+  nome: string;
+}
+
 class EtapaDto {
   @IsString()
   nome: string;
@@ -32,6 +37,11 @@ export class CreateVagaDto {
   @ValidateNested({ each: true })
   @Type(() => BeneficioDto)
   beneficios: BeneficioDto[];
+
+  @IsArray()
+  @ValidateNested({ each: true })
+  @Type(() => RequisitoDto)
+  requisitos: RequisitoDto[];
 
   @IsArray()
   @ValidateNested({ each: true })

@@ -11,6 +11,7 @@ const VagaData = ({ onProximo, vagaId }: { onProximo: () => void; vagaId?: numbe
   const [loading, setLoading] = useState(false);
   const [erro, setErro] = useState("");
   const [novoBeneficio, setNovoBeneficio] = useState("");
+  const [novoRequisito, setNovoRequisito] = useState("");
   const navigate = useNavigate();
   const maxCaracteres = 5000;
 
@@ -33,6 +34,16 @@ const VagaData = ({ onProximo, vagaId }: { onProximo: () => void; vagaId?: numbe
     setData({ beneficios: data.beneficios.filter((_, i) => i !== index) });
   };
 
+  const adicionarRequisito = () => {
+    if (!novoRequisito.trim()) return;
+    setData({ requisitos: [...data.requisitos, novoRequisito.trim()] });
+    setNovoRequisito("");
+  };
+
+  const removerRequisito = (index: number) => {
+    setData({ requisitos: data.requisitos.filter((_, i) => i !== index) });
+  };
+
   const handleProximo = () => {
     if (!validate()) return;
     onProximo();
@@ -51,6 +62,7 @@ const VagaData = ({ onProximo, vagaId }: { onProximo: () => void; vagaId?: numbe
           ? parseFloat(data.salario.replace(/[^0-9,.]/g, "").replace(",", "."))
           : undefined,
         beneficios: data.beneficios.map((nome) => ({ nome })),
+        requisitos: data.requisitos.map((nome) => ({ nome })),
       });
       navigate("/vagas-empresa");
     } catch (e: any) {
@@ -143,6 +155,53 @@ const VagaData = ({ onProximo, vagaId }: { onProximo: () => void; vagaId?: numbe
                       type="button"
                       onClick={() => removerBeneficio(index)}
                       aria-label={`Remover benefício ${beneficio}`}
+                      className="hover:text-red-600 transition-colors"
+                    >
+                      <X size={14} aria-hidden="true" />
+                    </button>
+                  </span>
+                ))}
+              </div>
+            )}
+          </div>
+
+          <div>
+            <label className={labelClass}>Requisitos e Qualificações <span className="text-gray-400 font-normal">(opcional)</span></label>
+            <div className="flex gap-3">
+              <input
+                type="text"
+                value={novoRequisito}
+                onChange={(e) => setNovoRequisito(e.target.value)}
+                onKeyDown={(e) => {
+                  if (e.key === "Enter") {
+                    e.preventDefault();
+                    adicionarRequisito();
+                  }
+                }}
+                placeholder="Ex: Experiência com manejo de gado"
+                className={inputClass}
+              />
+              <button
+                type="button"
+                onClick={adicionarRequisito}
+                className="flex items-center justify-center gap-2 bg-deepGreen text-white px-5 rounded-xl font-semibold hover:bg-mediumGreen transition-colors duration-200 flex-shrink-0"
+              >
+                <Plus size={18} aria-hidden="true" />
+                Adicionar
+              </button>
+            </div>
+            {data.requisitos.length > 0 && (
+              <div className="flex flex-wrap gap-2 mt-3">
+                {data.requisitos.map((requisito, index) => (
+                  <span
+                    key={index}
+                    className="inline-flex items-center gap-2 bg-paleGreen/40 text-deepGreen px-3 py-1.5 rounded-full text-sm"
+                  >
+                    {requisito}
+                    <button
+                      type="button"
+                      onClick={() => removerRequisito(index)}
+                      aria-label={`Remover requisito ${requisito}`}
                       className="hover:text-red-600 transition-colors"
                     >
                       <X size={14} aria-hidden="true" />

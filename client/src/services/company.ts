@@ -48,13 +48,20 @@ export interface PublicCompany {
   Address?: { city: string; state: string } | null;
 }
 
+const publicCompanyCache = new Map<number, PublicCompany>();
+
 export async function getPublicCompany(id: number): Promise<PublicCompany> {
+  const cached = publicCompanyCache.get(id);
+  if (cached) return cached;
+
   const response = await fetch(`${COMPANY_URL}/${id}`);
   if (!response.ok) {
     const error = await response.json();
     throw new Error(error.message || "Erro ao buscar empresa");
   }
-  return response.json();
+  const company = await response.json();
+  publicCompanyCache.set(id, company);
+  return company;
 }
 
 export interface UpdateProfilePayload {
@@ -75,6 +82,7 @@ export async function updateCompanyProfile(data: UpdateProfilePayload): Promise<
     const error = await response.json();
     throw new Error(error.message || "Erro ao atualizar perfil");
   }
+  invalidatePublicCompanyCache();
   return response.json();
 }
 
@@ -99,6 +107,7 @@ export async function updateCompanyCadastro(data: UpdateCadastroPayload): Promis
     const error = await response.json();
     throw new Error(error.message || "Erro ao atualizar cadastro");
   }
+  invalidatePublicCompanyCache();
   return response.json();
 }
 
@@ -113,6 +122,7 @@ export async function uploadCompanyLogo(file: File): Promise<Company> {
     const error = await response.json();
     throw new Error(error.message || "Erro ao enviar logo");
   }
+  invalidatePublicCompanyCache();
   return response.json();
 }
 
@@ -127,6 +137,7 @@ export async function uploadCompanyBanner(file: File): Promise<Company> {
     const error = await response.json();
     throw new Error(error.message || "Erro ao enviar banner");
   }
+  invalidatePublicCompanyCache();
   return response.json();
 }
 
@@ -139,5 +150,11 @@ export async function deleteCompany() {
     const error = await response.json();
     throw new Error(error.message || "Erro ao deletar conta");
   }
+  invalidatePublicCompanyCache();
   return response.json();
+}
+
+function invalidatePublicCompanyCache() {
+  const userId = Number(localStorage.getItem("userId"));
+  if (userId) publicCompanyCache.delete(userId);
 }

@@ -1,6 +1,6 @@
 import { useEffect, useState } from "react";
 import { useNavigate, useSearchParams } from "react-router";
-import { Users, Loader2, Mail, Phone, Check, X, FileText } from "lucide-react";
+import { ArrowLeft, Users, Loader2, Mail, Phone, Check, X, FileText } from "lucide-react";
 import { toast } from "sonner";
 import { getVagaById, Vaga } from "@/services/vaga";
 import {
@@ -11,8 +11,8 @@ import {
 } from "@/services/candidatura";
 
 export default function MainCandidates() {
-  const [searchParams] = useSearchParams();
   const navigate = useNavigate();
+  const [searchParams] = useSearchParams();
   const vagaId = searchParams.get("vagaId");
   const etapaId = searchParams.get("etapaId");
 
@@ -57,7 +57,15 @@ export default function MainCandidates() {
   return (
     <div className="min-h-screen bg-gray-50 pt-20 pb-12">
       <div className="max-w-4xl mx-auto px-4 sm:px-6">
-        <div className="py-8">
+        <button
+          onClick={() => navigate(`/gerenciar-processo?vagaId=${vagaId}`)}
+          className="flex items-center gap-2 text-gray-600 hover:text-deepGreen transition-colors duration-200 pt-8 font-SecondFont text-sm"
+        >
+          <ArrowLeft size={18} aria-hidden="true" />
+          Voltar para o processo seletivo
+        </button>
+
+        <div className="pb-8 pt-2">
           <h1 className="text-2xl font-bold text-deepGreen font-PrimaryFont">
             Candidatos
           </h1>

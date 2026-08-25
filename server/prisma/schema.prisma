@@ -91,6 +91,7 @@ model Vaga {
   empresaId         Int
   empresa           UserCompany       @relation(fields: [empresaId], references: [id], onDelete: Cascade)
   beneficios        Beneficio[]
+  requisitos        Requisito[]
   etapas            EtapaProcessoSeletivo[]
   processoSeletivo  ProcessoSeletivo?
 
@@ -99,6 +100,14 @@ model Vaga {
 }
 
 model Beneficio {
+  id     Int    @id @default(autoincrement())
+  nome   String
+
+  vagaId Int
+  vaga   Vaga @relation(fields: [vagaId], references: [id], onDelete: Cascade)
+}
+
+model Requisito {
   id     Int    @id @default(autoincrement())
   nome   String
 

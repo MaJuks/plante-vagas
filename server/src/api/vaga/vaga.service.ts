@@ -8,15 +8,16 @@ export class VagaService {
   constructor(private prisma: PrismaService) {}
 
   async create(createVagaDto: CreateVagaDto, empresaId: number) {
-    const { beneficios, etapas, ...vagaData } = createVagaDto;
+    const { beneficios, requisitos, etapas, ...vagaData } = createVagaDto;
     return this.prisma.vaga.create({
       data: {
         ...vagaData,
         empresaId,
         beneficios: { createMany: { data: beneficios } },
+        requisitos: { createMany: { data: requisitos } },
         etapas: { createMany: { data: etapas } },
       },
-      include: { beneficios: true, etapas: true },
+      include: { beneficios: true, requisitos: true, etapas: true },
     });
   }
 
@@ -24,6 +25,7 @@ export class VagaService {
     return this.prisma.vaga.findMany({
       include: {
         beneficios: true,
+        requisitos: true,
         empresa: { select: { id: true, fantasyName: true, name: true } },
       },
       orderBy: { createdAt: 'desc' },
@@ -33,7 +35,7 @@ export class VagaService {
   async findByEmpresa(empresaId: number) {
     return this.prisma.vaga.findMany({
       where: { empresaId },
-      include: { beneficios: true, etapas: true },
+      include: { beneficios: true, requisitos: true, etapas: true },
       orderBy: { createdAt: 'desc' },
     });
   }
@@ -43,6 +45,7 @@ export class VagaService {
       where: { id },
       include: {
         beneficios: true,
+        requisitos: true,
         etapas: true,
         empresa: { select: { id: true, fantasyName: true, name: true } },
       },
@@ -59,11 +62,14 @@ export class VagaService {
     if (!vaga) throw new ConflictException('Vaga não encontrada');
     if (vaga.empresaId !== empresaId) throw new ConflictException('Sem permissão para editar esta vaga');
 
-    const { beneficios, etapas, ...vagaData } = updateVagaDto;
+    const { beneficios, requisitos, etapas, ...vagaData } = updateVagaDto;
 
     return this.prisma.$transaction(async (tx) => {
       if (beneficios) {
         await tx.beneficio.deleteMany({ where: { vagaId: id } });
+      }
+      if (requisitos) {
+        await tx.requisito.deleteMany({ where: { vagaId: id } });
       }
       if (etapas && etapas.length > 0) {
         await tx.etapaProcessoSeletivo.deleteMany({ where: { vagaId: id } });
@@ -73,9 +79,10 @@ export class VagaService {
         data: {
           ...vagaData,
           ...(beneficios && { beneficios: { createMany: { data: beneficios } } }),
+          ...(requisitos && { requisitos: { createMany: { data: requisitos } } }),
           ...(etapas && { etapas: { createMany: { data: etapas } } }),
         },
-        include: { beneficios: true, etapas: true },
+        include: { beneficios: true, requisitos: true, etapas: true },
       });
     });
   }
