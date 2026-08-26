@@ -6,14 +6,28 @@ import {
 import { PrismaService } from '../prisma/prisma.service';
 import { CandidaturaInput } from './ingestao/fonte-de-candidatura.interface';
 import { MoveCandidaturaDto } from './dto/move-candidatura.dto';
+import { CandidaturaNotificationService } from './candidatura-notification.service';
 
-const CANDIDATO_SELECT = { id: true, name: true, email: true, phone: true, photoUrl: true };
-const EMPRESA_SELECT = { id: true, fantasyName: true, name: true, logoUrl: true };
+const CANDIDATO_SELECT = {
+  id: true,
+  name: true,
+  email: true,
+  phone: true,
+  photoUrl: true,
+};
+const EMPRESA_SELECT = {
+  id: true,
+  fantasyName: true,
+  name: true,
+  logoUrl: true,
+};
 
 @Injectable()
 export class CandidaturaService {
-  constructor(private prisma: PrismaService) {}
-
+  constructor(
+    private prisma: PrismaService,
+    private notification: CandidaturaNotificationService,
+  ) {}
 
   async aplicar(input: CandidaturaInput) {
     const vaga = await this.prisma.vaga.findUnique({
@@ -37,14 +51,30 @@ export class CandidaturaService {
       throw new ConflictException('Candidato já se candidatou a esta vaga');
     }
 
-    return this.prisma.candidatoEtapa.create({
+    const candidatura = await this.prisma.candidatoEtapa.create({
       data: {
         candidatoId: input.candidatoId,
         etapaId: primeiraEtapa.id,
         origem: input.origem,
       },
-      include: { etapa: { include: { vaga: true } } },
+      include: {
+        candidato: { select: CANDIDATO_SELECT },
+        etapa: {
+          include: {
+            vaga: { include: { empresa: { select: EMPRESA_SELECT } } },
+          },
+        },
+      },
     });
+
+    void this.notification.candidaturaConfirmada({
+      candidato: candidatura.candidato,
+      empresa: candidatura.etapa.vaga.empresa,
+      vaga: candidatura.etapa.vaga,
+      etapa: candidatura.etapa,
+    });
+
+    return candidatura;
   }
 
   async minhas(candidatoId: number) {
@@ -91,7 +121,13 @@ export class CandidaturaService {
   async mover(id: number, dto: MoveCandidaturaDto, empresaId: number) {
     const candidatura = await this.prisma.candidatoEtapa.findUnique({
       where: { id },
-      include: { etapa: { include: { vaga: true } } },
+      include: {
+        etapa: {
+          include: {
+            vaga: { include: { empresa: { select: EMPRESA_SELECT } } },
+          },
+        },
+      },
     });
     if (!candidatura) throw new NotFoundException('Candidatura não encontrada');
     if (candidatura.etapa.vaga.empresaId !== empresaId) {
@@ -107,7 +143,9 @@ export class CandidaturaService {
       }
     }
 
-    return this.prisma.candidatoEtapa.update({
+    const etapaAnterior = candidatura.etapa;
+
+    const atualizada = await this.prisma.candidatoEtapa.update({
       where: { id },
       data: {
         ...(dto.etapaId !== undefined && { etapaId: dto.etapaId }),
@@ -125,8 +163,35 @@ export class CandidaturaService {
           motivoRejeicao: dto.motivoRejeicao,
         }),
       },
-      include: { etapa: true, candidato: { select: CANDIDATO_SELECT } },
+      include: {
+        etapa: {
+          include: {
+            vaga: { include: { empresa: { select: EMPRESA_SELECT } } },
+          },
+        },
+        candidato: { select: CANDIDATO_SELECT },
+      },
     });
+
+    if (dto.rejeitado) {
+      void this.notification.candidaturaRecusada({
+        candidato: atualizada.candidato,
+        empresa: atualizada.etapa.vaga.empresa,
+        vaga: atualizada.etapa.vaga,
+        etapa: atualizada.etapa,
+        motivoRejeicao: atualizada.motivoRejeicao,
+      });
+    } else if (dto.etapaId !== undefined && dto.etapaId !== etapaAnterior.id) {
+      void this.notification.avancouEtapa({
+        candidato: atualizada.candidato,
+        empresa: atualizada.etapa.vaga.empresa,
+        vaga: atualizada.etapa.vaga,
+        etapaAnterior,
+        etapa: atualizada.etapa,
+      });
+    }
+
+    return atualizada;
   }
 
   async cancelar(id: number, candidatoId: number) {

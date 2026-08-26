@@ -1,6 +1,7 @@
 import { Module } from '@nestjs/common';
 import { PrismaModule } from '../prisma/prisma.module';
 import { CandidaturaService } from './candidatura.service';
+import { CandidaturaNotificationService } from './candidatura-notification.service';
 import { CandidaturaController } from './candidatura.controller';
 import { IngestaoController } from './ingestao/ingestao.controller';
 import { IngestaoService } from './ingestao/ingestao.service';
@@ -14,6 +15,7 @@ import { FONTES_DE_CANDIDATURA } from './ingestao/fonte-de-candidatura.interface
   controllers: [CandidaturaController, IngestaoController],
   providers: [
     CandidaturaService,
+    CandidaturaNotificationService,
     ApiKeyGuard,
     CandidaturaInternaFonte,
     CandidaturaRhExternoFonte,
