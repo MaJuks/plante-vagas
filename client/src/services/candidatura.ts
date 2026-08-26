@@ -72,3 +72,13 @@ export async function moverCandidatura(id: number, data: MoveCandidaturaPayload)
   });
   return handle<Candidatura>(response);
 }
+
+export async function cancelarCandidatura(id: number): Promise<void> {
+  const response = await authFetch(`${CANDIDATURA_URL}/${id}`, {
+    method: "DELETE",
+  });
+  if (!response.ok) {
+    const error = await response.json();
+    throw new Error(error.message || "Erro na requisição");
+  }
+}

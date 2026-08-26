@@ -1,19 +1,46 @@
 import { useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
-import { ClipboardList, Loader2, Building2, ArrowRight } from "lucide-react";
-import { getMinhasCandidaturas, type Candidatura } from "@/services/candidatura";
+import { ClipboardList, Loader2, Building2, ArrowRight, X } from "lucide-react";
+import { toast } from "sonner";
+import { getMinhasCandidaturas, cancelarCandidatura, type Candidatura } from "@/services/candidatura";
 import { timeAgo } from "@/utils/timeAgo";
+import {
+  AlertDialog,
+  AlertDialogContent,
+  AlertDialogHeader,
+  AlertDialogFooter,
+  AlertDialogTitle,
+  AlertDialogDescription,
+  AlertDialogCancel,
+} from "@/components/ui/alert-dialog";
 
 export default function SelectionProcess() {
   const navigate = useNavigate();
   const [candidaturas, setCandidaturas] = useState<Candidatura[]>([]);
   const [loading, setLoading] = useState(true);
+  const [cancelarAlvo, setCancelarAlvo] = useState<Candidatura | null>(null);
+  const [cancelando, setCancelando] = useState(false);
 
   useEffect(() => {
     getMinhasCandidaturas()
       .then(setCandidaturas)
       .finally(() => setLoading(false));
   }, []);
+
+  const handleConfirmarCancelamento = async () => {
+    if (!cancelarAlvo) return;
+    setCancelando(true);
+    try {
+      await cancelarCandidatura(cancelarAlvo.id);
+      setCandidaturas((prev) => prev.filter((c) => c.id !== cancelarAlvo.id));
+      toast.success("Candidatura cancelada");
+      setCancelarAlvo(null);
+    } catch (e: any) {
+      toast.error(e.message || "Erro ao cancelar candidatura");
+    } finally {
+      setCancelando(false);
+    }
+  };
 
   return (
     <div className="min-h-screen bg-gray-50 py-8 sm:py-12 px-4 sm:px-8">
@@ -107,12 +134,52 @@ export default function SelectionProcess() {
                   {candidatura.observacoes && (
                     <p className="text-gray-600 text-sm mt-4 break-words">{candidatura.observacoes}</p>
                   )}
+
+                  <div className="flex justify-end mt-4">
+                    <button
+                      onClick={(e) => {
+                        e.stopPropagation();
+                        setCancelarAlvo(candidatura);
+                      }}
+                      className="flex items-center gap-2 text-sm text-gray-600 px-4 py-2 rounded-xl border border-gray-200 hover:border-red-300 hover:text-red-600 transition-colors duration-200"
+                    >
+                      <X size={16} aria-hidden="true" />
+                      Cancelar candidatura
+                    </button>
+                  </div>
                 </div>
               );
             })}
           </div>
         )}
       </div>
+
+      <AlertDialog open={!!cancelarAlvo} onOpenChange={(open) => !open && setCancelarAlvo(null)}>
+        <AlertDialogContent className="font-SecondFont">
+          <AlertDialogHeader>
+            <AlertDialogTitle className="text-deepGreen">
+              Cancelar candidatura?
+            </AlertDialogTitle>
+            <AlertDialogDescription>
+              Tem certeza que deseja cancelar sua candidatura para{" "}
+              {cancelarAlvo?.etapa?.vaga?.nome ?? "esta vaga"}? Essa ação não pode ser desfeita.
+            </AlertDialogDescription>
+          </AlertDialogHeader>
+
+          <AlertDialogFooter>
+            <AlertDialogCancel>Voltar</AlertDialogCancel>
+            <button
+              type="button"
+              onClick={handleConfirmarCancelamento}
+              disabled={cancelando}
+              className="inline-flex items-center justify-center gap-2 rounded-md bg-red-700 text-white px-4 py-2 text-sm font-medium hover:opacity-90 transition-opacity disabled:opacity-60"
+            >
+              {cancelando && <Loader2 size={16} className="animate-spin" aria-hidden="true" />}
+              {cancelando ? "Cancelando..." : "Cancelar candidatura"}
+            </button>
+          </AlertDialogFooter>
+        </AlertDialogContent>
+      </AlertDialog>
     </div>
   );
 }

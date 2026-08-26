@@ -1,6 +1,7 @@
 import {
   Body,
   Controller,
+  Delete,
   Get,
   Param,
   Patch,
@@ -38,6 +39,13 @@ export class CandidaturaController {
   @Roles('candidate')
   async minhas(@Req() req) {
     return this.candidaturaService.minhas(req.user.sub);
+  }
+
+  @Delete(':id')
+  @UseGuards(JwtAuthGuard, RolesGuard)
+  @Roles('candidate')
+  async cancelar(@Param('id') id: string, @Req() req) {
+    return this.candidaturaService.cancelar(Number(id), req.user.sub);
   }
 
   @Get('vaga/:vagaId')
