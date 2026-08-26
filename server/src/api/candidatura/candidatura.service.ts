@@ -129,6 +129,18 @@ export class CandidaturaService {
     });
   }
 
+  async cancelar(id: number, candidatoId: number) {
+    const candidatura = await this.prisma.candidatoEtapa.findUnique({
+      where: { id },
+    });
+    if (!candidatura) throw new NotFoundException('Candidatura não encontrada');
+    if (candidatura.candidatoId !== candidatoId) {
+      throw new ConflictException('Sem permissão');
+    }
+
+    await this.prisma.candidatoEtapa.delete({ where: { id } });
+  }
+
   private async assertVagaPertenceEmpresa(vagaId: number, empresaId: number) {
     const vaga = await this.prisma.vaga.findUnique({ where: { id: vagaId } });
     if (!vaga) throw new NotFoundException('Vaga não encontrada');

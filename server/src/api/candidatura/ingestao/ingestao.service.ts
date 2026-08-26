@@ -5,11 +5,7 @@ import {
   FonteDeCandidatura,
 } from './fonte-de-candidatura.interface';
 
-/**
- * Orquestrador do framework: resolve a fonte pela chave recebida, traduz o
- * payload cru dela pro contrato comum (CandidaturaInput) e repassa pro
- * pipeline fixo (CandidaturaService.aplicar).
- */
+
 @Injectable()
 export class IngestaoService {
   private readonly fontes: Map<string, FonteDeCandidatura>;
