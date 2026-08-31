@@ -9,6 +9,7 @@ const Board = (props: {
   descricao_longa: string;
   vagas: Vaga[];
   loadingVagas?: boolean;
+  onVagaExcluida?: (id: number) => void;
   logoUrl?: string | null;
   bannerUrl?: string | null;
   facebookUrl?: string | null;
@@ -83,7 +84,7 @@ const Board = (props: {
         {activeTab === "vaga" ? (
           props.loadingVagas
             ? <p className="text-gray-500 text-center py-8">Carregando vagas...</p>
-            : <VagasCompanyProfile vagas={props.vagas} />
+            : <VagasCompanyProfile vagas={props.vagas} onVagaExcluida={props.onVagaExcluida} />
         ) : (
           <AboutCompany
             descricao_longa={props.descricao_longa}

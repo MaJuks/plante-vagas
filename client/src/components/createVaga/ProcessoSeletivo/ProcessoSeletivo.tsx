@@ -1,16 +1,38 @@
 import { useState } from "react";
-import { Info } from "lucide-react";
+import { useVagaCreate } from "../VagaCreateContext";
 
 const Processselective = ({ onProximo }: { onProximo: () => void }) => {
-  const [nomeProcesso, setNomeProcesso] = useState("");
-  const [dataInicio, setDataInicio] = useState("");
-  const [duracao, setDuracao] = useState("7 dias");
-  const [descricao, setDescricao] = useState("");
+  const { data, setData } = useVagaCreate();
+  const [nomeProcesso, setNomeProcesso] = useState(data.processoSeletivo.nome);
+  const [dataInicio, setDataInicio] = useState(data.processoSeletivo.dataInicio);
+  const [duracaoDias, setDuracaoDias] = useState(data.processoSeletivo.duracaoDias);
+  const [descricao, setDescricao] = useState(data.processoSeletivo.descricao);
+  const [erro, setErro] = useState("");
   const maxCaracteres = 5000;
 
   const inputClass =
     "w-full px-4 py-3 bg-gray-50 border border-gray-200 rounded-xl text-gray-800 placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-mediumGreen focus:border-transparent transition-all duration-300";
   const labelClass = "block text-sm font-medium text-gray-700 mb-2";
+
+  const handleProximo = () => {
+    if (!nomeProcesso.trim()) {
+      setErro("O nome do processo é obrigatório.");
+      return;
+    }
+    if (!dataInicio) {
+      setErro("A data de início é obrigatória.");
+      return;
+    }
+    setData({
+      processoSeletivo: {
+        nome: nomeProcesso.trim(),
+        descricao: descricao.trim(),
+        dataInicio,
+        duracaoDias,
+      },
+    });
+    onProximo();
+  };
 
   return (
     <div className="min-h-screen bg-gray-50 py-8 sm:py-12 px-4 sm:px-8">
@@ -21,15 +43,6 @@ const Processselective = ({ onProximo }: { onProximo: () => void }) => {
         <p className="text-gray-600 mb-6">
           Dê um nome e um período pro seu processo de seleção
         </p>
-
-        <div className="flex items-start gap-3 bg-paleGreen/30 border border-paleGreen rounded-xl p-4 mb-8">
-          <Info size={20} className="text-deepGreen flex-shrink-0 mt-0.5" aria-hidden="true" />
-          <p className="text-sm text-gray-700">
-            Essas informações ainda não são salvas — o banco de dados não tem onde guardar
-            nome, data de início ou duração do processo seletivo ainda (ver pendencias.txt,
-            item 1). O que realmente fica salvo são as etapas, na próxima tela.
-          </p>
-        </div>
 
         <div className="flex flex-col gap-6">
           <div>
@@ -56,16 +69,16 @@ const Processselective = ({ onProximo }: { onProximo: () => void }) => {
             <div>
               <label className={labelClass}>Duração</label>
               <select
-                value={duracao}
-                onChange={(e) => setDuracao(e.target.value)}
+                value={duracaoDias}
+                onChange={(e) => setDuracaoDias(Number(e.target.value))}
                 className={inputClass}
               >
-                <option>3 dias</option>
-                <option>7 dias</option>
-                <option>10 dias</option>
-                <option>15 dias</option>
-                <option>20 dias</option>
-                <option>30 dias</option>
+                <option value={3}>3 dias</option>
+                <option value={7}>7 dias</option>
+                <option value={10}>10 dias</option>
+                <option value={15}>15 dias</option>
+                <option value={20}>20 dias</option>
+                <option value={30}>30 dias</option>
               </select>
             </div>
           </div>
@@ -84,9 +97,11 @@ const Processselective = ({ onProximo }: { onProximo: () => void }) => {
             </div>
           </div>
 
+          {erro && <p className="text-red-500 text-sm">{erro}</p>}
+
           <div className="flex justify-end pt-2">
             <button
-              onClick={onProximo}
+              onClick={handleProximo}
               className="bg-deepGreen text-white px-8 py-3 rounded-xl font-SecondFont font-semibold hover:bg-mediumGreen transition-colors duration-200"
             >
               Próximo

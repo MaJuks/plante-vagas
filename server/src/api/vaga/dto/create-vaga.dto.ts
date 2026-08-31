@@ -1,4 +1,4 @@
-import { IsArray, IsNumber, IsOptional, IsString, ValidateNested } from 'class-validator';
+import { IsArray, IsDateString, IsInt, IsNumber, IsOptional, IsString, Min, ValidateNested } from 'class-validator';
 import { Type } from 'class-transformer';
 
 class BeneficioDto {
@@ -17,6 +17,21 @@ class EtapaDto {
 
   @IsString()
   descricao: string;
+}
+
+export class ProcessoSeletivoDto {
+  @IsString()
+  nome: string;
+
+  @IsString()
+  descricao: string;
+
+  @IsDateString()
+  dataInicio: string;
+
+  @IsInt()
+  @Min(1)
+  duracaoDias: number;
 }
 
 export class CreateVagaDto {
@@ -47,4 +62,8 @@ export class CreateVagaDto {
   @ValidateNested({ each: true })
   @Type(() => EtapaDto)
   etapas: EtapaDto[];
+
+  @ValidateNested()
+  @Type(() => ProcessoSeletivoDto)
+  processoSeletivo: ProcessoSeletivoDto;
 }

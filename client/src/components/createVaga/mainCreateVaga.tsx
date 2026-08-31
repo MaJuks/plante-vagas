@@ -28,6 +28,14 @@ const MainCreateVagaInner = () => {
         beneficios: vaga.beneficios.map((b) => b.nome),
         requisitos: vaga.requisitos.map((r) => r.nome),
         etapas: vaga.etapas.map((e) => ({ nome: e.nome, descricao: e.descricao })),
+        processoSeletivo: vaga.processoSeletivo
+          ? {
+              nome: vaga.processoSeletivo.nome,
+              descricao: vaga.processoSeletivo.descricao,
+              dataInicio: vaga.processoSeletivo.dataInicio.slice(0, 10),
+              duracaoDias: vaga.processoSeletivo.duracaoDias,
+            }
+          : { nome: "", descricao: "", dataInicio: "", duracaoDias: 7 },
       });
     }).finally(() => setLoading(false));
   }, [vagaId]);

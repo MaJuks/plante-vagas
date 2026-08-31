@@ -5,6 +5,13 @@ export interface EtapaData {
   descricao: string;
 }
 
+export interface ProcessoSeletivoData {
+  nome: string;
+  descricao: string;
+  dataInicio: string;
+  duracaoDias: number;
+}
+
 interface VagaCreateData {
   nome: string;
   cargo: string;
@@ -13,6 +20,7 @@ interface VagaCreateData {
   salario: string;
   descricao: string;
   etapas: EtapaData[];
+  processoSeletivo: ProcessoSeletivoData;
 }
 
 interface VagaCreateContextType {
@@ -31,6 +39,7 @@ export function VagaCreateProvider({ children }: { children: ReactNode }) {
     salario: "",
     descricao: "",
     etapas: [],
+    processoSeletivo: { nome: "", descricao: "", dataInicio: "", duracaoDias: 7 },
   });
 
   const setData = (partial: Partial<VagaCreateData>) => {

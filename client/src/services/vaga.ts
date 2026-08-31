@@ -2,6 +2,13 @@ import { authFetch, BASE_URL } from "./api";
 
 const VAGA_URL = `${BASE_URL}/vaga`;
 
+export interface ProcessoSeletivoPayload {
+  nome: string;
+  descricao: string;
+  dataInicio: string;
+  duracaoDias: number;
+}
+
 export interface VagaPayload {
   nome: string;
   cargo: string;
@@ -10,6 +17,7 @@ export interface VagaPayload {
   beneficios: { nome: string }[];
   requisitos: { nome: string }[];
   etapas: { nome: string; descricao: string }[];
+  processoSeletivo: ProcessoSeletivoPayload;
 }
 
 export interface EtapaProcessoSeletivo {
@@ -17,6 +25,14 @@ export interface EtapaProcessoSeletivo {
   nome: string;
   descricao: string;
   status: string;
+}
+
+export interface ProcessoSeletivo {
+  id: number;
+  nome: string;
+  descricao: string;
+  dataInicio: string;
+  duracaoDias: number;
 }
 
 export interface Vaga {
@@ -28,6 +44,7 @@ export interface Vaga {
   beneficios: { id: number; nome: string }[];
   requisitos: { id: number; nome: string }[];
   etapas: EtapaProcessoSeletivo[];
+  processoSeletivo?: ProcessoSeletivo | null;
   empresaId: number;
   empresa?: { id: number; fantasyName: string; name: string; logoUrl?: string | null };
   createdAt: string;
@@ -157,6 +174,26 @@ export async function addEtapa(vagaId: number, etapa: { nome: string; descricao:
   if (!response.ok) {
     const error = await response.json();
     throw new Error(error.message || "Erro ao adicionar etapa");
+  }
+  vagaCache.delete(vagaId);
+  invalidateVagaListCaches();
+  return response.json();
+}
+
+export async function upsertProcessoSeletivo(
+  vagaId: number,
+  data: ProcessoSeletivoPayload,
+): Promise<ProcessoSeletivo> {
+  const response = await authFetch(`${VAGA_URL}/${vagaId}/processo-seletivo`, {
+    method: "PATCH",
+    headers: {
+      "Content-Type": "application/json",
+    },
+    body: JSON.stringify(data),
+  });
+  if (!response.ok) {
+    const error = await response.json();
+    throw new Error(error.message || "Erro ao salvar processo seletivo");
   }
   vagaCache.delete(vagaId);
   invalidateVagaListCaches();
