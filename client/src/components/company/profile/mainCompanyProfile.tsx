@@ -39,6 +39,7 @@ export default function MainCompanyProfile() {
           descricao_longa={user?.description ?? ""}
           vagas={vagas}
           loadingVagas={loading}
+          onVagaExcluida={(id) => setVagas((prev) => prev.filter((v) => v.id !== id))}
           logoUrl={user?.logoUrl}
           bannerUrl={user?.bannerUrl}
           facebookUrl={user?.facebookUrl}

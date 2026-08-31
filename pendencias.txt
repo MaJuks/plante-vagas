@@ -820,12 +820,23 @@ movido cedo demais):
   - RF059 Finalizar vaga (encerrar vaga, impedir novas candidaturas)
     — não existe nenhum campo de status na Vaga (só a etapa tem
     status), não achei rota nem serviço pra isso.
-  - RF062/RF063/RF064 Criar/Alterar/Excluir processo seletivo — bate
-    de frente com o item 1 aqui no pendencias: a tela de "Processo
-    Seletivo" no cadastro de vaga (nome, data de início, duração)
-    continua sem salvar nada, porque o modelo ProcessoSeletivo no
-    banco tem os campos errados (ver item 2). Só as ETAPAS salvam
-    (RF066, esse sim de verdade).
+  - RF062/RF063/RF064/RF065 Criar/Alterar/Excluir/Listar processo
+    seletivo — CONFIRMADO via grep no backend inteiro: não existe
+    UMA ÚNICA chamada a processoSeletivo.create/update/delete/findMany
+    em nenhum arquivo (server/src/**). O model ProcessoSeletivo no
+    schema.prisma existe mas é 100% órfão — nenhum código do backend
+    cria, edita, lista ou exclui um registro dele, nunca. E os campos
+    do model estão errados pro que o nome sugere (cpf, dataDeNascimento,
+    genero, pessoaComDeficiencia — parecem campos de pessoa física
+    perdidos, não nome/data de início/duração de um processo seletivo
+    — ver item 2). Isso bate com o item 1 aqui no pendencias, que já
+    tinha achado que a tela de "Processo Seletivo" no cadastro de
+    vaga não salva nada — agora está confirmado o motivo exato: não
+    tem NENHUM código no backend que grave nesse model.
+    Só as ETAPAS salvam de verdade (RF066, via EtapaProcessoSeletivo,
+    esse sim implementado e usado — inclusive é isso que
+    candidatura.service.ts usa pra aplicar() e mover() candidato,
+    ignorando o ProcessoSeletivo completamente).
 
 AINDA FALTA (cards continuam na lista "Empresa", não implementado):
   - RF052 Pesquisar vagas (da própria empresa, na área dela)
@@ -845,3 +856,50 @@ AINDA FALTA (cards continuam na lista "Empresa", não implementado):
 
 Nada disso foi implementado agora — é só a lista organizada pra
 saber o que falta. Se quiser que eu comece algum desses, é só pedir.
+
+
+23. ProcessoSeletivo AGORA É USADO DE VERDADE (RF062/063/065 resolvidos)
+---------------------------------------------------------------------------
+[RESOLVIDO] O item 22 encontrou que o model ProcessoSeletivo era 100% órfão
+  (schema com campos errados — cpf, dataDeNascimento, genero,
+  pessoaComDeficiencia — e zero código no backend inteiro criando/lendo/
+  editando/excluindo um registro dele). Corrigido:
+
+  - Migration `fix_processo_seletivo_fields`: trocados os campos por
+    nome, descricao, dataInicio (DateTime), duracaoDias (Int) — mesmos 4
+    campos que o passo "Processo Seletivo" do wizard de criação de vaga
+    já coletava mas nunca salvava (banner de aviso removido).
+  - `POST /vaga/create` e `PATCH /vaga/update/:id` agora criam/atualizam
+    o ProcessoSeletivo junto da vaga (nested create / upsert dentro da
+    mesma transação).
+  - Novo endpoint dedicado `PATCH /vaga/:id/processo-seletivo` (upsert),
+    usado tanto pra editar quanto pra "retroalimentar" vagas antigas que
+    ainda não têm processo.
+  - Tela "Gerenciar processo seletivo": se a vaga não tiver
+    ProcessoSeletivo ainda (vagas criadas antes dessa mudança), mostra um
+    formulário pedindo pra preencher título/descrição/data/duração antes
+    de liberar as etapas — nada é criado sozinho no lugar da empresa.
+    Quando existe, o título e a descrição do PROCESSO (não mais
+    `vaga.nome — vaga.cargo`) aparecem no topo, com data de início e
+    duração, e um botão "Editar processo".
+  - Nova trava: `removeEtapa` agora recusa (409) excluir a última etapa
+    restante de um processo — sem isso, `candidatura.service.ts.aplicar()`
+    já barrava candidatos de se candidatarem (vaga sem etapa = erro), então
+    a trava só formaliza uma regra que já existia de fato. A tela mostra
+    um aviso explicando isso, com atalho pra "Excluir vaga inteira" em vez
+    disso (reaproveita `deleteVaga`, que já cascade-deleta etapas,
+    processo e candidaturas).
+  - Elemento visual novo: uma timeline horizontal (mesmo padrão visual do
+    Stepper do wizard de criação de vaga) mostrando as etapas em sequência
+    acima da lista de cards, clicável pra dar scroll até o card da etapa.
+
+  Testado via curl direto (sem UI, ver limitações abaixo): criar vaga com
+  processoSeletivo completo, editar processo via PATCH dedicado, tentar
+  excluir a única etapa (bloqueou 409 corretamente), adicionar 2ª etapa e
+  confirmar que aí sim excluir a 1ª funciona, excluir a vaga inteira e
+  confirmar que sumiu (cascade). Vaga de teste (id 102) removida ao final.
+
+  Limitação: não testei visualmente no navegador (sem ferramenta de
+  browser neste ambiente) — vale conferir o formulário de "completar
+  processo" em vagas antigas, a timeline com várias etapas, e o fluxo de
+  edição do processo direto na tela, olhando de verdade no navegador.

@@ -10,7 +10,7 @@ import {
   Req,
 } from '@nestjs/common';
 import { VagaService } from './vaga.service';
-import { CreateVagaDto } from './dto/create-vaga.dto';
+import { CreateVagaDto, ProcessoSeletivoDto } from './dto/create-vaga.dto';
 import { UpdateVagaDto } from './dto/update-vaga.dto';
 import { JwtAuthGuard } from '../auth/guards/jwt.auth.guard';
 import { RolesGuard } from '../auth/guards/roles.guard';
@@ -96,5 +96,17 @@ export class VagaController {
   ) {
     const empresaId = req.user.sub;
     return this.vagaService.addEtapa(Number(id), body, empresaId);
+  }
+
+  @Patch(':id/processo-seletivo')
+  @UseGuards(JwtAuthGuard, RolesGuard)
+  @Roles('company')
+  async upsertProcessoSeletivo(
+    @Param('id') id: string,
+    @Body() dto: ProcessoSeletivoDto,
+    @Req() req,
+  ) {
+    const empresaId = req.user.sub;
+    return this.vagaService.upsertProcessoSeletivo(Number(id), dto, empresaId);
   }
 }

@@ -47,6 +47,7 @@ const Etapas = ({ vagaId }: { vagaId?: number }) => {
         beneficios: data.beneficios.map((nome) => ({ nome })),
         requisitos: data.requisitos.map((nome) => ({ nome })),
         etapas: etapas.map((e) => ({ nome: e.nome.trim(), descricao: e.descricao.trim() })),
+        processoSeletivo: data.processoSeletivo,
       };
 
       if (isEdit) {

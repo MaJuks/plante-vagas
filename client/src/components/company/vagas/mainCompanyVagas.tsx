@@ -1,6 +1,6 @@
 import { useEffect, useState } from "react";
 import { useNavigate } from "react-router";
-import { Plus, Briefcase, Loader2 } from "lucide-react";
+import { Plus, Briefcase, Loader2, ArrowLeft } from "lucide-react";
 import { getVagasByEmpresa, Vaga } from "@/services/vaga";
 import VagaVagas from "./vagaVagas";
 
@@ -18,7 +18,15 @@ export default function MainCompanyVagas() {
   return (
     <div className="min-h-screen bg-gray-50 pt-20 pb-12">
       <div className="max-w-6xl mx-auto px-4 sm:px-6">
-        <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4 py-8">
+        <button
+          onClick={() => navigate("/empresa")}
+          className="flex items-center gap-2 text-gray-600 hover:text-deepGreen transition-colors duration-200 pt-8 font-SecondFont text-sm"
+        >
+          <ArrowLeft size={18} aria-hidden="true" />
+          Voltar para o início
+        </button>
+
+        <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4 pt-2 pb-8">
           <div>
             <h1 className="text-2xl sm:text-3xl font-bold text-deepGreen font-PrimaryFont">
               Vagas abertas

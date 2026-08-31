@@ -12,7 +12,15 @@ export default function EtapasDisplay({ etapas, vagaId, onExcluir, onAtualizar }
   return (
     <div className="flex flex-col gap-6 w-full">
       {etapas.map((etapa, index) => (
-        <Etapa key={etapa.id} etapa={etapa} vagaId={vagaId} index={index + 1} onExcluir={onExcluir} onAtualizar={onAtualizar} />
+        <Etapa
+          key={etapa.id}
+          etapa={etapa}
+          vagaId={vagaId}
+          index={index + 1}
+          podeExcluir={etapas.length > 1}
+          onExcluir={onExcluir}
+          onAtualizar={onAtualizar}
+        />
       ))}
     </div>
   );
