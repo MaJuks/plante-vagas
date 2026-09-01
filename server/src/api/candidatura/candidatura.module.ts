@@ -29,6 +29,6 @@ import { FONTES_DE_CANDIDATURA } from './ingestao/fonte-de-candidatura.interface
     },
     IngestaoService,
   ],
-  exports: [CandidaturaService],
+  exports: [CandidaturaService, CandidaturaNotificationService],
 })
 export class CandidaturaModule {}

@@ -88,6 +88,7 @@ model Vaga {
   cargo     String
   descricao String
   salario   Float?
+  status    String @default("aberta")
 
   empresaId         Int
   empresa           UserCompany       @relation(fields: [empresaId], references: [id], onDelete: Cascade)
@@ -133,10 +134,12 @@ model ProcessoSeletivo {
 }
 
 model EtapaProcessoSeletivo {
-  id        Int    @id @default(autoincrement())
-  nome      String
-  descricao String
-  status    String @default("aberta")
+  id          Int    @id @default(autoincrement())
+  nome        String
+  descricao   String
+  status      String @default("aberta")
+  prazoDias   Int?
+  ordem       Int    @default(0)
 
   vagaId Int
   vaga   Vaga @relation(fields: [vagaId], references: [id], onDelete: Cascade)

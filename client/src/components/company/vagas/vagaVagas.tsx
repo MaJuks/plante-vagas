@@ -1,10 +1,40 @@
-import { Briefcase, DollarSign, Tag, Clock, ArrowRight, Building2 } from "lucide-react";
+import { useState } from "react";
+import { Briefcase, DollarSign, Tag, Clock, ArrowRight, Building2, Copy, Ban, RotateCcw, Loader2 } from "lucide-react";
 import { useNavigate } from "react-router";
-import { Vaga } from "@/services/vaga";
+import { toast } from "sonner";
+import { Vaga, finalizarVaga, reabrirVaga, duplicarVaga } from "@/services/vaga";
 import { timeAgo } from "@/utils/timeAgo";
 
 const VagaVagas = ({ vaga }: { vaga: Vaga }) => {
   const navigate = useNavigate();
+  const [status, setStatus] = useState(vaga.status);
+  const [alterandoStatus, setAlterandoStatus] = useState(false);
+  const [duplicando, setDuplicando] = useState(false);
+
+  const handleAlternarStatus = async () => {
+    setAlterandoStatus(true);
+    try {
+      const atualizada = status === "aberta" ? await finalizarVaga(vaga.id) : await reabrirVaga(vaga.id);
+      setStatus(atualizada.status);
+      toast.success(atualizada.status === "aberta" ? "Vaga reaberta" : "Vaga finalizada");
+    } catch (e: any) {
+      toast.error(e.message || "Erro ao alterar status da vaga");
+    } finally {
+      setAlterandoStatus(false);
+    }
+  };
+
+  const handleDuplicar = async () => {
+    setDuplicando(true);
+    try {
+      const nova = await duplicarVaga(vaga.id);
+      toast.success("Vaga duplicada com sucesso");
+      navigate(`/gerenciar-processo?vagaId=${nova.id}`);
+    } catch (e: any) {
+      toast.error(e.message || "Erro ao duplicar vaga");
+      setDuplicando(false);
+    }
+  };
 
   return (
     <div
@@ -34,6 +64,13 @@ const VagaVagas = ({ vaga }: { vaga: Vaga }) => {
             <span className="flex items-center gap-2">
               <Clock size={16} className="text-mediumGreen" />
               Postada há {timeAgo(vaga.createdAt)}
+            </span>
+            <span
+              className={`px-3 py-1 rounded-full text-xs font-semibold capitalize ${
+                status === "aberta" ? "bg-paleGreen/50 text-deepGreen" : "bg-gray-100 text-gray-500"
+              }`}
+            >
+              {status}
             </span>
           </div>
         </div>
@@ -77,6 +114,32 @@ const VagaVagas = ({ vaga }: { vaga: Vaga }) => {
           className="flex items-center justify-center gap-2 border border-gray-200 text-gray-700 px-6 py-3 rounded-xl font-SecondFont font-medium hover:border-deepGreen hover:text-deepGreen transition-colors duration-200"
         >
           Editar vaga
+        </button>
+        <button
+          onClick={handleDuplicar}
+          disabled={duplicando}
+          className="flex items-center justify-center gap-2 border border-gray-200 text-gray-700 px-6 py-3 rounded-xl font-SecondFont font-medium hover:border-deepGreen hover:text-deepGreen transition-colors duration-200 disabled:opacity-60"
+        >
+          {duplicando ? <Loader2 size={16} className="animate-spin" aria-hidden="true" /> : <Copy size={16} aria-hidden="true" />}
+          {duplicando ? "Duplicando..." : "Duplicar vaga"}
+        </button>
+        <button
+          onClick={handleAlternarStatus}
+          disabled={alterandoStatus}
+          className={`flex items-center justify-center gap-2 px-6 py-3 rounded-xl font-SecondFont font-medium border transition-colors duration-200 disabled:opacity-60 ${
+            status === "aberta"
+              ? "border-amber-200 text-amber-700 hover:bg-amber-50"
+              : "border-gray-200 text-gray-700 hover:border-deepGreen hover:text-deepGreen"
+          }`}
+        >
+          {alterandoStatus ? (
+            <Loader2 size={16} className="animate-spin" aria-hidden="true" />
+          ) : status === "aberta" ? (
+            <Ban size={16} aria-hidden="true" />
+          ) : (
+            <RotateCcw size={16} aria-hidden="true" />
+          )}
+          {alterandoStatus ? "Aguarde..." : status === "aberta" ? "Finalizar vaga" : "Reabrir vaga"}
         </button>
       </div>
     </div>

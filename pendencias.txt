@@ -903,3 +903,60 @@ saber o que falta. Se quiser que eu comece algum desses, é só pedir.
   browser neste ambiente) — vale conferir o formulário de "completar
   processo" em vagas antigas, a timeline com várias etapas, e o fluxo de
   edição do processo direto na tela, olhando de verdade no navegador.
+
+
+24. AS 9 PENDÊNCIAS DO FLUXO "EMPRESA" DO TRELLO — RESOLVIDAS
+---------------------------------------------------------------------------
+[RESOLVIDO] Os 9 cards que ainda estavam abertos na lista "Empresa" do
+  Trello (nenhum tinha código correspondente, confirmado por exploração)
+  foram implementados:
+
+  - RF052/053/054 (Pesquisar/Filtrar/Ordenar vagas da empresa): busca por
+    nome/cargo, filtro por cargo (opções derivadas das vagas reais da
+    empresa) e ordenação (recentes/antigas/nome/salário), tudo client-side
+    em `mainCompanyVagas.tsx` — a lista já vinha inteira cacheada, não
+    precisou de endpoint novo. O filtro público pra candidatos
+    (`searchJob/filterBar`) continua 100% decorativo, não foi tocado aqui.
+  - RF059/RF060 (Finalizar/Reabrir vaga): `Vaga` ganhou campo `status`
+    ("aberta"/"fechada", migration `add_vaga_status`). Note que RF059
+    estava marcado "Concluído" no Trello mas era fake (ver item 22) — os
+    dois foram implementados juntos aqui, já que reabrir não fazia sentido
+    sem finalizar existir de verdade. `candidatura.service.ts.aplicar()`
+    agora rejeita (409) candidatura em vaga fechada.
+  - RF061 (Duplicar vaga): novo endpoint que copia nome (+" (cópia)"),
+    cargo, descrição, salário, benefícios, requisitos e etapas — não copia
+    o `processoSeletivo` nem as candidaturas. A vaga duplicada cai
+    naturalmente na tela de "complete o processo seletivo" (item 23).
+  - RF067 (Definir tempo de cada etapa): `EtapaProcessoSeletivo` ganhou
+    `prazoDias` opcional (migration `add_etapa_prazo_ordem`), editável no
+    form de etapa (tanto no wizard de criação quanto na tela de gerenciar
+    processo). Sem comportamento automático ainda — mesmo espírito do
+    `duracaoDias` do processo (item 23), só guarda o dado por enquanto.
+  - RF068 (Alterar etapas): reforçado pelo campo de prazo acima — editar
+    nome/descrição já existia (`updateEtapaService`).
+  - RF069 (Reordenar etapas): `EtapaProcessoSeletivo` ganhou `ordem`. Sem
+    lib de drag-and-drop nova (decisão do usuário) — setinhas ↑/↓ em cada
+    card de etapa, endpoint `PATCH vaga/:id/etapas/reordenar` reatribui a
+    ordem via transaction. Etapas criadas antes dessa mudança tinham todas
+    `ordem=0` (empate) — rodei um backfill (`ordem` = posição por `id`)
+    pra corrigir os dados existentes.
+  - RF070 (Encerrar processo seletivo): em vez de criar um fluxo novo,
+    completei o stub que já existia em `etapa.tsx` ("Fechar etapa") — o
+    próprio toast dizia exatamente o que faltava: campo de status editável
+    (agora existe) e integração com WhatsApp (o `candidatura-notification.
+    service.ts` que o colega subiu). Ao fechar uma etapa, todo
+    `CandidatoEtapa` não rejeitado ali recebe uma notificação
+    "processo_encerrado" via o mesmo webhook n8n já usado pras outras
+    notificações.
+
+  Testado via curl direto (login real, vaga de teste): criar vaga com
+  etapas com prazo, reordenar etapas (confirmado via find), finalizar vaga
+  e confirmar candidatura rejeitada com 409, reabrir vaga, duplicar vaga
+  (confirmado sem processoSeletivo, com etapas/benefícios copiados),
+  fechar etapa com candidato pendente (confirmado log de tentativa de
+  notificação "processo_encerrado"). Vagas de teste removidas ao final.
+
+  Limitação: mesma de sempre — não testei visualmente no navegador. Os
+  botões novos (Duplicar/Finalizar/Reabrir vaga nos cards, setinhas de
+  reordenar e prazo na etapa, busca/filtro/ordenação em "Vagas abertas")
+  valem uma conferida de verdade na tela.

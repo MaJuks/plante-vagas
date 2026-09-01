@@ -16,7 +16,7 @@ export interface VagaPayload {
   salario?: number;
   beneficios: { nome: string }[];
   requisitos: { nome: string }[];
-  etapas: { nome: string; descricao: string }[];
+  etapas: { nome: string; descricao: string; prazoDias?: number }[];
   processoSeletivo: ProcessoSeletivoPayload;
 }
 
@@ -25,6 +25,8 @@ export interface EtapaProcessoSeletivo {
   nome: string;
   descricao: string;
   status: string;
+  prazoDias?: number | null;
+  ordem: number;
 }
 
 export interface ProcessoSeletivo {
@@ -41,6 +43,7 @@ export interface Vaga {
   cargo: string;
   descricao: string;
   salario?: number;
+  status: string;
   beneficios: { id: number; nome: string }[];
   requisitos: { id: number; nome: string }[];
   etapas: EtapaProcessoSeletivo[];
@@ -134,7 +137,7 @@ export async function updateVaga(id: number, data: Partial<VagaPayload>): Promis
   return vaga;
 }
 
-export async function updateEtapaService(etapaId: number, data: { nome: string; descricao: string }): Promise<EtapaProcessoSeletivo> {
+export async function updateEtapaService(etapaId: number, data: { nome: string; descricao: string; prazoDias?: number }): Promise<EtapaProcessoSeletivo> {
   const response = await authFetch(`${VAGA_URL}/etapa/${etapaId}`, {
     method: "PATCH",
     headers: {
@@ -163,7 +166,7 @@ export async function deleteEtapa(etapaId: number): Promise<void> {
   invalidateVagaListCaches();
 }
 
-export async function addEtapa(vagaId: number, etapa: { nome: string; descricao: string }): Promise<EtapaProcessoSeletivo> {
+export async function addEtapa(vagaId: number, etapa: { nome: string; descricao: string; prazoDias?: number }): Promise<EtapaProcessoSeletivo> {
   const response = await authFetch(`${VAGA_URL}/${vagaId}/etapa`, {
     method: "POST",
     headers: {
@@ -196,6 +199,65 @@ export async function upsertProcessoSeletivo(
     throw new Error(error.message || "Erro ao salvar processo seletivo");
   }
   vagaCache.delete(vagaId);
+  invalidateVagaListCaches();
+  return response.json();
+}
+
+export async function finalizarVaga(id: number): Promise<Vaga> {
+  const response = await authFetch(`${VAGA_URL}/${id}/finalizar`, { method: "PATCH" });
+  if (!response.ok) {
+    const error = await response.json();
+    throw new Error(error.message || "Erro ao finalizar vaga");
+  }
+  vagaCache.delete(id);
+  invalidateVagaListCaches();
+  return response.json();
+}
+
+export async function reabrirVaga(id: number): Promise<Vaga> {
+  const response = await authFetch(`${VAGA_URL}/${id}/reabrir`, { method: "PATCH" });
+  if (!response.ok) {
+    const error = await response.json();
+    throw new Error(error.message || "Erro ao reabrir vaga");
+  }
+  vagaCache.delete(id);
+  invalidateVagaListCaches();
+  return response.json();
+}
+
+export async function duplicarVaga(id: number): Promise<Vaga> {
+  const response = await authFetch(`${VAGA_URL}/${id}/duplicar`, { method: "POST" });
+  if (!response.ok) {
+    const error = await response.json();
+    throw new Error(error.message || "Erro ao duplicar vaga");
+  }
+  invalidateVagaListCaches();
+  return response.json();
+}
+
+export async function reordenarEtapas(vagaId: number, etapaIds: number[]): Promise<void> {
+  const response = await authFetch(`${VAGA_URL}/${vagaId}/etapas/reordenar`, {
+    method: "PATCH",
+    headers: {
+      "Content-Type": "application/json",
+    },
+    body: JSON.stringify({ etapaIds }),
+  });
+  if (!response.ok) {
+    const error = await response.json();
+    throw new Error(error.message || "Erro ao reordenar etapas");
+  }
+  vagaCache.delete(vagaId);
+  invalidateVagaListCaches();
+}
+
+export async function fecharEtapa(etapaId: number): Promise<EtapaProcessoSeletivo> {
+  const response = await authFetch(`${VAGA_URL}/etapa/${etapaId}/fechar`, { method: "PATCH" });
+  if (!response.ok) {
+    const error = await response.json();
+    throw new Error(error.message || "Erro ao fechar etapa");
+  }
+  vagaCache.clear();
   invalidateVagaListCaches();
   return response.json();
 }

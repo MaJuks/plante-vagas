@@ -62,6 +62,20 @@ export class CandidaturaNotificationService {
     });
   }
 
+  async processoEncerrado(params: {
+    candidato: CandidatoPayload;
+    empresa: EmpresaPayload;
+    vaga: VagaPayload;
+    etapa: EtapaPayload;
+  }) {
+    await this.enviar('processo_encerrado', {
+      candidato: this.mapCandidato(params.candidato),
+      empresa: this.mapEmpresa(params.empresa),
+      vaga: params.vaga,
+      etapa: params.etapa,
+    });
+  }
+
   private mapCandidato(candidato: CandidatoPayload) {
     return {
       id: candidato.id,

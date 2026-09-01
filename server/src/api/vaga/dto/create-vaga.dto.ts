@@ -17,6 +17,10 @@ class EtapaDto {
 
   @IsString()
   descricao: string;
+
+  @IsOptional()
+  @IsInt()
+  prazoDias?: number;
 }
 
 export class ProcessoSeletivoDto {

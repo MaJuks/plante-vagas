@@ -1,12 +1,23 @@
-import { useEffect, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
 import { useNavigate } from "react-router";
-import { Plus, Briefcase, Loader2, ArrowLeft } from "lucide-react";
+import { Plus, Briefcase, Loader2, ArrowLeft, Search } from "lucide-react";
 import { getVagasByEmpresa, Vaga } from "@/services/vaga";
 import VagaVagas from "./vagaVagas";
+
+const ORDENACOES = [
+  { value: "recentes", label: "Mais recentes" },
+  { value: "antigas", label: "Mais antigas" },
+  { value: "nome", label: "Nome A-Z" },
+  { value: "salario-maior", label: "Maior salário" },
+  { value: "salario-menor", label: "Menor salário" },
+] as const;
 
 export default function MainCompanyVagas() {
   const [vagas, setVagas] = useState<Vaga[]>([]);
   const [loading, setLoading] = useState(true);
+  const [busca, setBusca] = useState("");
+  const [cargoFiltro, setCargoFiltro] = useState("");
+  const [ordenacao, setOrdenacao] = useState<(typeof ORDENACOES)[number]["value"]>("recentes");
   const navigate = useNavigate();
 
   useEffect(() => {
@@ -14,6 +25,41 @@ export default function MainCompanyVagas() {
       .then(setVagas)
       .finally(() => setLoading(false));
   }, []);
+
+  const cargos = useMemo(
+    () => [...new Set(vagas.map((v) => v.cargo))].sort((a, b) => a.localeCompare(b)),
+    [vagas],
+  );
+
+  const vagasExibidas = useMemo(() => {
+    const buscaLower = busca.trim().toLowerCase();
+    let resultado = vagas.filter((v) => {
+      const bateBusca = !buscaLower || v.nome.toLowerCase().includes(buscaLower) || v.cargo.toLowerCase().includes(buscaLower);
+      const bateCargo = !cargoFiltro || v.cargo === cargoFiltro;
+      return bateBusca && bateCargo;
+    });
+
+    resultado = [...resultado].sort((a, b) => {
+      switch (ordenacao) {
+        case "antigas":
+          return new Date(a.createdAt).getTime() - new Date(b.createdAt).getTime();
+        case "nome":
+          return a.nome.localeCompare(b.nome);
+        case "salario-maior":
+          return (b.salario ?? 0) - (a.salario ?? 0);
+        case "salario-menor":
+          return (a.salario ?? Infinity) - (b.salario ?? Infinity);
+        case "recentes":
+        default:
+          return new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime();
+      }
+    });
+
+    return resultado;
+  }, [vagas, busca, cargoFiltro, ordenacao]);
+
+  const inputClass =
+    "px-4 py-2.5 bg-white border border-gray-200 rounded-xl text-gray-800 text-sm focus:outline-none focus:ring-2 focus:ring-mediumGreen focus:border-transparent transition-all duration-300";
 
   return (
     <div className="min-h-screen bg-gray-50 pt-20 pb-12">
@@ -44,6 +90,36 @@ export default function MainCompanyVagas() {
           </button>
         </div>
 
+        {!loading && vagas.length > 0 && (
+          <div className="flex flex-col sm:flex-row gap-3 mb-6">
+            <div className="relative flex-1">
+              <Search size={16} className="absolute left-3.5 top-1/2 -translate-y-1/2 text-gray-400" aria-hidden="true" />
+              <input
+                type="text"
+                value={busca}
+                onChange={(e) => setBusca(e.target.value)}
+                placeholder="Pesquisar por nome ou cargo..."
+                className={`${inputClass} w-full pl-10`}
+              />
+            </div>
+            <select value={cargoFiltro} onChange={(e) => setCargoFiltro(e.target.value)} className={inputClass}>
+              <option value="">Todos os cargos</option>
+              {cargos.map((cargo) => (
+                <option key={cargo} value={cargo}>{cargo}</option>
+              ))}
+            </select>
+            <select
+              value={ordenacao}
+              onChange={(e) => setOrdenacao(e.target.value as typeof ordenacao)}
+              className={inputClass}
+            >
+              {ORDENACOES.map((o) => (
+                <option key={o.value} value={o.value}>{o.label}</option>
+              ))}
+            </select>
+          </div>
+        )}
+
         {loading ? (
           <div className="flex flex-col items-center justify-center py-20 text-gray-500 font-SecondFont">
             <Loader2 size={32} className="animate-spin text-mediumGreen mb-3" aria-hidden="true" />
@@ -60,9 +136,13 @@ export default function MainCompanyVagas() {
               Publicar a primeira vaga
             </button>
           </div>
+        ) : vagasExibidas.length === 0 ? (
+          <div className="flex flex-col items-center justify-center py-20 text-center bg-white rounded-2xl border border-gray-100">
+            <p className="text-gray-500 font-SecondFont">Nenhuma vaga encontrada com esses filtros.</p>
+          </div>
         ) : (
           <div className="flex flex-col gap-6 pb-8">
-            {vagas.map((vaga) => (
+            {vagasExibidas.map((vaga) => (
               <VagaVagas key={vaga.id} vaga={vaga} />
             ))}
           </div>

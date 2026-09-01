@@ -4,10 +4,12 @@ import { Plus, Loader2, ArrowLeft, Pencil, Calendar, Clock } from "lucide-react"
 import EtapasDisplay from "./etapasDisplay";
 import EtapasTimeline from "./etapasTimeline";
 import ProcessoSeletivoForm from "./processoSeletivoForm";
+import { toast } from "sonner";
 import {
   getVagaById,
   addEtapa,
   upsertProcessoSeletivo,
+  reordenarEtapas,
   EtapaProcessoSeletivo,
   ProcessoSeletivoPayload,
   Vaga,
@@ -25,10 +27,12 @@ const MainManagementProcess = () => {
   const [showForm, setShowForm] = useState(false);
   const [nomeEtapa, setNomeEtapa] = useState("");
   const [descricaoEtapa, setDescricaoEtapa] = useState("");
+  const [prazoDiasEtapa, setPrazoDiasEtapa] = useState("");
   const [salvando, setSalvando] = useState(false);
   const [erroForm, setErroForm] = useState("");
 
   const [editandoProcesso, setEditandoProcesso] = useState(false);
+  const [movendoId, setMovendoId] = useState<number | null>(null);
 
   const fetchVaga = () => {
     if (!vagaId) {
@@ -60,15 +64,35 @@ const MainManagementProcess = () => {
       const nova = await addEtapa(Number(vagaId), {
         nome: nomeEtapa.trim(),
         descricao: descricaoEtapa.trim(),
+        prazoDias: prazoDiasEtapa.trim() ? Number(prazoDiasEtapa) : undefined,
       });
       setVaga((prev) => prev ? { ...prev, etapas: [...prev.etapas, nova] } : prev);
       setNomeEtapa("");
       setDescricaoEtapa("");
+      setPrazoDiasEtapa("");
       setShowForm(false);
     } catch (e: any) {
       setErroForm(e.message || "Erro ao adicionar etapa");
     } finally {
       setSalvando(false);
+    }
+  };
+
+  const handleMover = async (etapaId: number, direcao: "cima" | "baixo") => {
+    const atual = [...etapas];
+    const idx = atual.findIndex((e) => e.id === etapaId);
+    const alvo = direcao === "cima" ? idx - 1 : idx + 1;
+    if (idx === -1 || alvo < 0 || alvo >= atual.length) return;
+
+    [atual[idx], atual[alvo]] = [atual[alvo], atual[idx]];
+    setMovendoId(etapaId);
+    try {
+      await reordenarEtapas(Number(vagaId), atual.map((e) => e.id));
+      setVaga((prev) => (prev ? { ...prev, etapas: atual } : prev));
+    } catch (e: any) {
+      toast.error(e.message || "Erro ao reordenar etapas");
+    } finally {
+      setMovendoId(null);
     }
   };
 
@@ -214,6 +238,20 @@ const MainManagementProcess = () => {
                   />
                 </div>
 
+                <div>
+                  <label className={labelClass}>
+                    Prazo (dias) <span className="text-gray-400 font-normal">(opcional)</span>
+                  </label>
+                  <input
+                    type="number"
+                    min={1}
+                    value={prazoDiasEtapa}
+                    onChange={(e) => setPrazoDiasEtapa(e.target.value)}
+                    placeholder="Ex: 5"
+                    className={inputClass}
+                  />
+                </div>
+
                 {erroForm && <p className="text-red-500 text-sm">{erroForm}</p>}
 
                 <div className="flex justify-end gap-3">
@@ -245,6 +283,8 @@ const MainManagementProcess = () => {
                 <EtapasDisplay
                   etapas={etapas}
                   vagaId={Number(vagaId)}
+                  movendoId={movendoId}
+                  onMover={handleMover}
                   onExcluir={(id) =>
                     setVaga((prev) =>
                       prev ? { ...prev, etapas: prev.etapas.filter((e) => e.id !== id) } : prev

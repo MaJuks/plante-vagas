@@ -35,6 +35,9 @@ export class CandidaturaService {
       include: { etapas: { orderBy: { id: 'asc' }, take: 1 } },
     });
     if (!vaga) throw new NotFoundException('Vaga não encontrada');
+    if (vaga.status === 'fechada') {
+      throw new ConflictException('Vaga fechada para novas candidaturas');
+    }
 
     const primeiraEtapa = vaga.etapas[0];
     if (!primeiraEtapa) {
