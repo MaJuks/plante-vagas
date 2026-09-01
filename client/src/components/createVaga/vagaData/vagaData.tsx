@@ -3,6 +3,7 @@ import { useNavigate } from "react-router";
 import { Plus, X, Loader2 } from "lucide-react";
 import { useVagaCreate } from "../VagaCreateContext";
 import { updateVaga } from "@/services/vaga";
+import { AREAS_VAGA, MODALIDADES_VAGA } from "@/utils/vagaOptions";
 
 const VagaData = ({ onProximo, vagaId }: { onProximo: () => void; vagaId?: number }) => {
   const isEdit = !!vagaId;
@@ -61,6 +62,8 @@ const VagaData = ({ onProximo, vagaId }: { onProximo: () => void; vagaId?: numbe
         salario: data.salario
           ? parseFloat(data.salario.replace(/[^0-9,.]/g, "").replace(",", "."))
           : undefined,
+        area: data.area || undefined,
+        modalidade: data.modalidade || undefined,
         beneficios: data.beneficios.map((nome) => ({ nome })),
         requisitos: data.requisitos.map((nome) => ({ nome })),
       });
@@ -116,6 +119,35 @@ const VagaData = ({ onProximo, vagaId }: { onProximo: () => void; vagaId?: numbe
               placeholder="Ex: 2500 ou deixe em branco pra combinar"
               className={inputClass}
             />
+          </div>
+
+          <div className="grid grid-cols-1 sm:grid-cols-2 gap-6">
+            <div>
+              <label className={labelClass}>Área <span className="text-gray-400 font-normal">(opcional)</span></label>
+              <select
+                value={data.area}
+                onChange={(e) => setData({ area: e.target.value })}
+                className={inputClass}
+              >
+                <option value="">Selecionar área</option>
+                {AREAS_VAGA.map((area) => (
+                  <option key={area} value={area}>{area}</option>
+                ))}
+              </select>
+            </div>
+            <div>
+              <label className={labelClass}>Modalidade <span className="text-gray-400 font-normal">(opcional)</span></label>
+              <select
+                value={data.modalidade}
+                onChange={(e) => setData({ modalidade: e.target.value })}
+                className={inputClass}
+              >
+                <option value="">Selecionar modalidade</option>
+                {MODALIDADES_VAGA.map((modalidade) => (
+                  <option key={modalidade} value={modalidade}>{modalidade}</option>
+                ))}
+              </select>
+            </div>
           </div>
 
           <div>

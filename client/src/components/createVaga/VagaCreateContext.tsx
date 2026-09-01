@@ -19,6 +19,8 @@ interface VagaCreateData {
   requisitos: string[];
   salario: string;
   descricao: string;
+  area: string;
+  modalidade: string;
   etapas: EtapaData[];
   processoSeletivo: ProcessoSeletivoData;
 }
@@ -38,6 +40,8 @@ export function VagaCreateProvider({ children }: { children: ReactNode }) {
     requisitos: [],
     salario: "",
     descricao: "",
+    area: "",
+    modalidade: "",
     etapas: [],
     processoSeletivo: { nome: "", descricao: "", dataInicio: "", duracaoDias: 7 },
   });

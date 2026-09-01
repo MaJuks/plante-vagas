@@ -5,7 +5,8 @@ import Header from "@/components/home-page/headers/header";
 import FilterBar from "@/components/searchJob/filterBar/filterBar";
 import Vagas from "@/components/searchJob/jobs/vagas";
 import { getAllVagas, type Vaga } from "@/services/vaga";
-import { Briefcase, Loader2 } from "lucide-react";
+import { normalizeText } from "@/utils/normalizeText";
+import { Briefcase, Loader2, ChevronLeft, ChevronRight } from "lucide-react";
 
 const ORDENACOES = [
   { value: "recentes", label: "Mais recentes" },
@@ -13,13 +14,23 @@ const ORDENACOES = [
   { value: "salario-menor", label: "Menor salário" },
 ] as const;
 
+const ITENS_POR_PAGINA = 10;
+
 const SearchJobs = () => {
   const [searchParams] = useSearchParams();
   const [vagas, setVagas] = useState<Vaga[]>([]);
   const [loading, setLoading] = useState(true);
   const [erro, setErro] = useState<string | null>(null);
   const [busca, setBusca] = useState(searchParams.get("busca") ?? "");
+  const [buscaInput, setBuscaInput] = useState(busca);
+  const [regiao, setRegiao] = useState("");
+  const [regiaoInput, setRegiaoInput] = useState("");
+  const [area, setArea] = useState("");
+  const [areaInput, setAreaInput] = useState("");
+  const [modalidade, setModalidade] = useState("");
+  const [modalidadeInput, setModalidadeInput] = useState("");
   const [ordenacao, setOrdenacao] = useState<(typeof ORDENACOES)[number]["value"]>("recentes");
+  const [paginaAtual, setPaginaAtual] = useState(1);
 
   useEffect(() => {
     getAllVagas()
@@ -28,16 +39,28 @@ const SearchJobs = () => {
       .finally(() => setLoading(false));
   }, []);
 
+  useEffect(() => {
+    setPaginaAtual(1);
+  }, [busca, regiao, area, modalidade, ordenacao]);
+
+  const regioes = useMemo(
+    () => [...new Set(vagas.map((v) => v.empresa?.Address?.city).filter((c): c is string => !!c))].sort((a, b) => a.localeCompare(b)),
+    [vagas],
+  );
+
   const vagasExibidas = useMemo(() => {
-    const buscaLower = busca.trim().toLowerCase();
+    const buscaLower = normalizeText(busca.trim());
     const filtradas = vagas.filter((v) => {
-      if (!buscaLower) return true;
-      return (
-        v.nome.toLowerCase().includes(buscaLower) ||
-        v.cargo.toLowerCase().includes(buscaLower) ||
-        v.empresa?.fantasyName?.toLowerCase().includes(buscaLower) ||
-        v.empresa?.name?.toLowerCase().includes(buscaLower)
-      );
+      const bateBusca =
+        !buscaLower ||
+        normalizeText(v.nome).includes(buscaLower) ||
+        normalizeText(v.cargo).includes(buscaLower) ||
+        (v.empresa?.fantasyName && normalizeText(v.empresa.fantasyName).includes(buscaLower)) ||
+        (v.empresa?.name && normalizeText(v.empresa.name).includes(buscaLower));
+      const bateRegiao = !regiao || v.empresa?.Address?.city === regiao;
+      const bateArea = !area || v.area === area;
+      const bateModalidade = !modalidade || v.modalidade === modalidade;
+      return bateBusca && bateRegiao && bateArea && bateModalidade;
     });
 
     return [...filtradas].sort((a, b) => {
@@ -51,7 +74,13 @@ const SearchJobs = () => {
           return new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime();
       }
     });
-  }, [vagas, busca, ordenacao]);
+  }, [vagas, busca, regiao, area, modalidade, ordenacao]);
+
+  const totalPaginas = Math.max(1, Math.ceil(vagasExibidas.length / ITENS_POR_PAGINA));
+  const vagasPaginadas = useMemo(
+    () => vagasExibidas.slice((paginaAtual - 1) * ITENS_POR_PAGINA, paginaAtual * ITENS_POR_PAGINA),
+    [vagasExibidas, paginaAtual],
+  );
 
   return (
     <>
@@ -75,7 +104,34 @@ const SearchJobs = () => {
         </div>
 
         {/* Filter Section */}
-        <FilterBar busca={busca} onBuscaChange={setBusca} />
+        <FilterBar
+          buscaInput={buscaInput}
+          onBuscaInputChange={setBuscaInput}
+          onBuscar={() => setBusca(buscaInput)}
+          regioes={regioes}
+          regiaoInput={regiaoInput}
+          onRegiaoInputChange={setRegiaoInput}
+          areaInput={areaInput}
+          onAreaInputChange={setAreaInput}
+          modalidadeInput={modalidadeInput}
+          onModalidadeInputChange={setModalidadeInput}
+          onAplicarFiltros={() => {
+            setRegiao(regiaoInput);
+            setArea(areaInput);
+            setModalidade(modalidadeInput);
+          }}
+          temFiltroAtivo={!!(busca || regiao || area || modalidade)}
+          onLimparFiltros={() => {
+            setBuscaInput("");
+            setBusca("");
+            setRegiaoInput("");
+            setRegiao("");
+            setAreaInput("");
+            setArea("");
+            setModalidadeInput("");
+            setModalidade("");
+          }}
+        />
 
         {/* Results Section */}
         <section className="py-8 sm:py-12 px-4 sm:px-6">
@@ -87,7 +143,9 @@ const SearchJobs = () => {
                   Vagas disponíveis
                 </h2>
                 <p className="text-gray-600 font-SecondFont mt-1">
-                  Mostrando {vagasExibidas.length} resultados
+                  {vagasExibidas.length === 0
+                    ? "Mostrando 0 resultados"
+                    : `Mostrando ${(paginaAtual - 1) * ITENS_POR_PAGINA + 1}-${Math.min(paginaAtual * ITENS_POR_PAGINA, vagasExibidas.length)} de ${vagasExibidas.length} resultados`}
                 </p>
               </div>
               <div className="flex items-center gap-2">
@@ -133,21 +191,64 @@ const SearchJobs = () => {
 
             {/* Jobs List */}
             {!loading && !erro && vagasExibidas.length > 0 && (
-              <div className="space-y-6">
-                {vagasExibidas.map((vaga) => (
-                  <Vagas
-                    key={vaga.id}
-                    id={vaga.id}
-                    nome={vaga.nome}
-                    cargo={vaga.cargo}
-                    salario={vaga.salario}
-                    descricao={vaga.descricao}
-                    beneficios={vaga.beneficios}
-                    empresa={vaga.empresa}
-                    createdAt={vaga.createdAt}
-                  />
-                ))}
-              </div>
+              <>
+                <div className="space-y-6">
+                  {vagasPaginadas.map((vaga) => (
+                    <Vagas
+                      key={vaga.id}
+                      id={vaga.id}
+                      nome={vaga.nome}
+                      cargo={vaga.cargo}
+                      salario={vaga.salario}
+                      descricao={vaga.descricao}
+                      beneficios={vaga.beneficios}
+                      empresa={vaga.empresa}
+                      createdAt={vaga.createdAt}
+                    />
+                  ))}
+                </div>
+
+                {totalPaginas > 1 && (
+                  <div className="flex items-center justify-center gap-2 mt-10">
+                    <button
+                      onClick={() => setPaginaAtual((p) => Math.max(1, p - 1))}
+                      disabled={paginaAtual === 1}
+                      aria-label="Página anterior"
+                      className="flex items-center justify-center w-10 h-10 rounded-lg border border-gray-200 text-gray-600
+                               hover:border-mediumGreen hover:text-deepGreen transition-colors duration-200
+                               disabled:opacity-40 disabled:hover:border-gray-200 disabled:hover:text-gray-600"
+                    >
+                      <ChevronLeft size={18} aria-hidden="true" />
+                    </button>
+
+                    {Array.from({ length: totalPaginas }, (_, i) => i + 1).map((pagina) => (
+                      <button
+                        key={pagina}
+                        onClick={() => setPaginaAtual(pagina)}
+                        aria-current={pagina === paginaAtual ? "page" : undefined}
+                        className={`flex items-center justify-center w-10 h-10 rounded-lg font-SecondFont text-sm transition-colors duration-200 ${
+                          pagina === paginaAtual
+                            ? "bg-deepGreen text-white font-semibold"
+                            : "border border-gray-200 text-gray-600 hover:border-mediumGreen hover:text-deepGreen"
+                        }`}
+                      >
+                        {pagina}
+                      </button>
+                    ))}
+
+                    <button
+                      onClick={() => setPaginaAtual((p) => Math.min(totalPaginas, p + 1))}
+                      disabled={paginaAtual === totalPaginas}
+                      aria-label="Próxima página"
+                      className="flex items-center justify-center w-10 h-10 rounded-lg border border-gray-200 text-gray-600
+                               hover:border-mediumGreen hover:text-deepGreen transition-colors duration-200
+                               disabled:opacity-40 disabled:hover:border-gray-200 disabled:hover:text-gray-600"
+                    >
+                      <ChevronRight size={18} aria-hidden="true" />
+                    </button>
+                  </div>
+                )}
+              </>
             )}
           </div>
         </section>

@@ -105,15 +105,37 @@ O que precisa ser feito:
     o formulário de criação de vaga, o card de busca e a FilterBar
     para usar os dados reais.
 
-[PARCIALMENTE RESOLVIDO — 01/09] RF008 (Pesquisar vagas) e RF009
-  (Filtrar vagas), do lado do candidato: a busca por texto (nome/cargo/
-  empresa) e a ordenação (mais recentes/maior salário/menor salário)
-  agora funcionam de verdade em `client/src/pages/Serachjob/index.tsx`
-  — client-side, mesmo padrão usado pra empresa no item 24. Os selects
-  de região/área/modalidade em `filterBar.tsx` continuam decorativos,
-  de propósito — não têm campo real no banco pra filtrar (motivo
-  documentado acima), então mexer neles é o mesmo problema de sempre:
-  precisa dos campos cidade/regime/contratação/pcd existirem primeiro.
+[RESOLVIDO — 01/09] RF008 (Pesquisar vagas) e RF009 (Filtrar vagas), do
+  lado do candidato: busca por texto, ordenação, paginação (10 por
+  página) e os 3 filtros (região/área/modalidade) agora funcionam de
+  verdade em `client/src/pages/Serachjob/index.tsx` — client-side, mesmo
+  padrão usado pra empresa no item 24.
+
+  `Vaga` ganhou os campos `area String?` e `modalidade String?` no schema
+  (migration `add_vaga_area_modalidade`) — opcionais, preenchidos pela
+  empresa no primeiro passo do wizard de criação de vaga
+  (`vagaData/vagaData.tsx`), a partir de listas fixas em
+  `client/src/utils/vagaOptions.ts` (`AREAS_VAGA`, `MODALIDADES_VAGA`,
+  reaproveitadas tanto no formulário de cadastro quanto no filtro
+  público, pra não haver risco de os valores não baterem). "Modalidade"
+  cobre só Presencial/Híbrido/Remoto (o que o item acima chama de
+  "regime de trabalho") — "tipo de contratação" (CLT/PJ/estágio) e "PCD"
+  continuam pendentes, não fazem parte dessa entrega.
+
+  "Região" NÃO ganhou campo próprio na vaga — usa a cidade cadastrada no
+  endereço da EMPRESA (`UserCompany.Address.city`, já existia). Os
+  selects de `find/all`/`find/empresa`/`find/:id` em `vaga.service.ts`
+  passaram a incluir `empresa.Address.city`. As 103 vagas já existentes
+  têm todas empresa com cidade cadastrada (testado), então "Região" já
+  filtra de verdade pra elas — "Área"/"Modalidade" só vão ter opções
+  reais conforme empresas forem criando/editando vagas com esses campos
+  preenchidos (nenhuma vaga antiga tem, o que é esperado, não é bug).
+
+  Busca e filtros só são aplicados ao clicar em "BUSCAR"/"APLICAR
+  FILTROS" (ou Enter no campo de busca) — não filtra a cada tecla
+  digitada, por pedido do usuário. `filterBar.tsx` guarda o valor
+  "digitado" localmente e só propagam pro componente pai (que de fato
+  filtra a lista) quando o formulário é submetido.
 
   [BUG ENCONTRADO E CORRIGIDO — 01/09] A caixa de busca da HOME
   (`client/src/components/home-page/main/main.tsx`, seção hero "Buscar
@@ -950,6 +972,13 @@ saber o que falta. Se quiser que eu comece algum desses, é só pedir.
     cargo, descrição, salário, benefícios, requisitos e etapas — não copia
     o `processoSeletivo` nem as candidaturas. A vaga duplicada cai
     naturalmente na tela de "complete o processo seletivo" (item 23).
+    [BUG ENCONTRADO E CORRIGIDO — 01/09, na revalidação] `duplicar()` não
+    copiava `area`/`modalidade` (ficavam `null` na cópia) — esses 2 campos
+    foram adicionados ao schema DEPOIS que `duplicar()` já tinha sido
+    implementado (item 25), e não foram retroalimentados nele. Corrigido
+    em `vaga.service.ts`, testado via curl (vaga de teste com
+    area="TI e Desenvolvimento"/modalidade="Remoto" → duplicada →
+    confirma que a cópia leva os mesmos valores, não null).
   - RF067 (Definir tempo de cada etapa): `EtapaProcessoSeletivo` ganhou
     `prazoDias` opcional (migration `add_etapa_prazo_ordem`), editável no
     form de etapa (tanto no wizard de criação quanto na tela de gerenciar
@@ -993,3 +1022,49 @@ saber o que falta. Se quiser que eu comece algum desses, é só pedir.
   como reaproveitar dado real de forma confiável pra todas; a empresa
   pode editar pelo botão "Editar processo" a qualquer momento. Confirmado
   depois: as 103 vagas do banco (102 antigas + a nova) têm processoSeletivo.
+
+
+25. BUSCA DO SITE INTOLERANTE A ACENTO + BACKFILL DE ÁREA/MODALIDADE
+    NAS VAGAS ANTIGAS
+---------------------------------------------------------------------------
+[RESOLVIDO — 01/09] Duas melhorias pedidas juntas:
+
+  a) Busca sem distinguir acento: digitar "veterinario" (sem acento) não
+     encontrava vagas com cargo "Veterinário". Criado
+     `client/src/utils/normalizeText.ts` — normaliza via Unicode NFD e
+     remove os diacríticos combinantes (faixa de código 0x0300–0x036f),
+     deixa minúsculo. Aplicado nas duas buscas por texto reais do site:
+     a busca pública de vagas (`Serachjob/index.tsx`, comparando nome/
+     cargo/nome fantasia/razão social da empresa) e a busca da própria
+     empresa em "Vagas abertas" (`mainCompanyVagas.tsx`, nome/cargo).
+     Verificado que "Veterinário"/"veterinario", "Técnico Agrícola"/
+     "tecnico agricola", "São Paulo"/"sao paulo" e "Produção"/"producao"
+     todos batem entre si agora.
+
+  b) Backfill de `area`/`modalidade` (campos novos do item 3) pras 103
+     vagas que já existiam antes desses campos existirem — só empresa
+     preenchendo vaga NOVA passava a ter esses dados; as antigas ficavam
+     com `area`/`modalidade` nulos e nunca apareciam nos filtros
+     correspondentes da busca pública. Rodado direto no banco (fora do
+     fluxo normal do formulário), com aprovação prévia do usuário em 3
+     etapas: confirmou "Presencial" como modalidade padrão pra todas,
+     pediu pra ver a tabela cargo→área antes de gravar, e só depois
+     aprovou a gravação.
+       - `modalidade`: "Presencial" pras 103 vagas (sem exceção — não tem
+         como inferir modalidade real a partir do cargo).
+       - `area`: mapeamento por palavra-chave do cargo pra uma das 10
+         categorias fixas de `vagaOptions.ts` (`AREAS_VAGA`) — ex.
+         "Técnico Agrícola"/"Engenheiro Agrônomo" → "Produção Agrícola",
+         "Veterinário"/"Zootecnista" → "Zootecnia e Pecuária",
+         "Analista Comercial"/"Vendedor" → "Vendas e Atendimento". 99 das
+         103 vagas caíram em algum cargo mapeado; as outras 4 (cargos
+         "Consultor Técnico", "SER CHATO" e "vaga 1" — os 2 últimos são
+         nomes de teste, não cargos reais de negócio) ficaram com `area`
+         nula de propósito, por não ter categoria óbvia — dá pra editar
+         manualmente pela tela de editar vaga a qualquer momento.
+
+  Verificado depois de rodar: 103/103 vagas com `modalidade` preenchida,
+  99/103 com `area` preenchida (as 4 sem área batem exatamente com os 3
+  cargos não mapeados). Script de backfill era temporário, removido do
+  repo depois de rodar (não fazia sentido versionar um script de uso
+  único).
