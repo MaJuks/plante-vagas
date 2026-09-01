@@ -1,4 +1,5 @@
 import { useEffect, useMemo, useState } from "react";
+import { useSearchParams } from "react-router";
 import Footer from "@/components/home-page/footer/footer";
 import Header from "@/components/home-page/headers/header";
 import FilterBar from "@/components/searchJob/filterBar/filterBar";
@@ -13,10 +14,11 @@ const ORDENACOES = [
 ] as const;
 
 const SearchJobs = () => {
+  const [searchParams] = useSearchParams();
   const [vagas, setVagas] = useState<Vaga[]>([]);
   const [loading, setLoading] = useState(true);
   const [erro, setErro] = useState<string | null>(null);
-  const [busca, setBusca] = useState("");
+  const [busca, setBusca] = useState(searchParams.get("busca") ?? "");
   const [ordenacao, setOrdenacao] = useState<(typeof ORDENACOES)[number]["value"]>("recentes");
 
   useEffect(() => {

@@ -115,6 +115,19 @@ O que precisa ser feito:
   documentado acima), então mexer neles é o mesmo problema de sempre:
   precisa dos campos cidade/regime/contratação/pcd existirem primeiro.
 
+  [BUG ENCONTRADO E CORRIGIDO — 01/09] A caixa de busca da HOME
+  (`client/src/components/home-page/main/main.tsx`, seção hero "Buscar
+  vagas") era um problema diferente e mais grave: o botão "PESQUISAR"
+  navegava pra `/pesquisa-de-vagas` mas nunca levava o texto digitado
+  (o `<input>` não tinha nem `value` nem `onChange`), e os botões
+  "Populares" (Agrônomo, Técnico Agrícola, Operador de Máquinas,
+  Veterinário) não tinham `onClick` nenhum — clicar não fazia nada.
+  Corrigido: o texto digitado agora vai como query param
+  (`/pesquisa-de-vagas?busca=...`), a tecla Enter no input também busca,
+  e os botões "Populares" navegam com o termo já preenchido. A tela de
+  resultados (`Serachjob/index.tsx`) lê esse `busca` da URL ao carregar
+  via `useSearchParams`.
+
 
 4. SEM ENDPOINT PÚBLICO DE PERFIL DE EMPRESA
 -----------------------------------------------
