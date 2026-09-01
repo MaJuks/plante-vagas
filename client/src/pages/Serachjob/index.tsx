@@ -1,4 +1,4 @@
-import { useEffect, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
 import Footer from "@/components/home-page/footer/footer";
 import Header from "@/components/home-page/headers/header";
 import FilterBar from "@/components/searchJob/filterBar/filterBar";
@@ -6,10 +6,18 @@ import Vagas from "@/components/searchJob/jobs/vagas";
 import { getAllVagas, type Vaga } from "@/services/vaga";
 import { Briefcase, Loader2 } from "lucide-react";
 
+const ORDENACOES = [
+  { value: "recentes", label: "Mais recentes" },
+  { value: "salario-maior", label: "Maior salário" },
+  { value: "salario-menor", label: "Menor salário" },
+] as const;
+
 const SearchJobs = () => {
   const [vagas, setVagas] = useState<Vaga[]>([]);
   const [loading, setLoading] = useState(true);
   const [erro, setErro] = useState<string | null>(null);
+  const [busca, setBusca] = useState("");
+  const [ordenacao, setOrdenacao] = useState<(typeof ORDENACOES)[number]["value"]>("recentes");
 
   useEffect(() => {
     getAllVagas()
@@ -17,6 +25,31 @@ const SearchJobs = () => {
       .catch((e) => setErro(e.message || "Erro ao buscar vagas"))
       .finally(() => setLoading(false));
   }, []);
+
+  const vagasExibidas = useMemo(() => {
+    const buscaLower = busca.trim().toLowerCase();
+    const filtradas = vagas.filter((v) => {
+      if (!buscaLower) return true;
+      return (
+        v.nome.toLowerCase().includes(buscaLower) ||
+        v.cargo.toLowerCase().includes(buscaLower) ||
+        v.empresa?.fantasyName?.toLowerCase().includes(buscaLower) ||
+        v.empresa?.name?.toLowerCase().includes(buscaLower)
+      );
+    });
+
+    return [...filtradas].sort((a, b) => {
+      switch (ordenacao) {
+        case "salario-maior":
+          return (b.salario ?? 0) - (a.salario ?? 0);
+        case "salario-menor":
+          return (a.salario ?? Infinity) - (b.salario ?? Infinity);
+        case "recentes":
+        default:
+          return new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime();
+      }
+    });
+  }, [vagas, busca, ordenacao]);
 
   return (
     <>
@@ -28,7 +61,7 @@ const SearchJobs = () => {
           <div className="max-w-6xl mx-auto px-4 sm:px-6 text-center">
             <div className="inline-flex items-center gap-2 bg-white/20 text-white px-4 py-2 rounded-full text-sm font-SecondFont font-medium mb-4">
               <Briefcase size={16} />
-              {vagas.length} vaga{vagas.length !== 1 ? "s" : ""} encontrada{vagas.length !== 1 ? "s" : ""}
+              {vagasExibidas.length} vaga{vagasExibidas.length !== 1 ? "s" : ""} encontrada{vagasExibidas.length !== 1 ? "s" : ""}
             </div>
             <h1 className="text-3xl sm:text-4xl md:text-5xl font-bold text-white font-PrimaryFont mb-4">
               Encontre sua vaga ideal
@@ -40,7 +73,7 @@ const SearchJobs = () => {
         </div>
 
         {/* Filter Section */}
-        <FilterBar />
+        <FilterBar busca={busca} onBuscaChange={setBusca} />
 
         {/* Results Section */}
         <section className="py-8 sm:py-12 px-4 sm:px-6">
@@ -52,16 +85,20 @@ const SearchJobs = () => {
                   Vagas disponíveis
                 </h2>
                 <p className="text-gray-600 font-SecondFont mt-1">
-                  Mostrando {vagas.length} resultados
+                  Mostrando {vagasExibidas.length} resultados
                 </p>
               </div>
               <div className="flex items-center gap-2">
                 <span className="text-gray-600 font-SecondFont text-sm">Ordenar por:</span>
-                <select className="bg-white border border-gray-200 rounded-lg px-4 py-2 font-SecondFont text-sm
-                                 focus:outline-none focus:ring-2 focus:ring-mediumGreen">
-                  <option>Mais recentes</option>
-                  <option>Maior salário</option>
-                  <option>Menor salário</option>
+                <select
+                  value={ordenacao}
+                  onChange={(e) => setOrdenacao(e.target.value as typeof ordenacao)}
+                  className="bg-white border border-gray-200 rounded-lg px-4 py-2 font-SecondFont text-sm
+                                 focus:outline-none focus:ring-2 focus:ring-mediumGreen"
+                >
+                  {ORDENACOES.map((o) => (
+                    <option key={o.value} value={o.value}>{o.label}</option>
+                  ))}
                 </select>
               </div>
             </div>
@@ -86,10 +123,16 @@ const SearchJobs = () => {
               </div>
             )}
 
+            {!loading && !erro && vagas.length > 0 && vagasExibidas.length === 0 && (
+              <div className="text-center py-20 text-gray-500 font-SecondFont">
+                Nenhuma vaga encontrada pra essa busca.
+              </div>
+            )}
+
             {/* Jobs List */}
-            {!loading && !erro && vagas.length > 0 && (
+            {!loading && !erro && vagasExibidas.length > 0 && (
               <div className="space-y-6">
-                {vagas.map((vaga) => (
+                {vagasExibidas.map((vaga) => (
                   <Vagas
                     key={vaga.id}
                     id={vaga.id}
