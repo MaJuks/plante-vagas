@@ -1,7 +1,8 @@
 import { useEffect, useMemo, useState } from "react";
 import { useNavigate } from "react-router";
-import { Plus, Briefcase, Loader2, ArrowLeft, Search } from "lucide-react";
+import { Plus, Briefcase, Loader2, ArrowLeft, Search, X } from "lucide-react";
 import { getVagasByEmpresa, Vaga } from "@/services/vaga";
+import { normalizeText } from "@/utils/normalizeText";
 import VagaVagas from "./vagaVagas";
 
 const ORDENACOES = [
@@ -32,9 +33,9 @@ export default function MainCompanyVagas() {
   );
 
   const vagasExibidas = useMemo(() => {
-    const buscaLower = busca.trim().toLowerCase();
+    const buscaLower = normalizeText(busca.trim());
     let resultado = vagas.filter((v) => {
-      const bateBusca = !buscaLower || v.nome.toLowerCase().includes(buscaLower) || v.cargo.toLowerCase().includes(buscaLower);
+      const bateBusca = !buscaLower || normalizeText(v.nome).includes(buscaLower) || normalizeText(v.cargo).includes(buscaLower);
       const bateCargo = !cargoFiltro || v.cargo === cargoFiltro;
       return bateBusca && bateCargo;
     });
@@ -117,6 +118,17 @@ export default function MainCompanyVagas() {
                 <option key={o.value} value={o.value}>{o.label}</option>
               ))}
             </select>
+            {(busca || cargoFiltro) && (
+              <button
+                type="button"
+                onClick={() => { setBusca(""); setCargoFiltro(""); }}
+                aria-label="Limpar filtros"
+                title="Limpar filtros"
+                className="flex items-center justify-center gap-2 border border-gray-200 text-gray-600 px-4 rounded-xl font-SecondFont font-medium hover:border-red-300 hover:text-red-600 transition-colors duration-200"
+              >
+                <X size={16} aria-hidden="true" />
+              </button>
+            )}
           </div>
         )}
 

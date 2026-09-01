@@ -38,7 +38,15 @@ export class VagaService {
       include: {
         beneficios: true,
         requisitos: true,
-        empresa: { select: { id: true, fantasyName: true, name: true, logoUrl: true } },
+        empresa: {
+          select: {
+            id: true,
+            fantasyName: true,
+            name: true,
+            logoUrl: true,
+            Address: { select: { city: true } },
+          },
+        },
       },
       orderBy: { createdAt: 'desc' },
     });
@@ -52,7 +60,15 @@ export class VagaService {
         requisitos: true,
         etapas: { orderBy: { ordem: 'asc' } },
         processoSeletivo: true,
-        empresa: { select: { id: true, fantasyName: true, name: true, logoUrl: true } },
+        empresa: {
+          select: {
+            id: true,
+            fantasyName: true,
+            name: true,
+            logoUrl: true,
+            Address: { select: { city: true } },
+          },
+        },
       },
       orderBy: { createdAt: 'desc' },
     });
@@ -66,7 +82,15 @@ export class VagaService {
         requisitos: true,
         etapas: { orderBy: { ordem: 'asc' } },
         processoSeletivo: true,
-        empresa: { select: { id: true, fantasyName: true, name: true, logoUrl: true } },
+        empresa: {
+          select: {
+            id: true,
+            fantasyName: true,
+            name: true,
+            logoUrl: true,
+            Address: { select: { city: true } },
+          },
+        },
       },
     });
 
@@ -129,6 +153,8 @@ export class VagaService {
         cargo: vaga.cargo,
         descricao: vaga.descricao,
         salario: vaga.salario,
+        area: vaga.area,
+        modalidade: vaga.modalidade,
         empresaId,
         beneficios: { createMany: { data: vaga.beneficios.map((b) => ({ nome: b.nome })) } },
         requisitos: { createMany: { data: vaga.requisitos.map((r) => ({ nome: r.nome })) } },

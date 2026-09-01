@@ -83,12 +83,14 @@ model UserCompany {
 }
 
 model Vaga {
-  id        Int    @id @default(autoincrement())
-  nome      String
-  cargo     String
-  descricao String
-  salario   Float?
-  status    String @default("aberta")
+  id         Int     @id @default(autoincrement())
+  nome       String
+  cargo      String
+  descricao  String
+  salario    Float?
+  status     String  @default("aberta")
+  area       String?
+  modalidade String?
 
   empresaId         Int
   empresa           UserCompany       @relation(fields: [empresaId], references: [id], onDelete: Cascade)

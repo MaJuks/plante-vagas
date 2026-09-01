@@ -52,6 +52,14 @@ export class CreateVagaDto {
   @IsNumber()
   salario?: number;
 
+  @IsOptional()
+  @IsString()
+  area?: string;
+
+  @IsOptional()
+  @IsString()
+  modalidade?: string;
+
   @IsArray()
   @ValidateNested({ each: true })
   @Type(() => BeneficioDto)

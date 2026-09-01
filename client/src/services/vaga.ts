@@ -14,6 +14,8 @@ export interface VagaPayload {
   cargo: string;
   descricao: string;
   salario?: number;
+  area?: string;
+  modalidade?: string;
   beneficios: { nome: string }[];
   requisitos: { nome: string }[];
   etapas: { nome: string; descricao: string; prazoDias?: number }[];
@@ -44,12 +46,20 @@ export interface Vaga {
   descricao: string;
   salario?: number;
   status: string;
+  area?: string | null;
+  modalidade?: string | null;
   beneficios: { id: number; nome: string }[];
   requisitos: { id: number; nome: string }[];
   etapas: EtapaProcessoSeletivo[];
   processoSeletivo?: ProcessoSeletivo | null;
   empresaId: number;
-  empresa?: { id: number; fantasyName: string; name: string; logoUrl?: string | null };
+  empresa?: {
+    id: number;
+    fantasyName: string;
+    name: string;
+    logoUrl?: string | null;
+    Address?: { city: string } | null;
+  };
   createdAt: string;
   updatedAt: string;
 }
