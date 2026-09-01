@@ -1,6 +1,11 @@
 import { MapPin, Briefcase, Monitor, Filter, ChevronDown, Search } from "lucide-react";
 
-const FilterBar = () => {
+type Props = {
+  busca: string;
+  onBuscaChange: (busca: string) => void;
+};
+
+const FilterBar = ({ busca, onBuscaChange }: Props) => {
   return (
     <div className="bg-gradient-to-b from-paleGreen/50 to-white w-full py-8 sm:py-12">
       <div className="max-w-6xl mx-auto px-4 sm:px-6">
@@ -11,15 +16,20 @@ const FilterBar = () => {
               <Search size={20} className="absolute left-4 top-1/2 -translate-y-1/2 text-gray-400" />
               <input
                 type="text"
+                value={busca}
+                onChange={(e) => onBuscaChange(e.target.value)}
                 placeholder="Buscar por cargo, empresa ou palavra-chave..."
                 className="w-full pl-12 pr-4 py-4 bg-gray-50 border border-gray-200 rounded-xl
                          focus:outline-none focus:ring-2 focus:ring-mediumGreen focus:border-transparent
                          transition-all duration-300 font-SecondFont"
               />
             </div>
-            <button className="flex items-center justify-center gap-2 bg-deepGreen text-white px-8 py-4
+            <button
+              type="button"
+              className="flex items-center justify-center gap-2 bg-deepGreen text-white px-8 py-4
                              rounded-xl font-SecondFont font-semibold hover:bg-mediumGreen
-                             transition-all duration-300 hover:shadow-lg hover:shadow-deepGreen/20">
+                             transition-all duration-300 hover:shadow-lg hover:shadow-deepGreen/20"
+            >
               <Search size={18} />
               BUSCAR
             </button>

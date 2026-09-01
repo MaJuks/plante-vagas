@@ -105,6 +105,16 @@ O que precisa ser feito:
     o formulário de criação de vaga, o card de busca e a FilterBar
     para usar os dados reais.
 
+[PARCIALMENTE RESOLVIDO — 01/09] RF008 (Pesquisar vagas) e RF009
+  (Filtrar vagas), do lado do candidato: a busca por texto (nome/cargo/
+  empresa) e a ordenação (mais recentes/maior salário/menor salário)
+  agora funcionam de verdade em `client/src/pages/Serachjob/index.tsx`
+  — client-side, mesmo padrão usado pra empresa no item 24. Os selects
+  de região/área/modalidade em `filterBar.tsx` continuam decorativos,
+  de propósito — não têm campo real no banco pra filtrar (motivo
+  documentado acima), então mexer neles é o mesmo problema de sempre:
+  precisa dos campos cidade/regime/contratação/pcd existirem primeiro.
+
 
 4. SEM ENDPOINT PÚBLICO DE PERFIL DE EMPRESA
 -----------------------------------------------
@@ -960,3 +970,13 @@ saber o que falta. Se quiser que eu comece algum desses, é só pedir.
   botões novos (Duplicar/Finalizar/Reabrir vaga nos cards, setinhas de
   reordenar e prazo na etapa, busca/filtro/ordenação em "Vagas abertas")
   valem uma conferida de verdade na tela.
+
+  [01/09] Backfill de ProcessoSeletivo pras 102 vagas que já existiam
+  antes desse recurso existir (rodado direto no banco, fora do fluxo
+  normal da tela de "completar processo"): nome = "Processo Seletivo",
+  descrição = "Processo seletivo padrão", duracaoDias = 15, dataInicio =
+  a própria data de criação da vaga (`Vaga.createdAt`, dado real). Valores
+  escolhidos com o usuário — nome/descrição genéricos porque não tinha
+  como reaproveitar dado real de forma confiável pra todas; a empresa
+  pode editar pelo botão "Editar processo" a qualquer momento. Confirmado
+  depois: as 103 vagas do banco (102 antigas + a nova) têm processoSeletivo.
