@@ -1,3 +1,4 @@
+import { useState } from "react";
 import { useNavigate } from "react-router";
 import { Search, ArrowRight, ExternalLink, Leaf } from "lucide-react";
 import bgImage from "../../../assets/images/bg-teste.jpg";
@@ -6,6 +7,12 @@ import bgImage3 from "../../../assets/images/teste2.jpg";
 
 export default function Main() {
   const navigate = useNavigate();
+  const [busca, setBusca] = useState("");
+
+  const buscarVagas = (termo: string) => {
+    const termoTratado = termo.trim();
+    navigate(termoTratado ? `/pesquisa-de-vagas?busca=${encodeURIComponent(termoTratado)}` : "/pesquisa-de-vagas");
+  };
 
   const stats = [
     { value: "28,1M+", label: "Profissionais no agro" },
@@ -58,13 +65,16 @@ export default function Main() {
             <div className="flex flex-col sm:flex-row gap-3">
               <input
                 type="text"
+                value={busca}
+                onChange={(e) => setBusca(e.target.value)}
+                onKeyDown={(e) => e.key === "Enter" && buscarVagas(busca)}
                 placeholder="Cargo, empresa ou palavra-chave..."
                 className="flex-1 p-4 bg-gray-50 border border-gray-200 rounded-xl
                          focus:outline-none focus:border-mediumGreen
                          transition-colors duration-200 font-SecondFont text-gray-700"
               />
               <button
-                onClick={() => navigate("/pesquisa-de-vagas")}
+                onClick={() => buscarVagas(busca)}
                 className="flex items-center justify-center gap-2 bg-deepGreen text-white px-8 py-4 rounded-xl
                          hover:bg-mediumGreen transition-colors duration-200 font-SecondFont font-semibold
                          tracking-wide"
@@ -78,6 +88,7 @@ export default function Main() {
                 (term, i, arr) => (
                   <span key={term} className="flex items-center gap-2">
                     <button
+                      onClick={() => buscarVagas(term)}
                       className="text-mediumGreen hover:text-deepGreen underline underline-offset-4
                                decoration-mediumGreen/30 hover:decoration-deepGreen transition-colors duration-200"
                     >
