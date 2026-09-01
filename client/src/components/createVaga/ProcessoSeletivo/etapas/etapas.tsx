@@ -7,11 +7,12 @@ import { createVaga, updateVaga } from "@/services/vaga";
 interface EtapaForm {
   nome: string;
   descricao: string;
+  prazoDias: string;
 }
 
 const Etapas = ({ vagaId }: { vagaId?: number }) => {
   const isEdit = !!vagaId;
-  const [etapas, setEtapas] = useState<EtapaForm[]>([{ nome: "", descricao: "" }]);
+  const [etapas, setEtapas] = useState<EtapaForm[]>([{ nome: "", descricao: "", prazoDias: "" }]);
   const [loading, setLoading] = useState(false);
   const [erro, setErro] = useState("");
   const maxCaracteres = 5000;
@@ -25,7 +26,7 @@ const Etapas = ({ vagaId }: { vagaId?: number }) => {
   };
 
   const adicionarEtapa = () => {
-    setEtapas((prev) => [...prev, { nome: "", descricao: "" }]);
+    setEtapas((prev) => [...prev, { nome: "", descricao: "", prazoDias: "" }]);
   };
 
   const handleProximo = async () => {
@@ -46,7 +47,11 @@ const Etapas = ({ vagaId }: { vagaId?: number }) => {
           : undefined,
         beneficios: data.beneficios.map((nome) => ({ nome })),
         requisitos: data.requisitos.map((nome) => ({ nome })),
-        etapas: etapas.map((e) => ({ nome: e.nome.trim(), descricao: e.descricao.trim() })),
+        etapas: etapas.map((e) => ({
+          nome: e.nome.trim(),
+          descricao: e.descricao.trim(),
+          prazoDias: e.prazoDias.trim() ? Number(e.prazoDias) : undefined,
+        })),
         processoSeletivo: data.processoSeletivo,
       };
 
@@ -105,6 +110,20 @@ const Etapas = ({ vagaId }: { vagaId?: number }) => {
                 <div className="text-right text-xs text-gray-400 mt-1">
                   {etapa.descricao.length}/{maxCaracteres}
                 </div>
+              </div>
+
+              <div>
+                <label className={labelClass}>
+                  Prazo (dias) <span className="text-gray-400 font-normal">(opcional)</span>
+                </label>
+                <input
+                  type="number"
+                  min={1}
+                  value={etapa.prazoDias}
+                  onChange={(e) => updateEtapa(index, "prazoDias", e.target.value)}
+                  placeholder="Ex: 5"
+                  className={inputClass}
+                />
               </div>
 
               {index < etapas.length - 1 && <hr className="border-gray-100 mt-2" />}

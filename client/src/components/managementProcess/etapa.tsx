@@ -1,8 +1,8 @@
 import { useState } from "react";
 import { useNavigate } from "react-router";
-import { Loader2, Users, Lock, AlertTriangle } from "lucide-react";
+import { Loader2, Users, Lock, AlertTriangle, ChevronUp, ChevronDown } from "lucide-react";
 import { toast } from "sonner";
-import { EtapaProcessoSeletivo, deleteEtapa, deleteVaga, updateEtapaService } from "@/services/vaga";
+import { EtapaProcessoSeletivo, deleteEtapa, deleteVaga, updateEtapaService, fecharEtapa as fecharEtapaService } from "@/services/vaga";
 import { ConfirmDialog } from "@/components/ui/confirm-dialog";
 import {
   AlertDialog,
@@ -18,18 +18,23 @@ type EtapaProps = {
   etapa: EtapaProcessoSeletivo;
   vagaId: number;
   index: number;
+  totalEtapas: number;
   podeExcluir: boolean;
+  movendo: boolean;
   onExcluir: (id: number) => void;
   onAtualizar: (etapa: EtapaProcessoSeletivo) => void;
+  onMover: (etapaId: number, direcao: "cima" | "baixo") => void;
 };
 
-const Etapa = ({ etapa, vagaId, index, podeExcluir, onExcluir, onAtualizar }: EtapaProps) => {
+const Etapa = ({ etapa, vagaId, index, totalEtapas, podeExcluir, movendo, onExcluir, onAtualizar, onMover }: EtapaProps) => {
   const navigate = useNavigate();
   const [editando, setEditando] = useState(false);
   const [nome, setNome] = useState(etapa.nome);
   const [descricao, setDescricao] = useState(etapa.descricao);
+  const [prazoDias, setPrazoDias] = useState(etapa.prazoDias?.toString() ?? "");
   const [salvando, setSalvando] = useState(false);
   const [excluindo, setExcluindo] = useState(false);
+  const [fechando, setFechando] = useState(false);
   const [erro, setErro] = useState("");
   const [confirmFechar, setConfirmFechar] = useState(false);
   const [confirmExcluir, setConfirmExcluir] = useState(false);
@@ -38,13 +43,18 @@ const Etapa = ({ etapa, vagaId, index, podeExcluir, onExcluir, onAtualizar }: Et
 
   const fechada = etapa.status !== "aberta";
 
-  const handleFecharEtapa = () => {
-    setConfirmFechar(false);
-    toast.info("Ainda não é possível fechar etapas de verdade", {
-      description:
-        "Falta um campo de status editável no backend e a integração com WhatsApp pra notificar os candidatos que não avançaram (ver pendencias.txt, item 9).",
-      duration: 6000,
-    });
+  const handleFecharEtapa = async () => {
+    setFechando(true);
+    try {
+      const atualizada = await fecharEtapaService(etapa.id);
+      onAtualizar(atualizada);
+      setConfirmFechar(false);
+      toast.success("Etapa fechada. Candidatos que não avançaram foram notificados.");
+    } catch (e: any) {
+      toast.error(e.message || "Erro ao fechar etapa");
+    } finally {
+      setFechando(false);
+    }
   };
 
   const inputClass =
@@ -59,7 +69,11 @@ const Etapa = ({ etapa, vagaId, index, podeExcluir, onExcluir, onAtualizar }: Et
     setSalvando(true);
     setErro("");
     try {
-      const atualizada = await updateEtapaService(etapa.id, { nome: nome.trim(), descricao: descricao.trim() });
+      const atualizada = await updateEtapaService(etapa.id, {
+        nome: nome.trim(),
+        descricao: descricao.trim(),
+        prazoDias: prazoDias.trim() ? Number(prazoDias) : undefined,
+      });
       onAtualizar(atualizada);
       setEditando(false);
     } catch (e: any) {
@@ -126,11 +140,25 @@ const Etapa = ({ etapa, vagaId, index, podeExcluir, onExcluir, onAtualizar }: Et
             />
           </div>
 
+          <div>
+            <label className={labelClass}>
+              Prazo (dias) <span className="text-gray-400 font-normal">(opcional)</span>
+            </label>
+            <input
+              type="number"
+              min={1}
+              value={prazoDias}
+              onChange={(e) => setPrazoDias(e.target.value)}
+              placeholder="Ex: 5"
+              className={inputClass}
+            />
+          </div>
+
           {erro && <p className="text-red-500 text-sm">{erro}</p>}
 
           <div className="flex justify-end gap-3">
             <button
-              onClick={() => { setEditando(false); setNome(etapa.nome); setDescricao(etapa.descricao); setErro(""); }}
+              onClick={() => { setEditando(false); setNome(etapa.nome); setDescricao(etapa.descricao); setPrazoDias(etapa.prazoDias?.toString() ?? ""); setErro(""); }}
               className="px-6 py-2.5 rounded-xl border border-gray-200 text-gray-600 hover:bg-gray-50 transition-colors duration-200 font-SecondFont font-medium"
             >
               Cancelar
@@ -154,7 +182,27 @@ const Etapa = ({ etapa, vagaId, index, podeExcluir, onExcluir, onAtualizar }: Et
       <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4">
         <h2 className="text-lg font-bold text-deepGreen font-PrimaryFont break-words">{etapa.nome}</h2>
 
-        <div className="flex gap-2 flex-shrink-0">
+        <div className="flex items-center gap-2 flex-shrink-0">
+          <div className="flex flex-col">
+            <button
+              type="button"
+              onClick={() => onMover(etapa.id, "cima")}
+              disabled={index === 1 || movendo}
+              aria-label="Mover etapa pra cima"
+              className="text-gray-400 hover:text-deepGreen disabled:opacity-30 disabled:hover:text-gray-400 transition-colors duration-200"
+            >
+              <ChevronUp size={16} aria-hidden="true" />
+            </button>
+            <button
+              type="button"
+              onClick={() => onMover(etapa.id, "baixo")}
+              disabled={index === totalEtapas || movendo}
+              aria-label="Mover etapa pra baixo"
+              className="text-gray-400 hover:text-deepGreen disabled:opacity-30 disabled:hover:text-gray-400 transition-colors duration-200"
+            >
+              <ChevronDown size={16} aria-hidden="true" />
+            </button>
+          </div>
           <span className="bg-gray-100 text-gray-600 text-sm px-3 py-1 rounded-full">{index}</span>
           <span className="bg-paleGreen/50 text-deepGreen text-sm px-3 py-1 rounded-full capitalize">{etapa.status}</span>
         </div>
@@ -162,6 +210,10 @@ const Etapa = ({ etapa, vagaId, index, podeExcluir, onExcluir, onAtualizar }: Et
 
       {etapa.descricao && (
         <p className="text-gray-600 text-sm leading-relaxed mt-4 break-words">{etapa.descricao}</p>
+      )}
+
+      {etapa.prazoDias != null && (
+        <p className="text-gray-500 text-xs mt-2">Prazo: {etapa.prazoDias} dias</p>
       )}
 
       <div className="flex flex-col sm:flex-row gap-3 justify-end mt-6">
@@ -182,11 +234,11 @@ const Etapa = ({ etapa, vagaId, index, podeExcluir, onExcluir, onAtualizar }: Et
 
         <button
           onClick={() => setConfirmFechar(true)}
-          disabled={fechada}
+          disabled={fechada || fechando}
           className="flex items-center justify-center gap-2 text-sm text-amber-700 px-5 py-2.5 rounded-xl border border-amber-200 hover:bg-amber-50 transition-colors duration-200 font-SecondFont font-medium disabled:opacity-60 disabled:hover:bg-transparent"
         >
-          <Lock size={16} aria-hidden="true" />
-          {fechada ? "Etapa fechada" : "Fechar etapa"}
+          {fechando ? <Loader2 size={16} className="animate-spin" aria-hidden="true" /> : <Lock size={16} aria-hidden="true" />}
+          {fechada ? "Etapa fechada" : fechando ? "Fechando..." : "Fechar etapa"}
         </button>
 
         <button
@@ -205,7 +257,7 @@ const Etapa = ({ etapa, vagaId, index, podeExcluir, onExcluir, onAtualizar }: Et
         title="Fechar esta etapa?"
         description={`Ao fechar "${etapa.nome}", todos os candidatos que não avançaram vão receber uma notificação automática via WhatsApp avisando que não foram selecionados. Essa ação não pode ser desfeita.`}
         onConfirm={handleFecharEtapa}
-        confirmLabel="Fechar etapa"
+        confirmLabel={fechando ? "Fechando..." : "Fechar etapa"}
         confirmClassName="bg-amber-600 hover:bg-amber-700 text-white"
       />
 

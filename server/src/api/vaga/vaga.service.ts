@@ -2,10 +2,17 @@ import { ConflictException, Injectable } from '@nestjs/common';
 import { CreateVagaDto, ProcessoSeletivoDto } from './dto/create-vaga.dto';
 import { UpdateVagaDto } from './dto/update-vaga.dto';
 import { PrismaService } from '../prisma/prisma.service';
+import { CandidaturaNotificationService } from '../candidatura/candidatura-notification.service';
+
+const CANDIDATO_SELECT = { id: true, name: true, email: true, phone: true };
+const EMPRESA_SELECT = { id: true, fantasyName: true, name: true };
 
 @Injectable()
 export class VagaService {
-  constructor(private prisma: PrismaService) {}
+  constructor(
+    private prisma: PrismaService,
+    private notification: CandidaturaNotificationService,
+  ) {}
 
   private normalizarProcesso(dto: ProcessoSeletivoDto) {
     return { ...dto, dataInicio: new Date(dto.dataInicio) };
@@ -19,10 +26,10 @@ export class VagaService {
         empresaId,
         beneficios: { createMany: { data: beneficios } },
         requisitos: { createMany: { data: requisitos } },
-        etapas: { createMany: { data: etapas } },
+        etapas: { createMany: { data: etapas.map((etapa, ordem) => ({ ...etapa, ordem })) } },
         processoSeletivo: { create: this.normalizarProcesso(processoSeletivo) },
       },
-      include: { beneficios: true, requisitos: true, etapas: true, processoSeletivo: true },
+      include: { beneficios: true, requisitos: true, etapas: { orderBy: { ordem: 'asc' } }, processoSeletivo: true },
     });
   }
 
@@ -43,7 +50,7 @@ export class VagaService {
       include: {
         beneficios: true,
         requisitos: true,
-        etapas: true,
+        etapas: { orderBy: { ordem: 'asc' } },
         processoSeletivo: true,
         empresa: { select: { id: true, fantasyName: true, name: true, logoUrl: true } },
       },
@@ -57,7 +64,7 @@ export class VagaService {
       include: {
         beneficios: true,
         requisitos: true,
-        etapas: true,
+        etapas: { orderBy: { ordem: 'asc' } },
         processoSeletivo: true,
         empresa: { select: { id: true, fantasyName: true, name: true, logoUrl: true } },
       },
@@ -100,11 +107,57 @@ export class VagaService {
           ...vagaData,
           ...(beneficios && { beneficios: { createMany: { data: beneficios } } }),
           ...(requisitos && { requisitos: { createMany: { data: requisitos } } }),
-          ...(etapas && { etapas: { createMany: { data: etapas } } }),
+          ...(etapas && { etapas: { createMany: { data: etapas.map((etapa, ordem) => ({ ...etapa, ordem })) } } }),
         },
-        include: { beneficios: true, requisitos: true, etapas: true, processoSeletivo: true },
+        include: { beneficios: true, requisitos: true, etapas: { orderBy: { ordem: 'asc' } }, processoSeletivo: true },
       });
     });
+  }
+
+  async duplicar(id: number, empresaId: number) {
+    const vaga = await this.prisma.vaga.findUnique({
+      where: { id },
+      include: { beneficios: true, requisitos: true, etapas: { orderBy: { ordem: 'asc' } } },
+    });
+
+    if (!vaga) throw new ConflictException('Vaga não encontrada');
+    if (vaga.empresaId !== empresaId) throw new ConflictException('Sem permissão');
+
+    return this.prisma.vaga.create({
+      data: {
+        nome: `${vaga.nome} (cópia)`,
+        cargo: vaga.cargo,
+        descricao: vaga.descricao,
+        salario: vaga.salario,
+        empresaId,
+        beneficios: { createMany: { data: vaga.beneficios.map((b) => ({ nome: b.nome })) } },
+        requisitos: { createMany: { data: vaga.requisitos.map((r) => ({ nome: r.nome })) } },
+        etapas: {
+          createMany: {
+            data: vaga.etapas.map((e) => ({ nome: e.nome, descricao: e.descricao, prazoDias: e.prazoDias, ordem: e.ordem })),
+          },
+        },
+      },
+      include: { beneficios: true, requisitos: true, etapas: { orderBy: { ordem: 'asc' } }, processoSeletivo: true },
+    });
+  }
+
+  async finalizar(id: number, empresaId: number) {
+    const vaga = await this.prisma.vaga.findUnique({ where: { id } });
+
+    if (!vaga) throw new ConflictException('Vaga não encontrada');
+    if (vaga.empresaId !== empresaId) throw new ConflictException('Sem permissão');
+
+    return this.prisma.vaga.update({ where: { id }, data: { status: 'fechada' } });
+  }
+
+  async reabrir(id: number, empresaId: number) {
+    const vaga = await this.prisma.vaga.findUnique({ where: { id } });
+
+    if (!vaga) throw new ConflictException('Vaga não encontrada');
+    if (vaga.empresaId !== empresaId) throw new ConflictException('Sem permissão');
+
+    return this.prisma.vaga.update({ where: { id }, data: { status: 'aberta' } });
   }
 
   async upsertProcessoSeletivo(vagaId: number, dto: ProcessoSeletivoDto, empresaId: number) {
@@ -121,7 +174,11 @@ export class VagaService {
     });
   }
 
-  async updateEtapa(etapaId: number, data: { nome: string; descricao: string }, empresaId: number) {
+  async updateEtapa(
+    etapaId: number,
+    data: { nome: string; descricao: string; prazoDias?: number },
+    empresaId: number,
+  ) {
     const etapa = await this.prisma.etapaProcessoSeletivo.findUnique({
       where: { id: etapaId },
       include: { vaga: true },
@@ -132,8 +189,53 @@ export class VagaService {
 
     return this.prisma.etapaProcessoSeletivo.update({
       where: { id: etapaId },
-      data: { nome: data.nome, descricao: data.descricao },
+      data: { nome: data.nome, descricao: data.descricao, prazoDias: data.prazoDias },
     });
+  }
+
+  async reordenarEtapas(vagaId: number, etapaIds: number[], empresaId: number) {
+    const vaga = await this.prisma.vaga.findUnique({ where: { id: vagaId } });
+
+    if (!vaga) throw new ConflictException('Vaga não encontrada');
+    if (vaga.empresaId !== empresaId) throw new ConflictException('Sem permissão');
+
+    return this.prisma.$transaction(
+      etapaIds.map((etapaId, ordem) =>
+        this.prisma.etapaProcessoSeletivo.update({
+          where: { id: etapaId, vagaId },
+          data: { ordem },
+        }),
+      ),
+    );
+  }
+
+  async fecharEtapa(etapaId: number, empresaId: number) {
+    const etapa = await this.prisma.etapaProcessoSeletivo.findUnique({
+      where: { id: etapaId },
+      include: {
+        vaga: { include: { empresa: { select: EMPRESA_SELECT } } },
+        candidatoEtapas: { where: { rejeitado: false }, include: { candidato: { select: CANDIDATO_SELECT } } },
+      },
+    });
+
+    if (!etapa) throw new ConflictException('Etapa não encontrada');
+    if (etapa.vaga.empresaId !== empresaId) throw new ConflictException('Sem permissão');
+
+    const atualizada = await this.prisma.etapaProcessoSeletivo.update({
+      where: { id: etapaId },
+      data: { status: 'fechada' },
+    });
+
+    for (const candidatoEtapa of etapa.candidatoEtapas) {
+      void this.notification.processoEncerrado({
+        candidato: candidatoEtapa.candidato,
+        empresa: etapa.vaga.empresa,
+        vaga: { id: etapa.vaga.id, nome: etapa.vaga.nome, cargo: etapa.vaga.cargo },
+        etapa: { id: etapa.id, nome: etapa.nome },
+      });
+    }
+
+    return atualizada;
   }
 
   async removeEtapa(etapaId: number, empresaId: number) {
@@ -157,14 +259,26 @@ export class VagaService {
     return this.prisma.etapaProcessoSeletivo.delete({ where: { id: etapaId } });
   }
 
-  async addEtapa(vagaId: number, etapa: { nome: string; descricao: string }, empresaId: number) {
+  async addEtapa(
+    vagaId: number,
+    etapa: { nome: string; descricao: string; prazoDias?: number },
+    empresaId: number,
+  ) {
     const vaga = await this.prisma.vaga.findUnique({ where: { id: vagaId } });
 
     if (!vaga) throw new ConflictException('Vaga não encontrada');
     if (vaga.empresaId !== empresaId) throw new ConflictException('Sem permissão');
 
+    const totalEtapas = await this.prisma.etapaProcessoSeletivo.count({ where: { vagaId } });
+
     return this.prisma.etapaProcessoSeletivo.create({
-      data: { nome: etapa.nome, descricao: etapa.descricao, vagaId },
+      data: {
+        nome: etapa.nome,
+        descricao: etapa.descricao,
+        prazoDias: etapa.prazoDias,
+        vagaId,
+        ordem: totalEtapas,
+      },
     });
   }
 
