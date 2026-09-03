@@ -1,6 +1,8 @@
 import { Test, TestingModule } from '@nestjs/testing';
 import { CurriculumController } from './curriculum.controller';
 import { CurriculumService } from './curriculum.service';
+import { PrismaService } from '../prisma/prisma.service';
+import { createPrismaMock } from '../../../test/support/prisma-mock';
 
 describe('CurriculumController', () => {
   let controller: CurriculumController;
@@ -8,7 +10,10 @@ describe('CurriculumController', () => {
   beforeEach(async () => {
     const module: TestingModule = await Test.createTestingModule({
       controllers: [CurriculumController],
-      providers: [CurriculumService],
+      providers: [
+        CurriculumService,
+        { provide: PrismaService, useValue: createPrismaMock() },
+      ],
     }).compile();
 
     controller = module.get<CurriculumController>(CurriculumController);
